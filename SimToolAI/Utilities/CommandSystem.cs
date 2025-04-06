@@ -91,14 +91,39 @@ namespace SimToolAI.Utilities
 
             // Create a new bullet
             var bullet = new Bullet(x, y, direction, scene, speed, damage);
+            bullet.FacingDirection = direction;
 
             // Add the bullet to the scene
             scene.AddEntity(bullet);
 
             // Trigger a render update
             scene.QueryScene<bool>("SetRenderRequired", true);
-            
+
             return bullet;
+        }
+
+        /// <summary>
+        /// Creates a bullet at the specified position
+        /// </summary>
+        /// <param name="x">X-coordinate</param>
+        /// <param name="y">Y-coordinate</param>
+        /// <param name="direction">Direction the bullet will travel</param>
+        /// <param name="scene">Scene to add the bullet to</param>
+        /// <param name="speed">Speed of the bullet</param>
+        /// <param name="damage">Damage the bullet deals</param>
+        /// <returns>The created bullet</returns>
+        public static Bullet FireBullet(int x, int y, Direction direction, IScene scene, float speed = 10, int damage = 1)
+        {
+            if (scene == null)
+                throw new ArgumentNullException(nameof(scene));
+
+            // If the scene is already a Scene, use it directly
+            if (scene is Scene sceneImpl)
+            {
+                return FireBullet(x, y, direction, sceneImpl, speed, damage);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -110,6 +135,22 @@ namespace SimToolAI.Utilities
         /// <param name="damage">Damage the bullet deals</param>
         /// <returns>The created bullet</returns>
         public static Bullet FireBullet(Player player, Scene scene, float speed = 10, int damage = 1)
+        {
+            if (player == null)
+                throw new ArgumentNullException(nameof(player));
+
+            return FireBullet(player.X, player.Y, player.FacingDirection, scene, speed, damage);
+        }
+
+        /// <summary>
+        /// Creates a bullet at the player's position
+        /// </summary>
+        /// <param name="player">Player to fire from</param>
+        /// <param name="scene">Scene to add the bullet to</param>
+        /// <param name="speed">Speed of the bullet</param>
+        /// <param name="damage">Damage the bullet deals</param>
+        /// <returns>The created bullet</returns>
+        public static Bullet FireBullet(Player player, IScene scene, float speed = 10, int damage = 1)
         {
             if (player == null)
                 throw new ArgumentNullException(nameof(player));

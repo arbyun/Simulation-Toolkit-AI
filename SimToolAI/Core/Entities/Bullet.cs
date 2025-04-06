@@ -16,17 +16,12 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Gets or sets the direction the bullet is traveling
         /// </summary>
-        public Direction Direction { get; set; }
-
-        /// <summary>
-        /// Gets or sets the speed of the bullet in cells per second
-        /// </summary>
-        public float Speed { get; set; }
+        public Direction Direction { get; }
 
         /// <summary>
         /// Gets or sets the damage the bullet deals
         /// </summary>
-        public int Damage { get; set; }
+        public int Damage { get; }
 
         /// <summary>
         /// Gets or sets the maximum distance the bullet can travel
@@ -36,7 +31,7 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Gets or sets the distance the bullet has traveled
         /// </summary>
-        public int DistanceTraveled { get; private set; } = 0;
+        public int DistanceTraveled { get; private set; }
 
         /// <summary>
         /// Gets whether the bullet has reached its maximum range
@@ -51,12 +46,12 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Reference to the scene
         /// </summary>
-        private Scene _scene;
+        private readonly Scene _scene;
 
         /// <summary>
         /// Time since the last movement
         /// </summary>
-        private float _timeSinceLastMove = 0;
+        private float _timeSinceLastMove;
 
         /// <summary>
         /// Whether the bullet blocks movement
@@ -75,7 +70,8 @@ namespace SimToolAI.Core.Entities
         /// <param name="direction">Direction the bullet will travel</param>
         /// <param name="map">Map reference</param>
         /// <param name="scene">Scene reference</param>
-        /// <param name="speed">Speed of the bullet (cells per second)</param>
+        /// <param name="bulletSpeed">Speed of the bullet (cells per second)</param>
+        /// <param name="speed">Speed of the bullet (pixels per second)</param>
         /// <param name="damage">Damage the bullet deals</param>
         public Bullet(int x, int y, Direction direction, ISimMap map, Scene scene, float speed = 10, int damage = 1)
             : base("bullet", x, y, 1)
@@ -91,12 +87,14 @@ namespace SimToolAI.Core.Entities
         }
 
         /// <summary>
-        /// Creates a new bullet (will get map and scene references from Program)
+        /// Creates a new bullet (will get map reference from scene)
         /// </summary>
         /// <param name="x">Starting X position</param>
         /// <param name="y">Starting Y position</param>
         /// <param name="direction">Direction the bullet will travel</param>
-        /// <param name="speed">Speed of the bullet (cells per second)</param>
+        /// <param name="scene">Scene reference</param>
+        /// <param name="bulletSpeed">Speed of the bullet (cells per second)</param>
+        /// <param name="speed">Speed of the bullet (pixels per second)</param>
         /// <param name="damage">Damage the bullet deals</param>
         public Bullet(int x, int y, Direction direction, Scene scene, float speed = 10, int damage = 1)
             : base("bullet", x, y, 1)
@@ -105,6 +103,9 @@ namespace SimToolAI.Core.Entities
             Speed = speed;
             Damage = damage;
             _scene = scene ?? throw new ArgumentNullException(nameof(scene));
+
+            // Get the map from the scene
+            _map = scene.Map;
 
             // Create a bullet renderable
             Avatar = new ConsoleEntityRenderable('*', ConsoleColor.Red, ConsoleColor.Black, this);
@@ -184,7 +185,7 @@ namespace SimToolAI.Core.Entities
 
             // Check if there's an entity at the new position
             var entity = _scene.GetEntityAt(newX, newY);
-            if (entity != null && entity != this)
+            if (entity != null && !entity.Equals(this))
             {
                 // Bullet hit an entity
                 HandleEntityCollision(entity);
@@ -209,6 +210,7 @@ namespace SimToolAI.Core.Entities
             if (entity is Player player)
             {
                 player.TakeDamage(Damage);
+                return;
             }
 
             // Remove the bullet

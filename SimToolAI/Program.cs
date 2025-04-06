@@ -19,7 +19,7 @@ namespace SimToolAI
         /// <summary>
         /// Map parser for loading maps from files
         /// </summary>
-        private static ConsoleMapParser<GridMap> _mapParser;
+        private static GridMapParser<GridMap> _mapParser;
 
         /// <summary>
         /// Current map
@@ -125,7 +125,7 @@ namespace SimToolAI
         /// <param name="path">Path to the map file</param>
         private static void LoadMap(string path)
         {
-            _mapParser = new ConsoleMapParser<GridMap>();
+            _mapParser = new GridMapParser<GridMap>();
             _map = _mapParser.LoadMapFromFile(path);
             _map.Initialize(new ConsoleMapRenderable(_mapParser.GetMapGrid(), _map.Height, _map.Width));
         }

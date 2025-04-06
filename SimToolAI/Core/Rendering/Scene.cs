@@ -12,6 +12,11 @@ namespace SimToolAI.Core.Rendering
     public abstract class Scene : IScene
     {
         /// <summary>
+        /// Event raised when an entity is removed from the scene
+        /// </summary>
+        public EventHandler<EntityEventArgs> EntityRemoved;
+
+        /// <summary>
         /// Gets the map associated with this scene
         /// </summary>
         public ISimMap Map { get; }
@@ -63,6 +68,9 @@ namespace SimToolAI.Core.Rendering
             if (Entities.Remove(entity))
             {
                 RenderRequired = true;
+
+                // Raise the EntityRemoved event
+                EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
             }
         }
 
@@ -82,7 +90,7 @@ namespace SimToolAI.Core.Rendering
         /// </summary>
         /// <param name="id">ID of the entity to get</param>
         /// <returns>The entity with the specified ID, or null if not found</returns>
-        public Entity GetEntity(Guid id)
+        public virtual Entity GetEntity(Guid id)
         {
             return Entities.FirstOrDefault(e => e.Id == id);
         }
@@ -93,7 +101,7 @@ namespace SimToolAI.Core.Rendering
         /// <param name="x">X-coordinate</param>
         /// <param name="y">Y-coordinate</param>
         /// <returns>The entity at the specified position, or null if not found</returns>
-        public Entity GetEntityAt(int x, int y)
+        public virtual Entity GetEntityAt(int x, int y)
         {
             return Entities.FirstOrDefault(e => e.X == x && e.Y == y);
         }
@@ -103,7 +111,7 @@ namespace SimToolAI.Core.Rendering
         /// </summary>
         /// <typeparam name="T">Type of entities to get</typeparam>
         /// <returns>All entities of the specified type</returns>
-        public IEnumerable<T> GetEntities<T>() where T : Entity
+        public virtual IEnumerable<T> GetEntities<T>() where T : Entity
         {
             return Entities.OfType<T>();
         }

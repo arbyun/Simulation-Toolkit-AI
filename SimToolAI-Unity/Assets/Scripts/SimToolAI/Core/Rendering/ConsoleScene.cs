@@ -53,13 +53,10 @@ namespace SimToolAI.Core.Rendering
                 // Render all entities sorted by render priority
                 var renderables = new List<IRenderable>();
 
-                foreach (Entity entity in Entities)
+                foreach (var entity in Entities.Where(entity => entity.Avatar != null))
                 {
-                    if (entity.Avatar != null)
-                    {
-                        entity.Avatar.MarkForRendering();
-                        renderables.Add(entity.Avatar);
-                    }
+                    entity.Avatar.MarkForRendering();
+                    renderables.Add(entity.Avatar);
                 }
 
                 // Sort renderables by priority and render them
@@ -74,7 +71,7 @@ namespace SimToolAI.Core.Rendering
             catch (Exception ex)
             {
                 // Ignore exceptions related to console buffer size changes
-                if (!(ex is ArgumentOutOfRangeException || ex is System.IO.IOException))
+                if (ex is not (ArgumentOutOfRangeException or System.IO.IOException))
                     throw;
             }
         }

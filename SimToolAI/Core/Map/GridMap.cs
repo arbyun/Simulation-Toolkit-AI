@@ -58,11 +58,21 @@ namespace SimToolAI.Core.Map
             _fieldOfView = new FieldOfView(this);
             Renderable = renderable ?? throw new ArgumentNullException(nameof(renderable));
         }
+        
+        /// <summary>
+        /// Creates a new grid map with the specified dimensions and renderable
+        /// </summary>
+        /// <param name="width">Width of the map</param>
+        /// <param name="height">Height of the map</param>
+        public GridMap(int width, int height) : base(width, height)
+        {
+            _fieldOfView = new FieldOfView(this);
+        }
 
         /// <summary>
         /// Creates a new grid map with default settings
         /// </summary>
-        public GridMap() : base()
+        public GridMap()
         {
             _fieldOfView = new FieldOfView(this);
         }
@@ -262,7 +272,7 @@ namespace SimToolAI.Core.Map
             }
 
             // Compute FOV with the entity as the center if it's the current FOV entity
-            if (_currentFovEntity == entity)
+            if (_currentFovEntity.Equals(entity))
             {
                 ComputeFov(entity);
             }

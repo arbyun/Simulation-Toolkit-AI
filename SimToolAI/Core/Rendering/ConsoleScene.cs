@@ -53,13 +53,10 @@ namespace SimToolAI.Core.Rendering
                 // Render all entities sorted by render priority
                 var renderables = new List<IRenderable>();
 
-                foreach (Entity entity in Entities)
+                foreach (var entity in Entities.Where(entity => entity.Avatar != null))
                 {
-                    if (entity.Avatar != null)
-                    {
-                        entity.Avatar.MarkForRendering();
-                        renderables.Add(entity.Avatar);
-                    }
+                    entity.Avatar.MarkForRendering();
+                    renderables.Add(entity.Avatar);
                 }
 
                 // Sort renderables by priority and render them
@@ -91,7 +88,7 @@ namespace SimToolAI.Core.Rendering
             switch (query)
             {
                 case "GetMap":
-                    return (T)(object)Map;
+                    return (T)Map;
                 case "SetRenderRequired":
                     RenderRequired = (bool)parameters[0];
                     return default;

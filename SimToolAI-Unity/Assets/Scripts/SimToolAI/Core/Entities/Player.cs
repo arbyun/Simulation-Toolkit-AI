@@ -1,6 +1,4 @@
 using System;
-using SimToolAI.Core.Rendering;
-using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.Entities
 {

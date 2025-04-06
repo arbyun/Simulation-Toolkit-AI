@@ -24,7 +24,7 @@ namespace SimToolAI.Core.Rendering
         /// <summary>
         /// List of entities in the scene
         /// </summary>
-        protected readonly List<Entity> Entities = new List<Entity>();
+        protected readonly List<Entity> Entities = new();
 
         /// <summary>
         /// Whether the scene needs to be rendered

@@ -91,7 +91,7 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
             catch (Exception ex)
             {
                 // Ignore exceptions related to console buffer size changes
-                if (!(ex is ArgumentOutOfRangeException or System.IO.IOException))
+                if (ex is not (ArgumentOutOfRangeException or System.IO.IOException))
                     throw;
             }
 

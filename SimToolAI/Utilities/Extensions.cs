@@ -9,7 +9,7 @@ namespace SimToolAI.Utilities
     public static class Extensions
     {
         /// <summary>
-        ///     Gets a random element from a list
+        /// Gets a random element from a list
         /// </summary>
         /// <typeparam name="T">The type of elements in the list</typeparam>
         /// <param name="list">The list to get a random element from</param>
@@ -25,7 +25,7 @@ namespace SimToolAI.Utilities
         }
 
         /// <summary>
-        ///     Clamps a value between a minimum and maximum value
+        /// Clamps a value between a minimum and maximum value
         /// </summary>
         /// <param name="value">The value to clamp</param>
         /// <param name="min">The minimum allowed value</param>
@@ -37,7 +37,7 @@ namespace SimToolAI.Utilities
         }
 
         /// <summary>
-        ///     Clamps a value between a minimum and maximum value
+        /// Clamps a value between a minimum and maximum value
         /// </summary>
         /// <param name="value">The value to clamp</param>
         /// <param name="min">The minimum allowed value</param>
@@ -49,7 +49,7 @@ namespace SimToolAI.Utilities
         }
 
         /// <summary>
-        ///     Converts a direction to a vector representation
+        /// Converts a direction to a vector representation
         /// </summary>
         /// <param name="dir">The direction to convert</param>
         /// <returns>A tuple containing the x and y components of the direction vector</returns>
@@ -72,7 +72,7 @@ namespace SimToolAI.Utilities
         }
 
         /// <summary>
-        ///     Gets the opposite direction
+        /// Gets the opposite direction
         /// </summary>
         /// <param name="dir">The direction to invert</param>
         /// <returns>The opposite direction</returns>
@@ -95,24 +95,25 @@ namespace SimToolAI.Utilities
         }
 
         /// <summary>
-        ///     Checks if the direction is diagonal
+        /// Checks if the direction is diagonal
         /// </summary>
         /// <param name="dir">The direction to check</param>
         /// <returns>True if the direction is diagonal, false otherwise</returns>
         public static bool IsDiagonal(this Direction dir)
         {
-            return dir is Direction.DownLeft || dir is Direction.DownRight || dir is Direction.UpLeft || dir is Direction.UpRight;
+            return dir is Direction.DownLeft || dir is Direction.DownRight || 
+                   dir is Direction.UpLeft ||dir is Direction.UpRight;
         }
 
         /// <summary>
-        ///     Checks if the direction is cardinal (non-diagonal)
+        /// Checks if the direction is cardinal (non-diagonal)
         /// </summary>
         /// <param name="dir">The direction to check</param>
         /// <returns>True if the direction is cardinal, false otherwise</returns>
         public static bool IsCardinal(this Direction dir)
         {
-            return dir is Direction.DownLeft || dir is Direction.DownRight ||
-                   dir is Direction.UpLeft || dir is Direction.UpRight;
+            return dir is Direction.Up || dir is Direction.Down || 
+                   dir is Direction.Left || dir is Direction.Right;
         }
     }
 }

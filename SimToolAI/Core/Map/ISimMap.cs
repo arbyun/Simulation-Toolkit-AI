@@ -1,7 +1,5 @@
-using System;
 using SimToolAI.Core.Entities;
 using SimToolAI.Core.Rendering;
-using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.Map
 {

@@ -1,6 +1,4 @@
 using System;
-using SimToolAI.Core.Rendering;
-using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.Entities
 {
@@ -30,16 +28,6 @@ namespace SimToolAI.Core.Entities
         /// Gets or sets the player's defense
         /// </summary>
         public int Defense { get; set; } = 5;
-
-        /// <summary>
-        /// Gets or sets the player's speed
-        /// </summary>
-        public float Speed { get; set; } = 1.0f;
-
-        /// <summary>
-        /// Gets or sets the player's current direction
-        /// </summary>
-        public Direction FacingDirection { get; set; } = Direction.Right;
 
         /// <summary>
         /// Gets whether the player is alive
@@ -74,16 +62,6 @@ namespace SimToolAI.Core.Entities
         #endregion
 
         #region Methods
-
-        /// <summary>
-        /// Updates the player state
-        /// </summary>
-        /// <param name="deltaTime">Time elapsed since the last update in seconds</param>
-        public override void Update(float deltaTime)
-        {
-            // Player updates are handled by input processing
-            base.Update(deltaTime);
-        }
 
         /// <summary>
         /// Applies damage to the player
