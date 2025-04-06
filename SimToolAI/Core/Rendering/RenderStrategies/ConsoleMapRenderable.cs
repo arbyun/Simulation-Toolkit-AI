@@ -1,47 +1,107 @@
-﻿using System;
+using System;
 using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.Rendering.RenderStrategies
 {
-    public class ConsoleMapRenderable: IRenderable
+    /// <summary>
+    /// Renderable strategy for console-based map rendering
+    /// </summary>
+    public class ConsoleMapRenderable : RenderableBase
     {
-        private readonly Data _settings;
+        /// <summary>
+        /// Gets the rendering priority (maps are rendered before entities)
+        /// </summary>
+        public override int RenderPriority => 0;
 
-        public ConsoleMapRenderable(Data settings)
+        /// <summary>
+        /// Creates a new console map renderable with the specified settings
+        /// </summary>
+        /// <param name="settings">Settings for the renderable</param>
+        public ConsoleMapRenderable(Data settings) : base(settings)
         {
-            _settings = settings;
-        }
-        
-        public ConsoleMapRenderable(char[,] mapGrid, int height, int width)
-        {
-            _settings = new Data();
-            _settings.Set("map", mapGrid);
-            _settings.Set("height", height);
-            _settings.Set("width", width);
         }
 
-        public void Render()
+        /// <summary>
+        /// Creates a new console map renderable with the specified parameters
+        /// </summary>
+        /// <param name="mapGrid">2D array of characters representing the map</param>
+        /// <param name="height">Height of the map</param>
+        /// <param name="width">Width of the map</param>
+        public ConsoleMapRenderable(char[,] mapGrid, int height, int width) : base()
         {
-            char[,] mapGrid = _settings.Get<char[,]>("map");
-            int height = _settings.Get<int>("height");
-            int width = _settings.Get<int>("width");
-            
-            Console.Clear();
+            if (mapGrid == null)
+                throw new ArgumentNullException(nameof(mapGrid));
 
-            for (int y = 0; y < height; y++)
+            if (height <= 0 || width <= 0)
+                throw new ArgumentException("Height and width must be positive");
+
+            Settings.Set("map", mapGrid);
+            Settings.Set("height", height);
+            Settings.Set("width", width);
+        }
+
+        /// <summary>
+        /// Renders the map to the console
+        /// </summary>
+        public override void Render()
+        {
+            if (!NeedsRendering)
+                return;
+
+            char[,] mapGrid = Settings.Get<char[,]>("map");
+            int height = Settings.Get<int>("height");
+            int width = Settings.Get<int>("width");
+
+            if (mapGrid == null)
+                return;
+
+            try
             {
-                for (int x = 0; x < width; x++)
-                {
-                    Console.SetCursorPosition(x,y);
-                    
-                    if (mapGrid[x, y] == '#') Console.ForegroundColor = ConsoleColor.DarkGray;
-                    else if (mapGrid[x, y] == '.') Console.ForegroundColor = ConsoleColor.Green;
-                    else if (mapGrid[x, y] == '&') Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Console.Clear();
 
-                    Console.Write(mapGrid[x, y]);
-                    Console.ResetColor();
+                // Determine the maximum dimensions to render based on console buffer size
+                int maxWidth = Math.Min(width, Console.BufferWidth);
+                int maxHeight = Math.Min(height, Console.BufferHeight);
+
+                for (int y = 0; y < maxHeight; y++)
+                {
+                    for (int x = 0; x < maxWidth; x++)
+                    {
+                        Console.SetCursorPosition(x, y);
+
+                        // Set the appropriate color based on the map cell
+                        switch (mapGrid[x, y])
+                        {
+                            case '#': // Wall
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                break;
+                            case '.': // Floor
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                break;
+                            case '&': // Door
+                                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                                break;
+                            case 'O': // Window
+                                Console.ForegroundColor = ConsoleColor.Cyan;
+                                break;
+                            default:
+                                Console.ForegroundColor = ConsoleColor.White;
+                                break;
+                        }
+
+                        Console.Write(mapGrid[x, y]);
+                        Console.ResetColor();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                // Ignore exceptions related to console buffer size changes
+                if (!(ex is ArgumentOutOfRangeException || ex is System.IO.IOException))
+                    throw;
+            }
+
+            MarkAsRendered();
         }
     }
 }
