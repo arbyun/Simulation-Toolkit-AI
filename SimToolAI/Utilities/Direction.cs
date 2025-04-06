@@ -1,4 +1,4 @@
-﻿namespace SimToolAI.Utilities
+namespace SimToolAI.Utilities
 {
     /// <summary>
     /// Represents a direction in the game
