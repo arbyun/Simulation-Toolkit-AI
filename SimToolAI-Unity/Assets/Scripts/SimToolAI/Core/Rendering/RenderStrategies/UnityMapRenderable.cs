@@ -76,9 +76,11 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
                             case '.': // Floor
                                 tilemap.SetTile(new Vector3Int(x, y), floor);
                                 break;
-                            case '&': // Door
+                            case '&': // Door; for now, let's treat it as floor
+                                tilemap.SetTile(new Vector3Int(x, y), floor);
                                 break;
-                            case 'O': // Window
+                            case 'O': // Window; for now, let's treat it as a wall
+                                tilemap.SetTile(new Vector3Int(x, y), wall);
                                 break;
                         }
                     }
