@@ -1,8 +1,8 @@
 ﻿namespace SimToolAI.Core.Rendering.RenderStrategies
 {
-    public class UnityRenderable: IRenderable
+    public class UnityMapRenderable: RenderableBase
     {
-        public void Render()
+        public override void Render()
         {
             throw new System.NotImplementedException();
         }
