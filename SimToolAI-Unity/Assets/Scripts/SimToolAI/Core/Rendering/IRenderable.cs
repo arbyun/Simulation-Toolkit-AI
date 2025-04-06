@@ -1,5 +1,3 @@
-using SimToolAI.Utilities;
-
 namespace SimToolAI.Core.Rendering
 {
     /// <summary>

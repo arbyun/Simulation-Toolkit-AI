@@ -27,7 +27,7 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// <param name="mapGrid">2D array of characters representing the map</param>
         /// <param name="height">Height of the map</param>
         /// <param name="width">Width of the map</param>
-        public ConsoleMapRenderable(char[,] mapGrid, int height, int width) : base()
+        public ConsoleMapRenderable(char[,] mapGrid, int height, int width)
         {
             if (mapGrid == null)
                 throw new ArgumentNullException(nameof(mapGrid));
@@ -70,24 +70,18 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
                         Console.SetCursorPosition(x, y);
 
                         // Set the appropriate color based on the map cell
-                        switch (mapGrid[x, y])
+                        Console.ForegroundColor = mapGrid[x, y] switch
                         {
-                            case '#': // Wall
-                                Console.ForegroundColor = ConsoleColor.DarkGray;
-                                break;
-                            case '.': // Floor
-                                Console.ForegroundColor = ConsoleColor.Green;
-                                break;
-                            case '&': // Door
-                                Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                                break;
-                            case 'O': // Window
-                                Console.ForegroundColor = ConsoleColor.Cyan;
-                                break;
-                            default:
-                                Console.ForegroundColor = ConsoleColor.White;
-                                break;
-                        }
+                            '#' => // Wall
+                                ConsoleColor.DarkGray,
+                            '.' => // Floor
+                                ConsoleColor.Green,
+                            '&' => // Door
+                                ConsoleColor.DarkMagenta,
+                            'O' => // Window
+                                ConsoleColor.Cyan,
+                            _ => ConsoleColor.White
+                        };
 
                         Console.Write(mapGrid[x, y]);
                         Console.ResetColor();
@@ -97,7 +91,7 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
             catch (Exception ex)
             {
                 // Ignore exceptions related to console buffer size changes
-                if (!(ex is ArgumentOutOfRangeException || ex is System.IO.IOException))
+                if (!(ex is ArgumentOutOfRangeException or System.IO.IOException))
                     throw;
             }
 

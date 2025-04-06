@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using SimToolAI.Core.Entities;
 using SimToolAI.Core.Map;
-using SimToolAI.Core.Rendering;
 using SimToolAI.Core.Rendering.RenderStrategies;
 
-namespace SimToolAI.Examples.Unity
+namespace SimToolAI.Core.Rendering
 {
     /// <summary>
     /// Unity-specific implementation of the IScene interface
@@ -58,9 +56,9 @@ namespace SimToolAI.Examples.Unity
         {
             base.RemoveEntity(entity);
 
-            if (entity.Avatar is UnityEntityRenderable avatar)
+            if (entity.Avatar is UnityEntityRenderable)
             {
-                avatar.Destroy();
+                EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
             }
         }
 

@@ -19,7 +19,7 @@ namespace SimToolAI.Core.Rendering
         public SceneAdapter(IScene scene) 
             : base(scene.Map)
         {
-            _wrappedScene = scene ?? throw new ArgumentNullException(nameof(scene));
+            _wrappedScene = scene;
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace SimToolAI.Core.Rendering
             switch (query)
             {
                 case "GetMap":
-                    return (T)(object)Map;
+                    return (T)Map;
                 case "SetRenderRequired":
                     RenderRequired = (bool)parameters[0];
                     return default;

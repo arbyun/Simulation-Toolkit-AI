@@ -16,17 +16,12 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Gets or sets the direction the bullet is traveling
         /// </summary>
-        public Direction Direction { get; set; }
-
-        /// <summary>
-        /// Gets or sets the speed of the bullet in cells per second
-        /// </summary>
-        public float BulletSpeed { get; set; }
+        public Direction Direction { get; }
 
         /// <summary>
         /// Gets or sets the damage the bullet deals
         /// </summary>
-        public int Damage { get; set; }
+        public int Damage { get; }
 
         /// <summary>
         /// Gets or sets the maximum distance the bullet can travel
@@ -36,7 +31,7 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Gets or sets the distance the bullet has traveled
         /// </summary>
-        public int DistanceTraveled { get; private set; } = 0;
+        public int DistanceTraveled { get; private set; }
 
         /// <summary>
         /// Gets whether the bullet has reached its maximum range
@@ -51,12 +46,12 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Reference to the scene
         /// </summary>
-        private Scene _scene;
+        private readonly Scene _scene;
 
         /// <summary>
         /// Time since the last movement
         /// </summary>
-        private float _timeSinceLastMove = 0;
+        private float _timeSinceLastMove;
 
         /// <summary>
         /// Whether the bullet blocks movement
@@ -78,12 +73,10 @@ namespace SimToolAI.Core.Entities
         /// <param name="bulletSpeed">Speed of the bullet (cells per second)</param>
         /// <param name="speed">Speed of the bullet (pixels per second)</param>
         /// <param name="damage">Damage the bullet deals</param>
-        public Bullet(int x, int y, Direction direction, ISimMap map, Scene scene, float bulletSpeed = 10, 
-            float speed = 10, int damage = 1)
+        public Bullet(int x, int y, Direction direction, ISimMap map, Scene scene, float speed = 10, int damage = 1)
             : base("bullet", x, y, 1)
         {
             Direction = direction;
-            BulletSpeed = bulletSpeed;
             Speed = speed;
             Damage = damage;
             _map = map ?? throw new ArgumentNullException(nameof(map));
@@ -103,11 +96,10 @@ namespace SimToolAI.Core.Entities
         /// <param name="bulletSpeed">Speed of the bullet (cells per second)</param>
         /// <param name="speed">Speed of the bullet (pixels per second)</param>
         /// <param name="damage">Damage the bullet deals</param>
-        public Bullet(int x, int y, Direction direction, Scene scene, float bulletSpeed = 10, float speed = 10, int damage = 1)
+        public Bullet(int x, int y, Direction direction, Scene scene, float speed = 10, int damage = 1)
             : base("bullet", x, y, 1)
         {
             Direction = direction;
-            BulletSpeed = bulletSpeed;
             Speed = speed;
             Damage = damage;
             _scene = scene ?? throw new ArgumentNullException(nameof(scene));
@@ -133,7 +125,7 @@ namespace SimToolAI.Core.Entities
             _timeSinceLastMove += deltaTime;
 
             // Check if it's time to move
-            if (_timeSinceLastMove >= 1.0f / BulletSpeed)
+            if (_timeSinceLastMove >= 1.0f / Speed)
             {
                 _timeSinceLastMove = 0;
                 MoveBullet();
@@ -193,7 +185,7 @@ namespace SimToolAI.Core.Entities
 
             // Check if there's an entity at the new position
             var entity = _scene.GetEntityAt(newX, newY);
-            if (entity != null && entity != this)
+            if (entity != null && !entity.Equals(this))
             {
                 // Bullet hit an entity
                 HandleEntityCollision(entity);

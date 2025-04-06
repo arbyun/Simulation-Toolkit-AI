@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SimToolAI.Core.Rendering.RenderStrategies
 {
     /// <summary>
-    /// Renderable strategy for Unity-based rendering (stub for future implementation)
+    /// Renderable strategy for Unity-based rendering
     /// </summary>
     public class UnityEntityRenderable : RenderableBase
     {
@@ -15,12 +15,24 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// <param name="settings">Settings for the renderable</param>
         public UnityEntityRenderable(Data settings) : base(settings)
         {
+            if (settings.Has("destroyable") && settings.Has("scene") && settings.Has("entity"))
+            {
+                if (settings.Get<bool>("destroyable"))
+                {
+                    Scene scene = Settings.Get<Scene>("scene");
+                    scene.EntityRemoved += (_, args) =>
+                    {
+                        if (args.Entity.Equals(settings.Get<Entity>("entity")))
+                            Destroy();
+                    };
+                }
+            }
         }
 
         /// <summary>
         /// Creates a new Unity renderable with default settings
         /// </summary>
-        public UnityEntityRenderable(Transform entityTransform, Entity entity) : base()
+        public UnityEntityRenderable(Transform entityTransform, Entity entity)
         {
             Settings.Set("transform", entityTransform);
             Settings.Set("entity", entity);
@@ -56,24 +68,19 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
             {
                 Transform transform = Settings.Get<Transform>("transform");
                 Entity entity = Settings.Get<Entity>("entity");
-                
-                float targetRotation = 0f;
-                
-                switch (entity.FacingDirection)
+
+                float targetRotation = entity.FacingDirection switch
                 {
-                    case Direction.Up:
-                        targetRotation = 270f;  // Rotate 90 degrees counter-clockwise from right
-                        break;
-                    case Direction.Right:
-                        targetRotation = 0f;   // No rotation (sprite starts facing right)
-                        break;
-                    case Direction.Down:
-                        targetRotation = 90f; // Rotate 270 degrees counter-clockwise from right
-                        break;
-                    case Direction.Left:
-                        targetRotation = 180f; // Rotate 180 degrees counter-clockwise from right
-                        break;
-                }
+                    Direction.Up => 270f // Rotate 90 degrees counter-clockwise from right
+                    ,
+                    Direction.Right => 0f // No rotation (sprite starts facing right)
+                    ,
+                    Direction.Down => 90f // Rotate 270 degrees counter-clockwise from right
+                    ,
+                    Direction.Left => 180f // Rotate 180 degrees counter-clockwise from right
+                    ,
+                    _ => 0f
+                };
 
                 // Smoothly rotate
                 transform.rotation = Quaternion.Lerp(transform.rotation, 
@@ -81,7 +88,7 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
             }
         }
 
-        public void Destroy()
+        private void Destroy()
         {
             if (Settings.Has("transform"))
             {

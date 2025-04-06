@@ -1,7 +1,6 @@
 using System;
 using SimToolAI.Core.Entities;
 using SimToolAI.Core.Rendering;
-using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.Map
 {
@@ -17,12 +16,12 @@ namespace SimToolAI.Core.Map
         /// <summary>
         /// Gets the width of the map
         /// </summary>
-        public int Width { get; private set; }
+        public int Width { get; }
 
         /// <summary>
         /// Gets the height of the map
         /// </summary>
-        public int Height { get; private set; }
+        public int Height { get; }
 
         /// <summary>
         /// Gets the renderable for the map
@@ -37,7 +36,7 @@ namespace SimToolAI.Core.Map
         /// <summary>
         /// Random number generator
         /// </summary>
-        private readonly Random _random = new Random();
+        private readonly Random _random = new();
 
         #endregion
 

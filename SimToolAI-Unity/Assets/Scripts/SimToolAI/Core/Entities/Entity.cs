@@ -38,12 +38,12 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Awareness radius of the entity (for field of view calculations)
         /// </summary>
-        public int Awareness { get; set; }
+        public int Awareness { get; }
 
         /// <summary>
         /// Name of the entity
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// Visual representation of the entity
@@ -53,12 +53,12 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Whether the entity blocks movement
         /// </summary>
-        public virtual bool BlocksMovement { get; set; } = true;
+        public virtual bool BlocksMovement { get; } = true;
 
         /// <summary>
         /// Whether the entity blocks line of sight
         /// </summary>
-        public virtual bool BlocksLineOfSight { get; set; } = false;
+        public bool BlocksLineOfSight { get; set; } = false;
         
         /// <summary>
         /// Gets or sets the entity's speed
@@ -81,22 +81,13 @@ namespace SimToolAI.Core.Entities
         /// <param name="x">X-coordinate</param>
         /// <param name="y">Y-coordinate</param>
         /// <param name="awareness">Awareness radius</param>
-        protected Entity(string name, int x, int y, int awareness)
+        protected Entity(string name, int x, int y, int awareness = 0)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             X = x;
             Y = y;
             Awareness = awareness;
         }
-
-        /// <summary>
-        /// Creates a new entity with the specified parameters and zero awareness
-        /// </summary>
-        /// <param name="name">Name of the entity</param>
-        /// <param name="x">X-coordinate</param>
-        /// <param name="y">Y-coordinate</param>
-        protected Entity(string name, int x, int y) : this(name, x, y, 0)
-        { }
 
         /// <summary>
         /// Creates a new unnamed entity at the specified position

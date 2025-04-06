@@ -66,16 +66,6 @@ namespace SimToolAI.Core.Entities
         #region Methods
 
         /// <summary>
-        /// Updates the player state
-        /// </summary>
-        /// <param name="deltaTime">Time elapsed since the last update in seconds</param>
-        public override void Update(float deltaTime)
-        {
-            // Player updates are handled by input processing
-            base.Update(deltaTime);
-        }
-
-        /// <summary>
         /// Applies damage to the player
         /// </summary>
         /// <param name="amount">Amount of damage to apply</param>

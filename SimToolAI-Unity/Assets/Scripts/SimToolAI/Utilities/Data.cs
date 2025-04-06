@@ -7,7 +7,7 @@ namespace SimToolAI.Utilities
     /// </summary>
     public class Data
     {
-        private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _properties = new();
 
         public void Set<T>(string key, T value)
         {

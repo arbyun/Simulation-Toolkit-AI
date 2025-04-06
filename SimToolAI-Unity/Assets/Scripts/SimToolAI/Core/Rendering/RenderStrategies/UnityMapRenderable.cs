@@ -26,8 +26,11 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// <param name="mapGrid">2D array of characters representing the map</param>
         /// <param name="height">Height of the map</param>
         /// <param name="width">Width of the map</param>
+        /// <param name="wall"></param>
+        /// <param name="floor"></param>
+        /// <param name="tilemap"></param>
         public UnityMapRenderable(char[,] mapGrid, int height, int width, Tilemap tilemap, 
-            TileBase wall, TileBase floor) : base()
+            TileBase wall, TileBase floor)
         {
             if (mapGrid == null)
                 throw new ArgumentNullException(nameof(mapGrid));

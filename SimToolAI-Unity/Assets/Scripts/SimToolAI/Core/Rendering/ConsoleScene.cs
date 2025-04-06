@@ -91,7 +91,7 @@ namespace SimToolAI.Core.Rendering
             switch (query)
             {
                 case "GetMap":
-                    return (T)(object)Map;
+                    return (T)Map;
                 case "SetRenderRequired":
                     RenderRequired = (bool)parameters[0];
                     return default;

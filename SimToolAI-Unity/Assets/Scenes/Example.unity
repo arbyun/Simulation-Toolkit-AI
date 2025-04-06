@@ -168,8 +168,8 @@ MonoBehaviour:
   mapText: {fileID: 0}
   grid: {fileID: 361535523}
   playerPrefab: {fileID: 7375144999536156576, guid: 9c281aec36ef4fc488060d985aa32e84, type: 3}
-  bulletPrefab: {fileID: 5834548435660928795, guid: d70a64f703ed11b489a6da207dc5e500, type: 3}
   moveSpeed: 5
+  bulletPrefab: {fileID: 5834548435660928795, guid: d70a64f703ed11b489a6da207dc5e500, type: 3}
   inputActions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   mainCamera: {fileID: 519420031}
   cameraOffset: {x: 0, y: 0, z: -10}
@@ -627,6 +627,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77e38ea77fc94343aa9fa56df8303501, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickAction: {fileID: 1120369429361536294, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   cursorTexture: {fileID: 2800000, guid: 68c4b7bb38865c34986bb73692d6ed16, type: 3}
   cursorTextureOnClick: {fileID: 2800000, guid: eeeae2e2f40d6bc4089b2aedbd4c0fd9, type: 3}
 --- !u!4 &2034931369

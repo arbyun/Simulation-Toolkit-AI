@@ -63,18 +63,27 @@ namespace SimToolAI.Core.Map
 
                 string[] parts = trimmed.Split(' ');
 
-                if (parts[0] == "#width")
-                    _width = int.Parse(parts[1]);
-                else if (parts[0] == "#height") 
-                    _height = int.Parse(parts[1]);
-                else if (parts[0] == "#window") 
-                    AddWindow(parts);
-                else if (parts[0] == "#wall") 
-                    DrawWall(parts);
-                else if (parts[0] == "#wallrect") 
-                    DrawRectangle(parts);
-                else if (parts[0] == "#door") 
-                    AddDoor(parts);
+                switch (parts[0])
+                {
+                    case "#width":
+                        _width = int.Parse(parts[1]);
+                        break;
+                    case "#height":
+                        _height = int.Parse(parts[1]);
+                        break;
+                    case "#window":
+                        AddWindow(parts);
+                        break;
+                    case "#wall":
+                        DrawWall(parts);
+                        break;
+                    case "#wallrect":
+                        DrawRectangle(parts);
+                        break;
+                    case "#door":
+                        AddDoor(parts);
+                        break;
+                }
             }
             
             return CreateInstance();
@@ -113,18 +122,27 @@ namespace SimToolAI.Core.Map
 
                 string[] parts = trimmed.Split(' ');
 
-                if (parts[0] == "#width")
-                    _width = int.Parse(parts[1]);
-                else if (parts[0] == "#height") 
-                    _height = int.Parse(parts[1]);
-                else if (parts[0] == "#window") 
-                    AddWindow(parts);
-                else if (parts[0] == "#wall") 
-                    DrawWall(parts);
-                else if (parts[0] == "#wallrect") 
-                    DrawRectangle(parts);
-                else if (parts[0] == "#door") 
-                    AddDoor(parts);
+                switch (parts[0])
+                {
+                    case "#width":
+                        _width = int.Parse(parts[1]);
+                        break;
+                    case "#height":
+                        _height = int.Parse(parts[1]);
+                        break;
+                    case "#window":
+                        AddWindow(parts);
+                        break;
+                    case "#wall":
+                        DrawWall(parts);
+                        break;
+                    case "#wallrect":
+                        DrawRectangle(parts);
+                        break;
+                    case "#door":
+                        AddDoor(parts);
+                        break;
+                }
             }
             
             return CreateInstance();
@@ -142,14 +160,24 @@ namespace SimToolAI.Core.Map
                 {
                     char cell = _mapGrid[x, y];
 
-                    if (cell == '#') // Wall
-                        rogueMap.SetCellProperties(x, y, isTransparent: false, isWalkable: false);
-                    else if (cell == 'O') // Window
-                        rogueMap.SetCellProperties(x, y, isTransparent: true, isWalkable: false);
-                    else if (cell == '&') // Door
-                        rogueMap.SetCellProperties(x, y, isTransparent: false, isWalkable: true);
-                    else if (cell == '.')
-                        rogueMap.SetCellProperties(x, y, isTransparent: true, isWalkable: true);
+                    switch (cell)
+                    {
+                        // Wall
+                        case '#':
+                            rogueMap.SetCellProperties(x, y, isTransparent: false, isWalkable: false);
+                            break;
+                        // Window
+                        case 'O':
+                            rogueMap.SetCellProperties(x, y, isTransparent: true, isWalkable: false);
+                            break;
+                        // Door
+                        case '&':
+                            rogueMap.SetCellProperties(x, y, isTransparent: false, isWalkable: true);
+                            break;
+                        case '.':
+                            rogueMap.SetCellProperties(x, y, isTransparent: true, isWalkable: true);
+                            break;
+                    }
                 }
             }
             

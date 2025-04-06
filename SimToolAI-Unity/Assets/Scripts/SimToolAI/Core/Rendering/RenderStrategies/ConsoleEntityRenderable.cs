@@ -30,7 +30,7 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// <param name="backgroundColor">Background color of the character</param>
         /// <param name="entity">Entity to render</param>
         public ConsoleEntityRenderable(char character, ConsoleColor foregroundColor,
-            ConsoleColor backgroundColor, Entity entity) : base()
+            ConsoleColor backgroundColor, Entity entity)
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));

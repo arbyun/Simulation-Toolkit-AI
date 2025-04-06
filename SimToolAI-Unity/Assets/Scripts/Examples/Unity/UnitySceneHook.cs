@@ -1,8 +1,10 @@
+using Examples.Unity.Cosmetic;
 using SimToolAI.Core.Entities;
 using SimToolAI.Core.Map;
 using SimToolAI.Core.Rendering.RenderStrategies;
-using SimToolAI.Examples.Unity;
 using SimToolAI.Utilities;
+using System.Collections.Generic;
+using SimToolAI.Core.Rendering;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
@@ -22,50 +24,61 @@ namespace Examples.Unity
         [SerializeField] private TileBase floorTile;
         [SerializeField] private TextAsset mapText;
         [SerializeField] private Grid grid;
-        
+
         [Header("Player Settings")]
         [SerializeField] private GameObject playerPrefab;
-        [SerializeField] private GameObject bulletPrefab;
         [SerializeField] private float moveSpeed = 5f;
-        
+        [SerializeField] private GameObject bulletPrefab;
+        [SerializeField] private float fireRate = 0.25f;
+
         [Header("Input Settings")]
         [SerializeField] private InputActionAsset inputActions;
-        
+
         [Header("Camera Settings")]
         [SerializeField] private Camera mainCamera;
         [SerializeField] private Vector3 cameraOffset;
 
+        [Header("Bullet Pool Settings")]
+        [SerializeField] private int initialPoolSize = 20;
+
         #region Properties
 
-        public GameObject PlayerObject 
-        { 
-            get; 
-            private set; 
+        public GameObject PlayerObject
+        {
+            get;
+            private set;
         }
 
         public Player Player
         {
-            get; 
+            get;
             private set;
         }
 
         public ISimMap Map
         {
-            get; 
+            get;
             private set;
         }
 
         public UnityScene UnityScene
         {
             get;
-            private set; 
+            private set;
         }
 
         #endregion
-        
+
         private InputAction _moveAction;
         private InputAction _fireAction;
+        private PlayerAnimations _playerAnimations;
         private Vector3 _targetPos = Vector3.zero;
+        private bool _isFiring;
+        private float _timeSinceLastShot;
+
+        // Bullet pooling
+        private readonly Queue<GameObject> _bulletPool = new();
+        private readonly Dictionary<Bullet, GameObject> _activeBullets = new();
 
         private void Awake()
         {
@@ -79,8 +92,9 @@ namespace Examples.Unity
                     _moveAction.Enable();
                     _fireAction.Enable();
 
-                    // Set up fire action callback
+                    // Set up fire action callbacks
                     _fireAction.performed += OnFireActionPerformed;
+                    _fireAction.canceled += OnFireActionCanceled;
                 }
                 else
                 {
@@ -96,50 +110,53 @@ namespace Examples.Unity
         private void Start()
         {
             ParseMap();
-            
+
             UnityScene = new UnityScene(Map);
-            
+
             CreatePlayer();
+
+            InitializeBulletPool();
         }
 
         private void Update()
         {
             ProcessMovementInput();
-            
-            mainCamera.transform.position = new Vector3(PlayerObject.transform.position.x + cameraOffset.x, 
+            ProcessContinuousFiring();
+
+            mainCamera.transform.position = new Vector3(PlayerObject.transform.position.x + cameraOffset.x,
                 PlayerObject.transform.position.y + cameraOffset.y, cameraOffset.z);
-            
+
             UnityScene.Update(Time.deltaTime);
             UnityScene.Render();
         }
-        
+
         private void OnDestroy()
         {
-            // Unsubscribe from input events
             if (_fireAction != null)
             {
                 _fireAction.performed -= OnFireActionPerformed;
+                _fireAction.canceled -= OnFireActionCanceled;
             }
         }
 
         #region Initialization Methods
-        
+
         private void ParseMap()
         {
             GridMapParser<GridMap> map = new GridMapParser<GridMap>();
-            
+
             Map = mapText ? map.LoadMapFromText(mapText.text) : map.LoadMapFromFile();
-            
-            Map.Initialize(new UnityMapRenderable(map.GetMapGrid(), Map.Height, Map.Width, 
+
+            Map.Initialize(new UnityMapRenderable(map.GetMapGrid(), Map.Height, Map.Width,
                 tilemap, wallTile, floorTile));
-            
+
             Map.Renderable.Render();
         }
-        
+
         private void CreatePlayer()
         {
             var startPos = Map.GetRandomWalkableLocation() ?? (5, 5);
-            
+
             Player = new Player("Player", startPos.Item1, startPos.Item2, 10)
             {
                 Health = 100,
@@ -149,12 +166,13 @@ namespace Examples.Unity
                 Speed = moveSpeed,
                 FacingDirection = Direction.Right
             };
-            
+
             // Initialize the target position to the player's starting position
             _targetPos = grid.GetCellCenterWorld(new Vector3Int(Player.X, Player.Y));
-            
+
             PlayerObject = Instantiate(playerPrefab);
             PlayerObject.transform.position = _targetPos;
+            _playerAnimations = PlayerObject.GetComponent<PlayerAnimations>();
 
             Data renderData = new Data();
             renderData.Set("transform", PlayerObject.transform);
@@ -163,29 +181,72 @@ namespace Examples.Unity
 
             UnityEntityRenderable playerRenderable = new UnityEntityRenderable(renderData);
             Player.Avatar = playerRenderable;
-            
+
             UnityScene.AddEntity(Player);
             Map.ToggleFieldOfView(Player);
         }
-        
+
         /// <summary>
-        /// Creates a Unity representation for a bullet
+        /// Initializes the bullet pool with a predefined number of bullet objects
+        /// </summary>
+        private void InitializeBulletPool()
+        {
+            for (int i = 0; i < initialPoolSize; i++)
+            {
+                GameObject bulletObj = Instantiate(bulletPrefab, PlayerObject.transform);
+                bulletObj.SetActive(false);
+                _bulletPool.Enqueue(bulletObj);
+            }
+
+            // Subscribe to the entity removed event to handle bullet recycling
+            UnityScene.EntityRemoved += OnEntityRemoved;
+        }
+
+        /// <summary>
+        /// Creates or reuses a Unity representation for a bullet
         /// </summary>
         private void CreateBulletObject(Bullet bullet)
         {
-            var bulletObj = Instantiate(bulletPrefab);
+            var bulletObj =
+                // Try to get a bullet from the pool
+                _bulletPool.Count > 0 ? _bulletPool.Dequeue() :
+                // If the pool is empty, create a new bullet
+                Instantiate(bulletPrefab);
+
+            // Activate and position the bullet
+            bulletObj.SetActive(true);
             bulletObj.transform.position = grid.GetCellCenterWorld(new Vector3Int(bullet.X, bullet.Y));
             bulletObj.name = $"Bullet_{bullet.Id}";
-            
+
+            // Track the active bullet
+            _activeBullets[bullet] = bulletObj;
+
+            // Set up the bullet's renderable
             Data bulletRenderableData = new Data();
             bulletRenderableData.Set("transform", bulletObj.transform);
             bulletRenderableData.Set("grid", grid);
             bulletRenderableData.Set("entity", bullet);
-            
+
             UnityEntityRenderable bulletRenderable = new UnityEntityRenderable(bulletRenderableData);
             bullet.Avatar = bulletRenderable;
         }
-        
+
+        /// <summary>
+        /// Handles entity removal events to recycle bullet objects
+        /// </summary>
+        private void OnEntityRemoved(object sender, EntityEventArgs e)
+        {
+            if (e.Entity is Bullet bullet && _activeBullets.TryGetValue(bullet, out GameObject bulletObj))
+            {
+                // Return the bullet to the pool
+                bulletObj.SetActive(false);
+                _bulletPool.Enqueue(bulletObj);
+
+                // Remove from active bullets
+                _activeBullets.Remove(bullet);
+            }
+        }
+
         #endregion
 
         #region Input Processing
@@ -225,31 +286,71 @@ namespace Examples.Unity
                         }
 
                         // Move the player
-                        if (moveDirection != Direction.None)
+                        bool moved = CommandSystem.MovePlayer(moveDirection, Player, Map);
+
+                        if (moved)
                         {
-                            bool moved = CommandSystem.MovePlayer(moveDirection, Player, Map);
+                            // Update the player's facing direction
+                            Player.FacingDirection = moveDirection;
 
-                            if (moved)
-                            {
-                                // Update the player's facing direction
-                                Player.FacingDirection = moveDirection;
-
-                                // Update the target position for visualization
-                                _targetPos = grid.GetCellCenterWorld(new Vector3Int(Player.X, Player.Y));
-                            }
+                            // Update the target position for visualization
+                            _targetPos = grid.GetCellCenterWorld(new Vector3Int(Player.X, Player.Y));
                         }
                     }
                 }
             }
         }
-        
+
         /// <summary>
-        /// Called when the fire action is performed
+        /// Processes continuous firing when the fire button is held down
+        /// </summary>
+        private void ProcessContinuousFiring()
+        {
+            if (_isFiring && Player != null)
+            {
+                _timeSinceLastShot += Time.deltaTime;
+
+                // Check if enough time has passed since the last shot
+                if (_timeSinceLastShot >= fireRate)
+                {
+                    FireBullet();
+                    _timeSinceLastShot = 0f;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when the fire action is performed (button pressed)
         /// </summary>
         private void OnFireActionPerformed(InputAction.CallbackContext context)
         {
             if (Player == null)
                 return;
+
+            // Start continuous firing
+            _isFiring = true;
+
+            // Fire immediately on first press
+            FireBullet();
+            _timeSinceLastShot = 0f;
+        }
+
+        /// <summary>
+        /// Called when the fire action is canceled (button released)
+        /// </summary>
+        private void OnFireActionCanceled(InputAction.CallbackContext context)
+        {
+            // Stop continuous firing
+            _isFiring = false;
+        }
+
+        /// <summary>
+        /// Fires a bullet in the player's facing direction
+        /// </summary>
+        private void FireBullet()
+        {
+            // Cosmetics
+            _playerAnimations.TriggerAnimation(PlayerAnimations.SHOOT_ANIMATION);
 
             // Fire a bullet in the player's facing direction
             var bullet = CommandSystem.FireBullet(Player, UnityScene, 8, 8);
@@ -266,7 +367,7 @@ namespace Examples.Unity
 
         private void OnDrawGizmos()
         {
-            if (_targetPos != Vector3.zero)
+            if (_targetPos != Vector3.zero && PlayerObject != null)
             {
                 Gizmos.color = Color.red;
                 Gizmos.DrawLine(PlayerObject.transform.position, _targetPos);
@@ -275,7 +376,6 @@ namespace Examples.Unity
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawSphere(_targetPos, 0.1f);
             }
-            
         }
     }
 }

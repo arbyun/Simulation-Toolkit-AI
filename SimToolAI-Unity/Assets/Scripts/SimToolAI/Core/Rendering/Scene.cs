@@ -12,6 +12,11 @@ namespace SimToolAI.Core.Rendering
     public abstract class Scene : IScene
     {
         /// <summary>
+        /// Event raised when an entity is removed from the scene
+        /// </summary>
+        public EventHandler<EntityEventArgs> EntityRemoved;
+
+        /// <summary>
         /// Gets the map associated with this scene
         /// </summary>
         public ISimMap Map { get; }
@@ -63,6 +68,9 @@ namespace SimToolAI.Core.Rendering
             if (Entities.Remove(entity))
             {
                 RenderRequired = true;
+
+                // Raise the EntityRemoved event
+                EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
             }
         }
 

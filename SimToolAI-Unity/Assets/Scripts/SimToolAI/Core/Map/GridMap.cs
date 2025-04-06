@@ -41,7 +41,7 @@ namespace SimToolAI.Core.Map
         /// <summary>
         /// Random number generator
         /// </summary>
-        private readonly Random _random = new Random();
+        private readonly Random _random = new();
 
         #endregion
 
@@ -72,7 +72,7 @@ namespace SimToolAI.Core.Map
         /// <summary>
         /// Creates a new grid map with default settings
         /// </summary>
-        public GridMap() : base()
+        public GridMap()
         {
             _fieldOfView = new FieldOfView(this);
         }
@@ -272,7 +272,7 @@ namespace SimToolAI.Core.Map
             }
 
             // Compute FOV with the entity as the center if it's the current FOV entity
-            if (_currentFovEntity == entity)
+            if (_currentFovEntity.Equals(entity))
             {
                 ComputeFov(entity);
             }
