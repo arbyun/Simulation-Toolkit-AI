@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using SimToolAI.Core.Entities;
@@ -35,6 +36,11 @@ namespace SimToolAI
         /// Player entity
         /// </summary>
         private static Player _player;
+        
+        /// <summary>
+        /// List of enemies
+        /// </summary>
+        private static List<Player> _enemies = new List<Player>();
 
         /// <summary>
         /// Game timer for continuous updates
@@ -107,7 +113,6 @@ namespace SimToolAI
             }
 
             // Create entities and set up the scene
-            CreateEntities();
             SetupScene();
 
             // Initialize the update timer
@@ -136,7 +141,7 @@ namespace SimToolAI
         private static void CreateEntities()
         {
             // Create the player
-            _player = new Player("Player", 5, 2, 15)
+            _player = new Player("Player", 5, 2, 15, _scene)
             {
                 Health = 100,
                 MaxHealth = 100,
@@ -148,6 +153,60 @@ namespace SimToolAI
 
             // Create the player's avatar
             _player.Avatar = new ConsoleEntityRenderable('@', ConsoleColor.Yellow, ConsoleColor.Black, _player);
+            
+            CreateEnemies();
+        }
+        
+        /// <summary>
+        /// Creates enemy entities
+        /// </summary>
+        private static void CreateEnemies()
+        {
+            // Clear any existing enemies
+            _enemies.Clear();
+            
+            // Create a few enemies at different positions
+            var enemy1 = new Player("Enemy1", 10, 2, _scene)
+            {
+                Health = 50,
+                MaxHealth = 50,
+                AttackPower = 5,
+                Defense = 2,
+                Speed = 0.5f,
+                FacingDirection = Direction.Left
+            };
+            
+            enemy1.Avatar = new ConsoleEntityRenderable('E', ConsoleColor.Red, ConsoleColor.Black, enemy1);
+            
+            _enemies.Add(enemy1);
+            
+            var enemy2 = new Player("Enemy2", 15, 3, _scene)
+            {
+                Health = 50,
+                MaxHealth = 50,
+                AttackPower = 5,
+                Defense = 2,
+                Speed = 0.5f,
+                FacingDirection = Direction.Left
+            };
+            
+            enemy2.Avatar = new ConsoleEntityRenderable('E', ConsoleColor.Red, ConsoleColor.Black, enemy2);
+            
+            _enemies.Add(enemy2);
+            
+            var enemy3 = new Player("Enemy3", 8, 1, _scene)
+            {
+                Health = 50,
+                MaxHealth = 50,
+                AttackPower = 5,
+                Defense = 2,
+                Speed = 0.5f,
+                FacingDirection = Direction.Left
+            };
+            
+            enemy3.Avatar = new ConsoleEntityRenderable('E', ConsoleColor.Red, ConsoleColor.Black, enemy3);
+            
+            _enemies.Add(enemy3);
         }
 
         /// <summary>
@@ -156,7 +215,16 @@ namespace SimToolAI
         private static void SetupScene()
         {
             _scene = new ConsoleScene(_map);
+            
+            CreateEntities();
+            
             _scene.AddEntity(_player);
+
+            foreach (var enemy in _enemies)
+            {
+                _scene.AddEntity(enemy);
+            }
+            
             _map.ToggleFieldOfView(_player);
         }
 
@@ -169,7 +237,11 @@ namespace SimToolAI
             Console.WriteLine("WASD / Arrow Keys: Move player");
             Console.WriteLine("Spacebar: Fire bullet");
             Console.WriteLine("Q / Escape: Quit");
-            Thread.Sleep(2000);
+            Console.WriteLine();
+            Console.WriteLine("Objective:");
+            Console.WriteLine("Shoot the enemies (represented by 'E') to reduce their health.");
+            Console.WriteLine("Enemies will die when their health reaches 0.");
+            Thread.Sleep(3000);
         }
 
         #endregion

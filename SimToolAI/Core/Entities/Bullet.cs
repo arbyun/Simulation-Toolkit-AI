@@ -57,6 +57,11 @@ namespace SimToolAI.Core.Entities
         /// Whether the bullet blocks movement
         /// </summary>
         public override bool BlocksMovement => false;
+        
+        /// <summary>
+        /// The owner of the bullet
+        /// </summary>
+        private readonly Entity _owner;
 
         #endregion
 
@@ -70,10 +75,9 @@ namespace SimToolAI.Core.Entities
         /// <param name="direction">Direction the bullet will travel</param>
         /// <param name="map">Map reference</param>
         /// <param name="scene">Scene reference</param>
-        /// <param name="bulletSpeed">Speed of the bullet (cells per second)</param>
-        /// <param name="speed">Speed of the bullet (pixels per second)</param>
+        /// <param name="speed">Speed of the bullet (per second)</param>
         /// <param name="damage">Damage the bullet deals</param>
-        public Bullet(int x, int y, Direction direction, ISimMap map, Scene scene, float speed = 10, int damage = 1)
+        public Bullet(int x, int y, Direction direction, ISimMap map, Scene scene, Entity owner, float speed = 10, int damage = 1)
             : base("bullet", x, y, 1)
         {
             Direction = direction;
@@ -81,6 +85,7 @@ namespace SimToolAI.Core.Entities
             Damage = damage;
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _scene = scene ?? throw new ArgumentNullException(nameof(scene));
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
 
             // Create a bullet renderable
             Avatar = new ConsoleEntityRenderable('*', ConsoleColor.Red, ConsoleColor.Black, this);
@@ -93,16 +98,16 @@ namespace SimToolAI.Core.Entities
         /// <param name="y">Starting Y position</param>
         /// <param name="direction">Direction the bullet will travel</param>
         /// <param name="scene">Scene reference</param>
-        /// <param name="bulletSpeed">Speed of the bullet (cells per second)</param>
-        /// <param name="speed">Speed of the bullet (pixels per second)</param>
+        /// <param name="speed">Speed of the bullet (per second)</param>
         /// <param name="damage">Damage the bullet deals</param>
-        public Bullet(int x, int y, Direction direction, Scene scene, float speed = 10, int damage = 1)
+        public Bullet(int x, int y, Direction direction, Scene scene, Entity owner, float speed = 10, int damage = 1)
             : base("bullet", x, y, 1)
         {
             Direction = direction;
             Speed = speed;
             Damage = damage;
             _scene = scene ?? throw new ArgumentNullException(nameof(scene));
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
 
             // Get the map from the scene
             _map = scene.Map;
@@ -185,7 +190,7 @@ namespace SimToolAI.Core.Entities
 
             // Check if there's an entity at the new position
             var entity = _scene.GetEntityAt(newX, newY);
-            if (entity != null && !entity.Equals(this))
+            if (entity != null && !entity.Equals(this) && !entity.Equals(_owner))
             {
                 // Bullet hit an entity
                 HandleEntityCollision(entity);
@@ -210,10 +215,9 @@ namespace SimToolAI.Core.Entities
             if (entity is Player player)
             {
                 player.TakeDamage(Damage);
-                return;
             }
 
-            // Remove the bullet
+            // Remove the bullet for any other entity type
             _scene.RemoveEntity(this);
         }
 

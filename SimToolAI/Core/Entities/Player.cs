@@ -1,4 +1,5 @@
 using System;
+using SimToolAI.Core.Rendering;
 
 namespace SimToolAI.Core.Entities
 {
@@ -33,6 +34,11 @@ namespace SimToolAI.Core.Entities
         /// Gets whether the player is alive
         /// </summary>
         public bool IsAlive => Health > 0;
+        
+        /// <summary>
+        /// Reference to the scene
+        /// </summary>
+        private readonly Scene _scene;
 
         #endregion
 
@@ -45,8 +51,9 @@ namespace SimToolAI.Core.Entities
         /// <param name="x">X-coordinate</param>
         /// <param name="y">Y-coordinate</param>
         /// <param name="awareness">Awareness radius</param>
-        public Player(string name, int x, int y, int awareness) : base(name, x, y, awareness)
+        public Player(string name, int x, int y, int awareness, Scene scene) : base(name, x, y, awareness)
         {
+            _scene = scene ?? throw new ArgumentNullException(nameof(scene));
         }
 
         /// <summary>
@@ -55,13 +62,28 @@ namespace SimToolAI.Core.Entities
         /// <param name="name">Name of the player</param>
         /// <param name="x">X-coordinate</param>
         /// <param name="y">Y-coordinate</param>
-        public Player(string name, int x, int y) : base(name, x, y, 10)
+        public Player(string name, int x, int y, Scene scene) : base(name, x, y, 10)
         {
+            _scene = scene ?? throw new ArgumentNullException(nameof(scene));
         }
 
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Updates the enemy state
+        /// </summary>
+        /// <param name="deltaTime">Time elapsed since the last update in seconds</param>
+        public override void Update(float deltaTime)
+        {
+            // If the enemy is dead, remove it from the scene
+            if (!IsAlive)
+            {
+                _scene.RemoveEntity(this);
+                return;
+            }
+        }
 
         /// <summary>
         /// Applies damage to the player
@@ -75,8 +97,24 @@ namespace SimToolAI.Core.Entities
 
             // Apply defense reduction
             int actualDamage = Math.Max(1, amount - Defense);
+            int previousHealth = Health;
 
             Health = Math.Max(0, Health - actualDamage);
+            
+            Console.SetCursorPosition(0, 0);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"{Name} took {actualDamage} damage! Health: {previousHealth} -> {Health}");
+            Console.ResetColor();
+            
+            if (!IsAlive)
+            {
+                Console.SetCursorPosition(0, 1);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{Name} has been defeated!");
+                Console.ResetColor();
+                
+                _scene.QueryScene<bool>("SetRenderRequired", true);
+            }
 
             return IsAlive;
         }

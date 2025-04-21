@@ -84,13 +84,13 @@ namespace SimToolAI.Utilities
         /// <param name="speed">Speed of the bullet</param>
         /// <param name="damage">Damage the bullet deals</param>
         /// <returns>The created bullet</returns>
-        public static Bullet FireBullet(int x, int y, Direction direction, Scene scene, float speed = 10, int damage = 1)
+        public static Bullet FireBullet(int x, int y, Direction direction, Scene scene, Entity owner, float speed = 10, int damage = 20)
         {
             if (scene == null)
                 throw new ArgumentNullException(nameof(scene));
 
             // Create a new bullet
-            var bullet = new Bullet(x, y, direction, scene, speed, damage);
+            var bullet = new Bullet(x, y, direction, scene, owner, speed, damage);
             bullet.FacingDirection = direction;
 
             // Add the bullet to the scene
@@ -112,7 +112,7 @@ namespace SimToolAI.Utilities
         /// <param name="speed">Speed of the bullet</param>
         /// <param name="damage">Damage the bullet deals</param>
         /// <returns>The created bullet</returns>
-        public static Bullet FireBullet(int x, int y, Direction direction, IScene scene, float speed = 10, int damage = 1)
+        public static Bullet FireBullet(int x, int y, Direction direction, IScene scene, Entity owner, float speed = 10, int damage = 20)
         {
             if (scene == null)
                 throw new ArgumentNullException(nameof(scene));
@@ -120,7 +120,7 @@ namespace SimToolAI.Utilities
             // If the scene is already a Scene, use it directly
             if (scene is Scene sceneImpl)
             {
-                return FireBullet(x, y, direction, sceneImpl, speed, damage);
+                return FireBullet(x, y, direction, sceneImpl, owner, speed, damage);
             }
 
             return null;
@@ -134,12 +134,12 @@ namespace SimToolAI.Utilities
         /// <param name="speed">Speed of the bullet</param>
         /// <param name="damage">Damage the bullet deals</param>
         /// <returns>The created bullet</returns>
-        public static Bullet FireBullet(Player player, Scene scene, float speed = 10, int damage = 1)
+        public static Bullet FireBullet(Player player, Scene scene, float speed = 10, int damage = 20)
         {
             if (player == null)
                 throw new ArgumentNullException(nameof(player));
 
-            return FireBullet(player.X, player.Y, player.FacingDirection, scene, speed, damage);
+            return FireBullet(player.X, player.Y, player.FacingDirection, scene, player, speed, damage);
         }
 
         /// <summary>
@@ -150,12 +150,12 @@ namespace SimToolAI.Utilities
         /// <param name="speed">Speed of the bullet</param>
         /// <param name="damage">Damage the bullet deals</param>
         /// <returns>The created bullet</returns>
-        public static Bullet FireBullet(Player player, IScene scene, float speed = 10, int damage = 1)
+        public static Bullet FireBullet(Player player, IScene scene, float speed = 10, int damage = 20)
         {
             if (player == null)
                 throw new ArgumentNullException(nameof(player));
 
-            return FireBullet(player.X, player.Y, player.FacingDirection, scene, speed, damage);
+            return FireBullet(player.X, player.Y, player.FacingDirection, scene, player, speed, damage);
         }
     }
 }
