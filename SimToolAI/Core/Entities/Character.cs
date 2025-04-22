@@ -159,14 +159,12 @@ namespace SimToolAI.Core.Entities
 
             Health = Math.Max(0, Health - actualDamage);
             
-            Console.SetCursorPosition(0, 0);
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"{Name} took {actualDamage} damage! Health: {previousHealth} -> {Health}");
             Console.ResetColor();
             
             if (!IsAlive)
             {
-                Console.SetCursorPosition(0, 1);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{Name} has been defeated!");
                 Console.ResetColor();

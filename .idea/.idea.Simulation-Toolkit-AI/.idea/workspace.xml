@@ -7,17 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4b44a6d-48f9-454b-865e-4a642a100618" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/SimToolAI/Core/Rendering/RenderStrategies/ConsoleNotRenderable.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Simulation-Toolkit-AI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Simulation-Toolkit-AI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimToolAI/ConsoleRunner.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimToolAI/Core/Configuration/AgentConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SimToolAI/Core/Configuration/AgentConfig.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimToolAI/Core/Configuration/MatchConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SimToolAI/Core/Configuration/MatchConfig.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimToolAI/Core/Simulation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SimToolAI/Core/Simulation.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimToolAI/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SimToolAI/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimToolAI/bin/Debug/net8.0/SimToolAI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SimToolAI/bin/Debug/net8.0/SimToolAI.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimToolAI/bin/Debug/net8.0/SimToolAI.exe" beforeDir="false" afterPath="$PROJECT_DIR$/SimToolAI/bin/Debug/net8.0/SimToolAI.exe" afterDir="false" />
-    </list>
+    <list default="true" id="f4b44a6d-48f9-454b-865e-4a642a100618" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -95,7 +85,7 @@
       <workItem from="1744213879806" duration="1196000" />
       <workItem from="1744292985940" duration="3553000" />
       <workItem from="1745230394432" duration="4612000" />
-      <workItem from="1745321948632" duration="7119000" />
+      <workItem from="1745321948632" duration="7490000" />
     </task>
     <servers />
   </component>
@@ -170,6 +160,6 @@
     <option name="repoAccumulatedChanges" value="17" />
     <option name="repoTotalFiles" value="217" />
     <option name="repositoryId" value="ba31495c-09a0-4bdf-a14b-d6deb081f7e1" />
-    <option name="state" value="FULLY_INDEXED" />
+    <option name="state" value="UPDATING_INDEX" />
   </component>
 </project>
