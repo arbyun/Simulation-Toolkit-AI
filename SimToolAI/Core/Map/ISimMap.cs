@@ -125,5 +125,15 @@ namespace SimToolAI.Core.Map
         /// <param name="y2">Y-coordinate of the second position</param>
         /// <returns>The distance between the two positions</returns>
         float GetDistance(int x1, int y1, int x2, int y2);
+
+        /// <summary>
+        /// Checks if there is a direct line of sight between two points.
+        /// </summary>
+        /// <param name="ownerX">X-coordinate of the owner</param>
+        /// <param name="ownerY">Y-coordinate of the owner</param>
+        /// <param name="argX">X-coordinate of the target point</param>
+        /// <param name="argY">Y-coordinate of the target point</param>
+        /// <returns></returns>
+        bool IsInLineOfSight(int ownerX, int ownerY, int argX, int argY);
     }
 }

@@ -222,6 +222,12 @@ namespace SimToolAI.Core.Map
             return (float)Math.Sqrt(dx * dx + dy * dy);
         }
 
+        public bool IsInLineOfSight(int ownerX, int ownerY, int argX, int argY)
+        {
+            // This is a stub for future implementation
+            throw new NotImplementedException("Continuous map is not yet implemented");
+        }
+
         #endregion
     }
 }

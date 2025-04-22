@@ -295,6 +295,57 @@ namespace SimToolAI.Core.Map
             return (float)Math.Sqrt(dx * dx + dy * dy);
         }
 
+        /// <summary>
+        /// Checks if there is a clear line of sight between two positions
+        /// </summary>
+        /// <param name="ownerX">X-coordinate of the starting position</param>
+        /// <param name="ownerY">Y-coordinate of the starting position</param>
+        /// <param name="argX">X-coordinate of the target position</param>
+        /// <param name="argY">Y-coordinate of the target position</param>
+        /// <returns>True if there is a clear line of sight, false otherwise</returns>
+        public bool IsInLineOfSight(int ownerX, int ownerY, int argX, int argY)
+        {
+            // Check if both positions are in bounds
+            if (!IsInBounds(ownerX, ownerY) || !IsInBounds(argX, argY))
+                return false;
+                
+            // Use Bresenham's line algorithm to check for obstacles
+            int dx = Math.Abs(argX - ownerX);
+            int dy = Math.Abs(argY - ownerY);
+            int sx = ownerX < argX ? 1 : -1;
+            int sy = ownerY < argY ? 1 : -1;
+            int err = dx - dy;
+            
+            int x = ownerX;
+            int y = ownerY;
+            
+            while (x != argX || y != argY)
+            {
+                // Skip the starting position
+                if (x != ownerX || y != ownerY)
+                {
+                    // If we hit a non-transparent cell, there's no line of sight
+                    if (!GetCell(x, y).IsTransparent)
+                        return false;
+                }
+                
+                int e2 = 2 * err;
+                if (e2 > -dy)
+                {
+                    err -= dy;
+                    x += sx;
+                }
+                if (e2 < dx)
+                {
+                    err += dx;
+                    y += sy;
+                }
+            }
+            
+            // If we reached the target without hitting obstacles, there's a clear line of sight
+            return true;
+        }
+
         #endregion
     }
 }
