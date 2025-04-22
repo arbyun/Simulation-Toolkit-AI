@@ -112,11 +112,12 @@ namespace SimToolAI.Core.Configuration
             var serializer = new XmlSerializer(typeof(MatchConfig));
             serializer.Serialize(stream, this);
         }
-        
+
         /// <summary>
         /// Validates the match configuration
         /// </summary>
         /// <param name="consoleMode">Whether the configuration is being validated for console mode</param>
+        /// <param name="errorMessage">Error message if validation fails</param>
         /// <returns>True if the configuration is valid, false otherwise</returns>
         public bool Validate(bool consoleMode, out string errorMessage)
         {

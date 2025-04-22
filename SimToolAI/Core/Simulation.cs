@@ -151,7 +151,7 @@ namespace SimToolAI.Core
             else
             {
                 // For offline mode, use a minimal scene without rendering
-                Map.Initialize(null);
+                Map.Initialize(new ConsoleNotRenderable());
                 Scene = new MinimalScene(Map);
             }
             

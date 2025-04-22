@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace SimToolAI.Core.Configuration
 {
@@ -18,6 +19,7 @@ namespace SimToolAI.Core.Configuration
         /// <summary>
         /// Type of brain for the agent
         /// </summary>
+        [JsonConverter(typeof(JsonStringEnumConverter<BrainType>))] 
         public BrainType BrainType { get; set; } = BrainType.AI;
         
         /// <summary>

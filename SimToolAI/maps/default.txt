@@ -1,0 +1,8 @@
+#spacing X 2
+#spacing Y 3
+#offset X 3
+#offset Y 3
+#wallrect (0,0) (35,4)
+#door (35,3)
+#wallrect (34,0) (39,6)
+#door (34,3)
