@@ -1,0 +1,38 @@
+{
+  "Name": "Sample Match",
+  "MapPath": "maps/default.txt",
+  "RealtimeMode": false,
+  "MaxSteps": 1000,
+  "Agents": [
+    {
+      "Name": "Agent1",
+      "BrainType": "AI",
+      "RandomStart": true,
+      "Awareness": 10,
+      "MaxHealth": 100,
+      "AttackPower": 10,
+      "Defense": 5,
+      "Speed": 1.0
+    },
+    {
+      "Name": "Agent2",
+      "BrainType": "AI",
+      "RandomStart": true,
+      "Awareness": 8,
+      "MaxHealth": 80,
+      "AttackPower": 12,
+      "Defense": 3,
+      "Speed": 1.2
+    },
+    {
+      "Name": "Agent3",
+      "BrainType": "AI",
+      "RandomStart": true,
+      "Awareness": 12,
+      "MaxHealth": 120,
+      "AttackPower": 8,
+      "Defense": 7,
+      "Speed": 0.8
+    }
+  ]
+}
