@@ -66,3 +66,116 @@ The project follows SOLID principles and is organized into the following main di
 
 - C# (.NET)
 - [RogueSharp](https://github.com/FaronBracy/RogueSharp/tree/main)
+
+## Changelog
+
+<details>
+<summary> 
+<b>22/04/2025</b>
+</summary>
+
+#### Core Architecture Changes
+
+##### 1. Brain System
+- Added a `Brain` abstract class as the base for all decision-making components
+- Implemented `HumanBrain` for player-controlled entities
+- Implemented `AIBrain` for AI-controlled entities
+- Moved awareness from Entity to Brain for better encapsulation
+
+##### 2. Entity Hierarchy
+- Maintained `Entity` as the base class for all entities
+- Added `Character` as an intermediate class with health, combat abilities
+- Updated `Player` to inherit from `Character` instead of directly from `Entity`
+- Characters now have a Brain that controls their decision-making
+
+##### 3. Configuration System
+- Added `MatchConfig` for loading simulation settings from JSON or XML
+- Added `AgentConfig` for configuring individual agents
+- Support for different brain types (Human/AI)
+- Support for different simulation modes (Realtime/Offline)
+
+##### 4. Simulation System
+- Added `Simulation` class to manage the simulation lifecycle
+- Support for Realtime and Offline simulation modes
+- Event-based architecture for simulation events
+- Proper separation of simulation logic from visualization
+
+##### 5. Unity Integration
+- Added `AIToolkitRunner` MonoBehaviour for Unity integration
+- Support for loading configuration files in Unity
+- Visualization of entities in Unity
+- Input handling for human-controlled entities
+
+##### 6. Console Application
+- Added `ConsoleRunner` for running simulations from the command line
+- Support for loading configuration files
+- Proper error handling and validation
+- Output of simulation results
+
+#### Usage Examples
+
+##### Console Application
+```csharp
+// Load a configuration file
+var config = MatchConfig.LoadFromFile("sample_config.json");
+
+// Create a simulation in offline mode
+var simulation = new Simulation(config, SimulationMode.Offline);
+
+// Initialize and run the simulation
+simulation.Initialize();
+simulation.Start();
+```
+
+##### Unity Integration
+```csharp
+// In a MonoBehaviour
+public void StartSimulation(string configPath)
+{
+    // Load the configuration
+    var config = MatchConfig.LoadFromFile(configPath);
+    
+    // Create the simulation
+    var simulation = new Simulation(config, SimulationMode.Realtime);
+    
+    // Initialize and start the simulation
+    simulation.Initialize();
+    simulation.Start();
+    
+    // Process input for a human-controlled player
+    simulation.ProcessPlayerInput(playerId, Direction.Up, true);
+}
+```
+
+##### Configuration Example
+```json
+{
+  "Name": "Sample Match",
+  "MapPath": "maps/default.txt",
+  "RealtimeMode": true,
+  "MaxSteps": 1000,
+  "Agents": [
+    {
+      "Name": "Player",
+      "BrainType": "Human",
+      "RandomStart": true,
+      "Awareness": 15,
+      "MaxHealth": 100,
+      "AttackPower": 10,
+      "Defense": 5,
+      "Speed": 1.0
+    },
+    {
+      "Name": "Enemy1",
+      "BrainType": "AI",
+      "RandomStart": true,
+      "Awareness": 8,
+      "MaxHealth": 80,
+      "AttackPower": 12,
+      "Defense": 3,
+      "Speed": 1.2
+    }
+  ]
+}
+```
+</details>
