@@ -1,7 +1,8 @@
 using System;
 using System.Linq;
+using System.Numerics;
+using External.SimToolAI.SimToolAI.Core.AI;
 using SimToolAI.Core.Entities;
-using SimToolAI.Core.Rendering;
 using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.AI
@@ -21,12 +22,12 @@ namespace SimToolAI.Core.AI
         /// <summary>
         /// How often the AI makes decisions (in seconds)
         /// </summary>
-        public float DecisionInterval { get; set; } = 1.0f;
+        public float DecisionInterval { get; } = 1.0f;
         
         /// <summary>
         /// Current movement direction
         /// </summary>
-        private Direction? _currentMovementDirection;
+        private Vector3? _currentMovementDirection;
         
         /// <summary>
         /// Current attack target
@@ -36,21 +37,34 @@ namespace SimToolAI.Core.AI
         /// <summary>
         /// Random number generator for AI decisions
         /// </summary>
-        private readonly Random _random = new Random();
+        private readonly Random _random = new();
         
         #endregion
         
         #region Constructors
-        
+
         /// <summary>
         /// Creates a new AI brain with the specified parameters
         /// </summary>
         /// <param name="owner">The entity this brain controls</param>
         /// <param name="awareness">Awareness radius</param>
-        /// <param name="scene">Reference to the scene</param>
-        public AIBrain(Character owner, int awareness, Scene scene) 
-            : base(owner, awareness, scene)
+        /// <param name="simulation">The simulation instance</param>
+        public AIBrain(Character owner, int awareness, Simulation simulation) 
+            : base(owner, awareness, simulation)
         {
+        }
+
+        /// <summary>
+        /// Creates a new AI brain with the specified parameters
+        /// </summary>
+        /// <param name="owner">The entity this brain controls</param>
+        /// <param name="awareness">Awareness radius</param>
+        /// <param name="decisionInterval">Time between decisions in seconds</param>
+        /// <param name="simulation">The simulation instance</param>
+        public AIBrain(Character owner, int awareness, float decisionInterval, Simulation simulation) 
+            : base(owner, awareness, simulation)
+        {
+            DecisionInterval = decisionInterval;
         }
         
         #endregion
@@ -72,7 +86,25 @@ namespace SimToolAI.Core.AI
                 MakeDecisions();
             }
         }
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public override Vector3 GetMovementDirection()
+        {
+            return _currentMovementDirection ?? Vector3.Zero;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public override Entity GetInteractionTarget()
+        {
+            return _currentAttackTarget;
+        }
+
         /// <summary>
         /// Makes decisions about movement and attacks
         /// </summary>
@@ -83,7 +115,7 @@ namespace SimToolAI.Core.AI
             
             // Find the nearest player or character
             Entity nearestTarget = perceivedEntities
-                .Where(e => e is Player || e is Character)
+                .Where(e => e is Character)
                 .OrderBy(e => Owner.DistanceTo(e))
                 .FirstOrDefault();
             
@@ -100,11 +132,11 @@ namespace SimToolAI.Core.AI
                     
                     if (Math.Abs(dx) > Math.Abs(dy))
                     {
-                        _currentMovementDirection = dx > 0 ? Direction.Right : Direction.Left;
+                        _currentMovementDirection = dx > 0 ? DirectionVector.Right : DirectionVector.Left;
                     }
                     else
                     {
-                        _currentMovementDirection = dy > 0 ? Direction.Down : Direction.Up;
+                        _currentMovementDirection = dy > 0 ? DirectionVector.Down : DirectionVector.Up;
                     }
                 }
                 else
@@ -117,26 +149,11 @@ namespace SimToolAI.Core.AI
             {
                 // If no target is found, move randomly
                 _currentAttackTarget = null;
-                _currentMovementDirection = (Direction)_random.Next(4); // Random direction
+                _currentMovementDirection = DirectionVector.GetRandomCardinalDirection(_random);
             }
-        }
-        
-        /// <summary>
-        /// Decides whether to move and in which direction
-        /// </summary>
-        /// <returns>Direction to move, or null if no movement is desired</returns>
-        public override Direction? DecideMovement()
-        {
-            return _currentMovementDirection;
-        }
-        
-        /// <summary>
-        /// Decides whether to attack and which target
-        /// </summary>
-        /// <returns>Target to attack, or null if no attack is desired</returns>
-        public override Entity DecideAttackTarget()
-        {
-            return _currentAttackTarget;
+
+            if (_currentMovementDirection != null) 
+                Move(_currentMovementDirection.Value);
         }
         
         #endregion

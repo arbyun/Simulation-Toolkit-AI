@@ -7,6 +7,8 @@ using SimToolAI.Core.Map;
 using SimToolAI.Core.Rendering;
 using SimToolAI.Core.Rendering.RenderStrategies;
 using SimToolAI.Utilities;
+using UnityEngine;
+using SimulationMode = SimToolAI.Core.Configuration.SimulationMode;
 
 namespace SimToolAI.Core
 {
@@ -30,27 +32,27 @@ namespace SimToolAI.Core
         /// <summary>
         /// Map
         /// </summary>
-        public ISimMap Map { get; private set; }
+        public ISimMap Map { get; protected internal set; }
         
         /// <summary>
         /// Scene
         /// </summary>
-        public Scene Scene { get; private set; }
+        public Scene Scene { get; protected internal set; }
         
         /// <summary>
         /// List of agents
         /// </summary>
-        public List<Character> Agents { get; } = new List<Character>();
+        public List<Character> Agents { get; } = new();
         
         /// <summary>
         /// Whether the simulation is running
         /// </summary>
-        public bool IsRunning { get; private set; }
+        public bool IsRunning { get; private protected set; }
         
         /// <summary>
         /// Current step count
         /// </summary>
-        public int CurrentStep { get; private set; }
+        public int CurrentStep { get; private protected set; }
         
         /// <summary>
         /// Maximum number of steps
@@ -60,7 +62,7 @@ namespace SimToolAI.Core
         /// <summary>
         /// Elapsed time in seconds
         /// </summary>
-        public float ElapsedTime { get; private set; }
+        public float ElapsedTime { get; private protected set; }
         
         /// <summary>
         /// Whether the simulation has human-controlled agents
@@ -101,6 +103,16 @@ namespace SimToolAI.Core
         /// </summary>
         public event EventHandler<int> StepCompleted;
         
+        /// <summary>
+        /// Event raised when an entity is created
+        /// </summary>
+        public event EventHandler<Entity> OnCreate;
+        
+        /// <summary>
+        /// Event raised when an entity is moved
+        /// </summary>
+        public event EventHandler<Entity> OnMove;
+        
         #endregion
         
         #region Constructors
@@ -115,7 +127,6 @@ namespace SimToolAI.Core
             Config = config ?? throw new ArgumentNullException(nameof(config));
             Mode = mode;
             
-            // In console mode, force offline mode
             if (mode == SimulationMode.Offline)
             {
                 // Validate that there are no human agents in offline mode
@@ -135,32 +146,15 @@ namespace SimToolAI.Core
         /// <summary>
         /// Initializes the simulation
         /// </summary>
-        public void Initialize()
+        public void Initialize(ISimMap map, Scene scene)
         {
-            // Load the map
-            var mapParser = new GridMapParser<GridMap>();
-            Map = mapParser.LoadMapFromFile(Config.MapPath);
+            Map = map ?? throw new ArgumentNullException(nameof(map));
+            Scene = scene ?? throw new ArgumentNullException(nameof(scene));
             
-            // Create the scene based on the simulation mode
-            if (Mode == SimulationMode.Realtime)
-            {
-                // For realtime mode, use a console scene
-                Map.Initialize(new ConsoleMapRenderable(mapParser.GetMapGrid(), Map.Height, Map.Width));
-                Scene = new ConsoleScene(Map);
-            }
-            else
-            {
-                // For offline mode, use a minimal scene without rendering
-                Map.Initialize(new ConsoleNotRenderable());
-                Scene = new MinimalScene(Map);
-            }
-            
-            // Create agents
             CreateAgents();
             
-            // Reset simulation state
             CurrentStep = 0;
-            ElapsedTime = 0;
+            ElapsedTime = 0f;
             
             // Raise the initialized event
             Initialized?.Invoke(this, EventArgs.Empty);
@@ -194,12 +188,12 @@ namespace SimToolAI.Core
                 if (agentConfig.BrainType == BrainType.Human)
                 {
                     // Create a human-controlled player
-                    agent = new Player(agentConfig.Name, startX, startY, agentConfig.Awareness, Scene, true);
+                    agent = new Player(agentConfig.Name, startX, startY, agentConfig.Awareness, this, true);
                 }
                 else
                 {
                     // Create an AI-controlled character
-                    agent = new Character(agentConfig.Name, startX, startY, agentConfig.Awareness, Scene);
+                    agent = new Character(agentConfig.Name, startX, startY, agentConfig.Awareness, this);
                 }
                 
                 // Set agent properties
@@ -209,16 +203,8 @@ namespace SimToolAI.Core
                 agent.Defense = agentConfig.Defense;
                 agent.Speed = agentConfig.Speed;
                 
-                // Create a renderable for the agent if in realtime mode
-                if (Mode == SimulationMode.Realtime)
-                {
-                    agent.Avatar = new ConsoleEntityRenderable(
-                        agentConfig.BrainType == BrainType.Human ? '@' : 'A',
-                        agentConfig.BrainType == BrainType.Human ? ConsoleColor.Yellow : ConsoleColor.Red,
-                        ConsoleColor.Black,
-                        agent
-                    );
-                }
+                // Raise the create event
+                OnCreate?.Invoke(this, agent);
                 
                 // Add the agent to the scene and the list
                 Scene.AddEntity(agent);
@@ -326,12 +312,6 @@ namespace SimToolAI.Core
             {
                 Stop();
             }
-            
-            // Render the scene if in realtime mode
-            if (Mode == SimulationMode.Realtime)
-            {
-                Scene.Render();
-            }
         }
         
         /// <summary>
@@ -349,26 +329,53 @@ namespace SimToolAI.Core
         /// <summary>
         /// Processes input for a human-controlled player
         /// </summary>
-        /// <param name="playerId">ID of the player</param>
+        /// <param name="entity">The entity to move</param>
         /// <param name="direction">Direction to move, or null for no movement</param>
-        /// <param name="attack">Whether to attack</param>
-        /// <param name="targetId">ID of the target to attack, or null for default direction</param>
-        public void ProcessPlayerInput(Guid playerId, Direction? direction, bool attack, Guid? targetId = null)
+        public bool ProcessMovement(Entity entity, System.Numerics.Vector3 direction)
         {
-            // Find the player
-            var player = Agents.OfType<Player>().FirstOrDefault(p => p.Id == playerId && p.IsHumanControlled);
-            if (player == null)
-                return;
-                
-            // Find the target if specified
-            Entity target = null;
-            if (targetId.HasValue)
+            // Calculate the new position based on the direction
+            int newX = entity.X + (int)direction.X;
+            int newY = entity.Y + (int)direction.Y;
+
+            // Update the entity's facing direction if it's a player
+            if (entity is Player player)
             {
-                target = Scene.GetEntity(targetId.Value);
+                player.FacingDirection = direction;
             }
             
+            bool success = Map.SetEntityPosition(entity, newX, newY);
+
+            if (success)
+            {
+                OnMove?.Invoke(this, entity);
+            }
+            
+            // Try to move the entity
+            return Map.SetEntityPosition(entity, newX, newY);
+        }
+        
+        /// <summary>
+        /// Processes input for a human-controlled player
+        /// </summary>
+        /// <param name="entityId">ID of the entity</param>
+        /// <param name="direction">Direction to move, or null for no movement</param>
+        public void ProcessMovement(Guid entityId, System.Numerics.Vector3 direction)
+        {
+            // Find the target
+            Entity target = Scene.GetEntity(entityId);
+            
             // Process the input
-            player.ProcessInput(direction, attack, target);
+            ProcessMovement(target, direction);
+        }
+
+        /// <summary>
+        /// Processes the creation of a new entity
+        /// </summary>
+        /// <param name="entity">The entity to create</param>
+        public void ProcessNewCreation(Entity entity)
+        {
+            Scene.AddEntity(entity);
+            OnCreate?.Invoke(this, entity);
         }
         
         #endregion

@@ -6,7 +6,7 @@ using SimToolAI.Core.Rendering;
 
 namespace SimToolAI.Utilities
 {
-    /// <summary>
+    /*/// <summary>
     /// Command pattern implementation for game actions
     /// </summary>
     public static class CommandSystem
@@ -157,5 +157,5 @@ namespace SimToolAI.Utilities
 
             return FireBullet(player.X, player.Y, player.FacingDirection, scene, player, speed, damage);
         }
-    }
+    }*/
 }

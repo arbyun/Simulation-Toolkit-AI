@@ -1,11 +1,13 @@
 using System;
 using System.Linq;
+using System.Numerics;
+using SimToolAI.Core;
 using SimToolAI.Core.Entities;
 using SimToolAI.Core.Map;
 using SimToolAI.Core.Rendering;
 using SimToolAI.Utilities;
 
-namespace SimToolAI.Core.AI
+namespace External.SimToolAI.SimToolAI.Core.AI
 {
     /// <summary>
     /// Base class for all brain implementations that control entity decision making
@@ -17,7 +19,7 @@ namespace SimToolAI.Core.AI
         /// <summary>
         /// The entity this brain controls
         /// </summary>
-        protected Character Owner { get; }
+        public Character Owner { get; }
         
         /// <summary>
         /// Awareness radius of the brain (for perception calculations)
@@ -27,29 +29,35 @@ namespace SimToolAI.Core.AI
         /// <summary>
         /// Reference to the scene
         /// </summary>
-        protected Scene Scene { get; }
+        public Scene Scene { get; }
         
         /// <summary>
         /// Reference to the map
         /// </summary>
-        protected ISimMap Map { get; }
+        public ISimMap Map { get; }
+        
+        /// <summary>
+        /// Reference to the simulation
+        /// </summary>
+        public Simulation Simulation { get; }
         
         #endregion
         
         #region Constructors
-        
+
         /// <summary>
         /// Creates a new brain with the specified parameters
         /// </summary>
         /// <param name="owner">The entity this brain controls</param>
         /// <param name="awareness">Awareness radius</param>
-        /// <param name="scene">Reference to the scene</param>
-        protected Brain(Character owner, int awareness, Scene scene)
+        /// <param name="simulation">Reference to the simulation</param>
+        protected Brain(Character owner, int awareness, Simulation simulation)
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             Awareness = awareness;
-            Scene = scene ?? throw new ArgumentNullException(nameof(scene));
-            Map = scene.Map;
+            Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
+            Scene = Simulation.Scene;
+            Map = Simulation.Map;
         }
         
         #endregion
@@ -62,17 +70,18 @@ namespace SimToolAI.Core.AI
         /// <param name="deltaTime">Time elapsed since the last update in seconds</param>
         public abstract void Think(float deltaTime);
         
-        /// <summary>
-        /// Decides whether to move and in which direction
-        /// </summary>
-        /// <returns>Direction to move, or null if no movement is desired</returns>
-        public abstract Direction? DecideMovement();
+        public abstract Vector3 GetMovementDirection();
+        public abstract Entity GetInteractionTarget();
+
+        protected bool Move(Vector3 direction)
+        {
+            return Simulation.ProcessMovement(Owner, direction);
+        }
         
-        /// <summary>
-        /// Decides whether to attack and which target
-        /// </summary>
-        /// <returns>Target to attack, or null if no attack is desired</returns>
-        public abstract Entity DecideAttackTarget();
+        protected bool Attack(Vector3 target)
+        {
+            return Owner.Attack(target);
+        }
         
         /// <summary>
         /// Perceives entities within awareness radius
@@ -85,7 +94,7 @@ namespace SimToolAI.Core.AI
             
             // Filter entities by distance
             return entities.Where(e => 
-                e != Owner && 
+                !e.Equals(Owner) && 
                 Owner.DistanceTo(e) <= Awareness && 
                 Map.IsInLineOfSight(Owner.X, Owner.Y, e.X, e.Y)
             ).ToArray();

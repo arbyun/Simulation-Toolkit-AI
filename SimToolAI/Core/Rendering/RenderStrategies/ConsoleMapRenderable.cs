@@ -1,4 +1,5 @@
 using System;
+using SimToolAI.Core.Entities;
 using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.Rendering.RenderStrategies
@@ -12,6 +13,11 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// Gets the rendering priority (maps are rendered before entities)
         /// </summary>
         public override int RenderPriority => 0;
+
+        public override void Connect(Entity entity)
+        {
+            return;
+        }
 
         /// <summary>
         /// Creates a new console map renderable with the specified settings

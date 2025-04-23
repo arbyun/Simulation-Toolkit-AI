@@ -14,6 +14,11 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// </summary>
         public override int RenderPriority => 10;
 
+        public override void Connect(Entity entity)
+        {
+            Settings.Set("entity", entity);
+        }
+
         /// <summary>
         /// Creates a new console entity renderable with the specified settings
         /// </summary>
@@ -30,15 +35,11 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// <param name="backgroundColor">Background color of the character</param>
         /// <param name="entity">Entity to render</param>
         public ConsoleEntityRenderable(char character, ConsoleColor foregroundColor,
-            ConsoleColor backgroundColor, Entity entity)
+            ConsoleColor backgroundColor)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             Settings.Set("char", character);
             Settings.Set("fcolor", foregroundColor);
             Settings.Set("bcolor", backgroundColor);
-            Settings.Set("entity", entity);
         }
 
         /// <summary>

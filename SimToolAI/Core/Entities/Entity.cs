@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using SimToolAI.Core.Rendering;
 using SimToolAI.Utilities;
 
@@ -36,11 +37,6 @@ namespace SimToolAI.Core.Entities
         }
 
         /// <summary>
-        /// Awareness radius of the entity (for field of view calculations)
-        /// </summary>
-        public int Awareness { get; }
-
-        /// <summary>
         /// Name of the entity
         /// </summary>
         public string Name { get; }
@@ -68,7 +64,12 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Gets or sets the entity's current direction
         /// </summary>
-        public Direction FacingDirection { get; set; } = Direction.Right;
+        public Vector3 FacingDirection { get; set; } = Vector3.Zero;
+        
+        /// <summary>
+        /// The simulation that contains this entity
+        /// </summary>
+        public Simulation Simulation { get; internal set; }
 
         #endregion
 
@@ -80,22 +81,14 @@ namespace SimToolAI.Core.Entities
         /// <param name="name">Name of the entity</param>
         /// <param name="x">X-coordinate</param>
         /// <param name="y">Y-coordinate</param>
-        /// <param name="awareness">Awareness radius</param>
-        protected Entity(string name, int x, int y, int awareness = 0)
+        /// <param name="simulation"></param>
+        protected Entity(string name, int x, int y, Simulation simulation)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             X = x;
             Y = y;
-            Awareness = awareness;
+            Simulation = simulation;
         }
-
-        /// <summary>
-        /// Creates a new unnamed entity at the specified position
-        /// </summary>
-        /// <param name="x">X-coordinate</param>
-        /// <param name="y">Y-coordinate</param>
-        protected Entity(int x, int y) : this("null", x, y, 0)
-        { }
 
         #endregion
 

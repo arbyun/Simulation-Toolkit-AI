@@ -135,6 +135,16 @@ namespace SimToolAI.Core.Map
             throw new NotImplementedException("Continuous map is not yet implemented");
         }
 
+        public void ComputeFov(Character entity, bool lightWalls = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ToggleFieldOfView(Character entity, bool enabled = true)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Computes the field of view from a given entity's position
         /// </summary>

@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using SimToolAI.Core;
 using SimToolAI.Core.Configuration;
+using SimToolAI.Core.Map;
+using SimToolAI.Core.Rendering;
 
 namespace SimToolAI
 {
@@ -83,10 +85,16 @@ namespace SimToolAI
             simulation.Stopped += OnSimulationStopped;
             
             // Initialize and start the simulation
-            simulation.Initialize();
-            simulation.Start();
             
-            Console.WriteLine("Simulation completed");
+            // Load the map
+            var mapParser = new GridMapParser<GridMap>();
+            ISimMap map = mapParser.LoadMapFromFile(config.MapPath);
+            
+            // Create scene
+            var scene = new MinimalScene(map);
+            
+            simulation.Initialize(map, scene);
+            simulation.Start();
         }
         
         /// <summary>
@@ -110,6 +118,8 @@ namespace SimToolAI
             {
                 Console.WriteLine($"- {agent.Name}");
             }
+            
+            Console.WriteLine("Simulation completed");
         }
     }
 }

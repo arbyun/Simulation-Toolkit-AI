@@ -1,6 +1,6 @@
+using System.Numerics;
+using External.SimToolAI.SimToolAI.Core.AI;
 using SimToolAI.Core.Entities;
-using SimToolAI.Core.Rendering;
-using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.AI
 {
@@ -14,12 +14,7 @@ namespace SimToolAI.Core.AI
         /// <summary>
         /// The last movement direction input by the human player
         /// </summary>
-        private Direction? _lastMovementInput;
-        
-        /// <summary>
-        /// Whether the human player has requested an attack
-        /// </summary>
-        private bool _attackRequested;
+        private Vector3? _lastMovementInput;
         
         /// <summary>
         /// The target of the attack, if any
@@ -29,15 +24,15 @@ namespace SimToolAI.Core.AI
         #endregion
         
         #region Constructors
-        
+
         /// <summary>
         /// Creates a new human brain with the specified parameters
         /// </summary>
         /// <param name="owner">The entity this brain controls</param>
         /// <param name="awareness">Awareness radius</param>
-        /// <param name="scene">Reference to the scene</param>
-        public HumanBrain(Character owner, int awareness, Scene scene) 
-            : base(owner, awareness, scene)
+        /// <param name="simulation">Simulation instance</param>
+        public HumanBrain(Character owner, int awareness, Simulation simulation) 
+            : base(owner, awareness, simulation)
         {
         }
         
@@ -51,57 +46,48 @@ namespace SimToolAI.Core.AI
         /// <param name="deltaTime">Time elapsed since the last update in seconds</param>
         public override void Think(float deltaTime)
         {
-            // Human brains don't think autonomously - they respond to input
-            // This method is intentionally left empty
         }
-        
+
         /// <summary>
-        /// Decides whether to move and in which direction
+        /// Gets the movement direction requested by the human player
         /// </summary>
-        /// <returns>Direction to move, or null if no movement is desired</returns>
-        public override Direction? DecideMovement()
+        /// <returns>The movement direction</returns>
+        public override Vector3 GetMovementDirection()
         {
-            // Return the last movement input and clear it
-            Direction? result = _lastMovementInput;
-            _lastMovementInput = null;
-            return result;
+            if (_lastMovementInput != null) 
+                return _lastMovementInput.Value;
+
+            return new Vector3(0, 0, 0);
         }
-        
+
         /// <summary>
-        /// Decides whether to attack and which target
+        /// Gets the interaction target (if any)
         /// </summary>
-        /// <returns>Target to attack, or null if no attack is desired</returns>
-        public override Entity DecideAttackTarget()
+        /// <returns>The interaction target, or null if none is set</returns>
+        public override Entity GetInteractionTarget()
         {
-            // Return the attack target if an attack was requested and clear it
-            if (_attackRequested)
-            {
-                _attackRequested = false;
-                Entity target = _attackTarget;
-                _attackTarget = null;
-                return target;
-            }
-            
-            return null;
+            return _attackTarget;
         }
         
         /// <summary>
         /// Sets the movement input from the human player
         /// </summary>
         /// <param name="direction">Direction to move</param>
-        public void SetMovementInput(Direction direction)
+        public bool SetMovementInput(Vector3 direction)
         {
             _lastMovementInput = direction;
+            return Move(_lastMovementInput.Value);
         }
-        
+
         /// <summary>
         /// Sets the attack input from the human player
         /// </summary>
-        /// <param name="target">Target to attack, or null for default direction</param>
-        public void SetAttackInput(Entity target = null)
+        /// <param name="target">The attack direction</param>
+        /// <param name="targetEntity">Target entity to attack</param>
+        public bool SetAttackInput(Vector3 target, Entity targetEntity)
         {
-            _attackRequested = true;
-            _attackTarget = target;
+            _attackTarget = targetEntity;
+            return Attack(target);
         }
         
         #endregion

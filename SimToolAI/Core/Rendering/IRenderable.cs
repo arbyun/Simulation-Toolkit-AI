@@ -1,3 +1,5 @@
+using SimToolAI.Core.Entities;
+
 namespace SimToolAI.Core.Rendering
 {
     /// <summary>
@@ -25,5 +27,7 @@ namespace SimToolAI.Core.Rendering
         /// Gets the rendering priority (higher values are rendered later/on top)
         /// </summary>
         int RenderPriority { get; }
+
+        void Connect(Entity entity);
     }
 }

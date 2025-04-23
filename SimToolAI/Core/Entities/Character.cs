@@ -1,7 +1,7 @@
 using System;
+using System.Numerics;
+using External.SimToolAI.SimToolAI.Core.AI;
 using SimToolAI.Core.AI;
-using SimToolAI.Core.Rendering;
-using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.Entities
 {
@@ -40,12 +40,12 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Gets the brain that controls this character
         /// </summary>
-        public Brain Brain { get; }
+        public Brain Brain { get; protected set; }
         
         /// <summary>
-        /// Reference to the scene
+        /// Owned weapons
         /// </summary>
-        protected readonly Scene Scene;
+        public Weapon[] Weapons { get; private set; }
 
         #endregion
 
@@ -58,14 +58,40 @@ namespace SimToolAI.Core.Entities
         /// <param name="x">X-coordinate</param>
         /// <param name="y">Y-coordinate</param>
         /// <param name="brain">Brain that controls this character</param>
-        /// <param name="scene">Scene reference</param>
-        public Character(string name, int x, int y, Brain brain, Scene scene) 
-            : base(name, x, y, 0) // Awareness is now in the brain
+        /// <param name="simulation">The simulation instance</param>
+        public Character(string name, int x, int y, Brain brain, Simulation simulation) 
+            : base(name, x, y, simulation) // Awareness is now in the brain
         {
             Brain = brain ?? throw new ArgumentNullException(nameof(brain));
-            Scene = scene ?? throw new ArgumentNullException(nameof(scene));
         }
         
+        public Character(string name, int x, int y, Simulation simulation) 
+            : base(name, x, y, simulation)
+        {
+            Brain = new AIBrain(this, 1, simulation);
+        }
+
+        /// <summary>
+        /// Creates a new character with the specified parameters
+        /// </summary>
+        /// <param name="name">Name of the character</param>
+        /// <param name="x">X-coordinate</param>
+        /// <param name="y">Y-coordinate</param>
+        /// <param name="brain">Brain that controls this character</param>
+        /// <param name="simulation">The simulation instance</param>
+        /// <param name="weapons">The weapons owned by the character</param>
+        public Character(string name, int x, int y, Brain brain, Simulation simulation, Weapon[] weapons) 
+            : base(name, x, y, simulation) // Awareness is now in the brain
+        {
+            Brain = brain ?? throw new ArgumentNullException(nameof(brain));
+            Weapons = weapons;
+
+            foreach (var w in Weapons)
+            {
+                w.Owned = true;
+            }
+        }
+
         /// <summary>
         /// Creates a new character with the specified parameters and an AI brain
         /// </summary>
@@ -73,12 +99,11 @@ namespace SimToolAI.Core.Entities
         /// <param name="x">X-coordinate</param>
         /// <param name="y">Y-coordinate</param>
         /// <param name="awareness">Awareness radius</param>
-        /// <param name="scene">Scene reference</param>
-        public Character(string name, int x, int y, int awareness, Scene scene) 
-            : base(name, x, y, 0) // Awareness is now in the brain
+        /// <param name="simulation"></param>
+        public Character(string name, int x, int y, int awareness, Simulation simulation) 
+            : base(name, x, y, simulation)
         {
-            Scene = scene ?? throw new ArgumentNullException(nameof(scene));
-            Brain = new AIBrain(this, awareness, scene);
+            Brain = new AIBrain(this, awareness, simulation);
         }
 
         #endregion
@@ -94,55 +119,14 @@ namespace SimToolAI.Core.Entities
             // If the character is dead, remove it from the scene
             if (!IsAlive)
             {
-                Scene.RemoveEntity(this);
+                Simulation.Scene.RemoveEntity(this);
                 return;
             }
             
             // Update the brain
             Brain.Think(deltaTime);
-            
-            // Process brain decisions
-            ProcessBrainDecisions();
         }
         
-        /// <summary>
-        /// Processes decisions made by the brain
-        /// </summary>
-        protected virtual void ProcessBrainDecisions()
-        {
-            // Process movement decision
-            Direction? moveDirection = Brain.DecideMovement();
-            if (moveDirection.HasValue)
-            {
-                CommandSystem.MoveEntity(moveDirection.Value, this, Scene.Map);
-            }
-            
-            // Process attack decision
-            Entity target = Brain.DecideAttackTarget();
-            if (target != null)
-            {
-                Attack(target);
-            }
-        }
-        
-        /// <summary>
-        /// Attacks the specified target
-        /// </summary>
-        /// <param name="target">Target to attack</param>
-        protected virtual void Attack(Entity target)
-        {
-            // If the target is a character, damage it
-            if (target is Character character)
-            {
-                character.TakeDamage(AttackPower);
-            }
-            // Otherwise, fire a bullet at it
-            else
-            {
-                CommandSystem.FireBullet(this.X, this.Y, this.FacingDirection, Scene, this, 10, AttackPower);
-            }
-        }
-
         /// <summary>
         /// Applies damage to the character
         /// </summary>
@@ -169,7 +153,7 @@ namespace SimToolAI.Core.Entities
                 Console.WriteLine($"{Name} has been defeated!");
                 Console.ResetColor();
                 
-                Scene.QueryScene<bool>("SetRenderRequired", true);
+                Simulation.Scene.QueryScene<bool>("SetRenderRequired", true);
             }
 
             return IsAlive;
@@ -186,6 +170,23 @@ namespace SimToolAI.Core.Entities
 
             Health = Math.Min(MaxHealth, Health + amount);
         }
+        
+        /// <summary>
+        /// Attacks another entity
+        /// </summary>
+        /// <param name="target">Direction towards which to attack</param>
+        /// <returns>If the attack was successful</returns>
+        public bool Attack(Vector3 target)
+        {
+            if (Weapons.Length == 0)
+            {
+             // Choose random weapon for now
+             Weapons[new Random().Next(0, Weapons.Length)].Attack(target);
+             return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Returns a string representation of this character
@@ -197,5 +198,7 @@ namespace SimToolAI.Core.Entities
         }
 
         #endregion
+
+        
     }
 }

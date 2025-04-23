@@ -106,7 +106,7 @@ namespace SimToolAI.Core.Map
         /// </summary>
         /// <param name="entity">Entity to toggle field of view for</param>
         /// <param name="enabled">Whether field of view should be enabled</param>
-        public void ToggleFieldOfView(Entity entity, bool enabled = true)
+        public void ToggleFieldOfView(Character entity, bool enabled = true)
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
@@ -157,7 +157,7 @@ namespace SimToolAI.Core.Map
         /// </summary>
         /// <param name="entity">Entity to compute field of view for</param>
         /// <param name="lightWalls">Whether walls should be visible at the edge of the field of view</param>
-        public void ComputeFov(Entity entity, bool lightWalls = true)
+        public void ComputeFov(Character entity, bool lightWalls = true)
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
@@ -167,7 +167,7 @@ namespace SimToolAI.Core.Map
                 _fieldOfView = new FieldOfView(this);
             }
 
-            _fieldOfView.ComputeFov(entity.X, entity.Y, entity.Awareness, lightWalls);
+            _fieldOfView.ComputeFov(entity.X, entity.Y, entity.Brain.Awareness, lightWalls);
         }
 
         /// <summary>
@@ -272,9 +272,9 @@ namespace SimToolAI.Core.Map
             }
 
             // Compute FOV with the entity as the center if it's the current FOV entity
-            if (_currentFovEntity.Equals(entity))
+            if (_currentFovEntity.Equals(entity) && entity is Character character)
             {
-                ComputeFov(entity);
+                ComputeFov(character);
             }
 
             return true;

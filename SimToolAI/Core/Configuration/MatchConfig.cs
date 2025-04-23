@@ -58,6 +58,16 @@ namespace SimToolAI.Core.Configuration
         }
         
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static MatchConfig LoadFromTextJson(string text)
+        {
+            return JsonSerializer.Deserialize<MatchConfig>(text);
+        }
+        
+        /// <summary>
         /// Loads a match configuration from an XML file
         /// </summary>
         /// <param name="path">Path to the XML file</param>

@@ -1,3 +1,4 @@
+using SimToolAI.Core.Entities;
 using SimToolAI.Utilities;
 
 namespace SimToolAI.Core.Rendering.RenderStrategies
@@ -26,7 +27,9 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// Gets the rendering priority (higher values are rendered later/on top)
         /// </summary>
         public virtual int RenderPriority => 0;
-        
+
+        public abstract void Connect(Entity entity);
+
         /// <summary>
         /// Creates a new renderable with the specified settings
         /// </summary>

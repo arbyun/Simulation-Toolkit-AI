@@ -32,9 +32,13 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
         /// <summary>
         /// Creates a new Unity renderable with default settings
         /// </summary>
-        public UnityEntityRenderable(Transform entityTransform, Entity entity)
+        public UnityEntityRenderable(Transform entityTransform)
         {
             Settings.Set("transform", entityTransform);
+        }
+
+        public override void Connect(Entity entity)
+        {
             Settings.Set("entity", entity);
         }
 
@@ -69,18 +73,7 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
                 Transform transform = Settings.Get<Transform>("transform");
                 Entity entity = Settings.Get<Entity>("entity");
 
-                float targetRotation = entity.FacingDirection switch
-                {
-                    Direction.Up => 270f // Rotate 90 degrees counter-clockwise from right
-                    ,
-                    Direction.Right => 0f // No rotation (sprite starts facing right)
-                    ,
-                    Direction.Down => 90f // Rotate 270 degrees counter-clockwise from right
-                    ,
-                    Direction.Left => 180f // Rotate 180 degrees counter-clockwise from right
-                    ,
-                    _ => 0f
-                };
+                float targetRotation = DirectionVector.GetRotationAngle(entity.FacingDirection);
 
                 // Smoothly rotate
                 transform.rotation = Quaternion.Lerp(transform.rotation, 

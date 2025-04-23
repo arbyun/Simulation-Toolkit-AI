@@ -74,14 +74,14 @@ namespace SimToolAI.Core.Map
         /// </summary>
         /// <param name="entity">Entity to compute field of view for</param>
         /// <param name="lightWalls">Whether walls should be visible at the edge of the field of view</param>
-        void ComputeFov(Entity entity, bool lightWalls = true);
+        void ComputeFov(Character entity, bool lightWalls = true);
 
         /// <summary>
         /// Toggles field of view computation for an entity
         /// </summary>
         /// <param name="entity">Entity to toggle field of view for</param>
         /// <param name="enabled">Whether field of view should be enabled</param>
-        void ToggleFieldOfView(Entity entity, bool enabled = true);
+        void ToggleFieldOfView(Character entity, bool enabled = true);
 
         /// <summary>
         /// Checks if a position is in the current field of view

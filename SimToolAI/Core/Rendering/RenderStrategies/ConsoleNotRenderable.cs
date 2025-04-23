@@ -1,3 +1,5 @@
+using SimToolAI.Core.Entities;
+
 namespace SimToolAI.Core.Rendering.RenderStrategies
 {
     /// <summary>
@@ -5,6 +7,11 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
     /// </summary>
     public class ConsoleNotRenderable: RenderableBase
     {
+        public override void Connect(Entity entity)
+        {
+            return;
+        }
+
         public override void Render()
         {
             return;
