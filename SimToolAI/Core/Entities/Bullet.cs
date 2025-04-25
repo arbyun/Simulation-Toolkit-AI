@@ -20,7 +20,7 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Gets or sets the damage the bullet deals
         /// </summary>
-        public int Damage { get; }
+        public int Damage { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum distance the bullet can travel

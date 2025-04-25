@@ -1,5 +1,6 @@
 using System.Numerics;
 using SimToolAI.Core.AI;
+using Unity.VisualScripting;
 
 namespace SimToolAI.Core.Entities
 {
@@ -44,6 +45,21 @@ namespace SimToolAI.Core.Entities
             {
                 Brain = new AIBrain(this, awareness, simulation);
             }
+        }
+        
+        public Player(string name, int x, int y, int awareness, Simulation simulation, Weapon[] weapons,
+            bool humanControlled = false) : base(name, x, y, simulation)
+        {
+            if (humanControlled)
+            {
+                Brain = new HumanBrain(this, awareness, simulation);
+            }
+            else
+            {
+                Brain = new AIBrain(this, awareness, simulation);
+            }
+
+            Weapons = weapons;
         }
 
         #endregion

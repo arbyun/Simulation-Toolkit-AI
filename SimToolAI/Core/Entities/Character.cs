@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using External.SimToolAI.SimToolAI.Core.AI;
 using SimToolAI.Core.AI;
@@ -45,7 +46,7 @@ namespace SimToolAI.Core.Entities
         /// <summary>
         /// Owned weapons
         /// </summary>
-        public Weapon[] Weapons { get; private set; }
+        public Weapon[] Weapons { get; private protected set; }
 
         #endregion
 
@@ -178,11 +179,27 @@ namespace SimToolAI.Core.Entities
         /// <returns>If the attack was successful</returns>
         public bool Attack(Vector3 target)
         {
-            if (Weapons.Length == 0)
+            if (Weapons != null && Weapons.Length > 0)
             {
-             // Choose random weapon for now
-             Weapons[new Random().Next(0, Weapons.Length)].Attack(target);
-             return true;
+                // Choose random weapon for now
+                Weapons[new Random().Next(0, Weapons.Length)].Attack(target);
+                return true;
+            }
+            else
+            {
+                // Melee attack if no weapons
+                // Find entities in the target direction
+                int targetX = X + (int)target.X;
+                int targetY = Y + (int)target.Y;
+                
+                var targetEntity = Simulation.Scene.GetEntities<Entity>()
+                    .FirstOrDefault(e => e.X == targetX && e.Y == targetY && e != this);
+                
+                if (targetEntity is Character targetCharacter)
+                {
+                    targetCharacter.TakeDamage(AttackPower);
+                    return true;
+                }
             }
 
             return false;
