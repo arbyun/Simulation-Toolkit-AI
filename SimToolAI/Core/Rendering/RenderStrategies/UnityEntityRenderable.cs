@@ -76,8 +76,20 @@ namespace SimToolAI.Core.Rendering.RenderStrategies
                 float targetRotation = DirectionVector.GetRotationAngle(entity.FacingDirection);
 
                 // Smoothly rotate
-                transform.rotation = Quaternion.Lerp(transform.rotation, 
-                    Quaternion.Euler(0, 0, targetRotation), Time.deltaTime * 16f);
+
+                if (Settings.Has("avatar"))
+                {
+                    Transform avatar = Settings.Get<Transform>("avatar");
+                    
+                    avatar.rotation = Quaternion.Lerp(avatar.rotation, 
+                        Quaternion.Euler(0, 0, targetRotation), Time.deltaTime * 16f);
+                }
+                else
+                {
+                    transform.rotation = Quaternion.Lerp(transform.rotation,
+                        Quaternion.Euler(0, 0, targetRotation), Time.deltaTime * 16f);
+                }
+                
             }
         }
 
