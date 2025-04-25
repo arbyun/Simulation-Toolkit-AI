@@ -187,8 +187,13 @@ namespace SimToolAI.Core
                 
                 if (agentConfig.BrainType == BrainType.Human)
                 {
+                    // Create a default weapon
+                    RangedWeapon defaultWeapon = new RangedWeapon("Pistol", 1, 1, this);
+                    
                     // Create a human-controlled player
-                    agent = new Player(agentConfig.Name, startX, startY, agentConfig.Awareness, this, true);
+                    agent = new Player(agentConfig.Name, startX, startY, agentConfig.Awareness, this, 
+                        new Weapon[] { defaultWeapon }, true);
+                    defaultWeapon.SetOwner(agent);
                 }
                 else
                 {
@@ -301,14 +306,26 @@ namespace SimToolAI.Core
             // Update the scene
             Scene.Update(deltaTime);
             
-            // Increment the step count
-            CurrentStep++;
+            // In realtime mode with human players, we don't count steps
+            bool isRealtimeWithHumans = Mode == SimulationMode.Realtime && HasHumanAgents;
             
-            // Raise the step completed event
-            StepCompleted?.Invoke(this, CurrentStep);
+            if (!isRealtimeWithHumans)
+            {
+                // Increment the step count only in non-human or offline mode
+                CurrentStep++;
+                
+                // Raise the step completed event
+                StepCompleted?.Invoke(this, CurrentStep);
+                
+                // Check if the simulation should stop based on steps
+                if (CurrentStep >= MaxSteps)
+                {
+                    Stop();
+                }
+            }
             
-            // Check if the simulation should stop
-            if (CurrentStep >= MaxSteps || Agents.All(a => !a.IsAlive))
+            // Always check if all agents are defeated
+            if (Agents.All(a => !a.IsAlive))
             {
                 Stop();
             }
@@ -343,6 +360,7 @@ namespace SimToolAI.Core
                 player.FacingDirection = direction;
             }
             
+            // Try to move the entity
             bool success = Map.SetEntityPosition(entity, newX, newY);
 
             if (success)
@@ -350,8 +368,7 @@ namespace SimToolAI.Core
                 OnMove?.Invoke(this, entity);
             }
             
-            // Try to move the entity
-            return Map.SetEntityPosition(entity, newX, newY);
+            return success;
         }
         
         /// <summary>
