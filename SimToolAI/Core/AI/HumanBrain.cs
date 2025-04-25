@@ -75,8 +75,15 @@ namespace SimToolAI.Core.AI
         /// <param name="direction">Direction to move</param>
         public bool SetMovementInput(Vector3 direction)
         {
+            // Store the input for future reference
             _lastMovementInput = direction;
-            return Move(_lastMovementInput.Value);
+            
+            // Always update the facing direction, even if we can't move
+            Owner.FacingDirection = direction;
+            
+            // Immediately try to move in the given direction
+            // The simulation will handle the actual movement and raise events
+            return Move(direction);
         }
 
         /// <summary>
