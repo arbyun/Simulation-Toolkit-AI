@@ -42,7 +42,7 @@ namespace SimToolAI.Core
         /// <summary>
         /// List of agents
         /// </summary>
-        public List<Character> Agents { get; } = new();
+        public List<Character> Agents { get; } = new List<Character>();
         
         /// <summary>
         /// Whether the simulation is running

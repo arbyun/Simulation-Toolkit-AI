@@ -37,7 +37,7 @@ namespace SimToolAI.Core.AI
         /// <summary>
         /// Random number generator for AI decisions
         /// </summary>
-        private readonly Random _random = new();
+        private readonly Random _random = new Random();
         
         #endregion
         

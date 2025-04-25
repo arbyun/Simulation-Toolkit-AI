@@ -173,7 +173,7 @@ namespace SimToolAI.Core.Entities
             X = newX;
             Y = newY;
 
-            if (Avatar is not ConsoleNotRenderable)
+            if (!(Avatar is ConsoleNotRenderable))
             {
                 // Trigger a render update
                 Simulation.Scene.QueryScene<bool>("SetRenderRequired", true);
