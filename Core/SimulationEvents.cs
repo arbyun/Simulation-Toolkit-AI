@@ -1,0 +1,28 @@
+﻿using SimArena.Core.Entities;
+using SimArena.Core.Serialization.Results;
+
+namespace SimArena.Core
+{
+    public class SimulationEvents
+    {
+        public event EventHandler Initialized;
+        public event EventHandler Started;
+        public event EventHandler Paused;
+        public event EventHandler Resumed;
+        public event EventHandler<ISimulationResult> Stopped;
+        public event EventHandler<int> StepCompleted;
+        public event EventHandler<Entity> OnCreate;
+        public event EventHandler<Entity> OnMove;
+        public event EventHandler<Entity> OnDestroy;
+
+        internal void RaiseInitialized(object sender) => Initialized?.Invoke(sender, EventArgs.Empty);
+        internal void RaiseStarted(object sender) => Started?.Invoke(sender, EventArgs.Empty);
+        internal void RaisePaused(object sender) => Paused?.Invoke(sender, EventArgs.Empty);
+        internal void RaiseResumed(object sender) => Resumed?.Invoke(sender, EventArgs.Empty);
+        internal void RaiseStopped(object sender, ISimulationResult result) => Stopped?.Invoke(sender, result);
+        internal void RaiseStepCompleted(object sender, int step) => StepCompleted?.Invoke(sender, step);
+        internal void RaiseOnCreate(object sender, Entity entity) => OnCreate?.Invoke(sender, entity);
+        internal void RaiseOnMove(object sender, Entity entity) => OnMove?.Invoke(sender, entity);
+        internal void RaiseOnDestroy(object sender, Entity entity) => OnDestroy?.Invoke(sender, entity);
+    }
+}
