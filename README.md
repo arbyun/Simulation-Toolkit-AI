@@ -7,12 +7,13 @@ A flexible and extensible simulation framework for AI-driven agent-based simulat
 - **Flexible Simulation Engine**: Run simulations in real-time or offline mode
 - **Agent-Based Architecture**: Create and manage multiple AI or human-controlled agents
 - **Map System**: Grid-based map system with field of view calculations (based on RogueSharp)
+- **Weapon System**: Support for different weapon types (melee and ranged)
 - **Multiple Objective Types**: Support for various simulation objectives:
   - Team Deathmatch
   - Capture Point
   - Defense
   - Step-based simulations
-- **JSON Configuration**: Easy setup through JSON configuration files
+- **Configuration Flexibility**: Easy setup through JSON or XML configuration files
 - **Event System**: Comprehensive event system for monitoring simulation state changes
 
 ## Table of Contents
@@ -22,6 +23,7 @@ A flexible and extensible simulation framework for AI-driven agent-based simulat
 - [Configuration](#configuration)
   - [Game Configuration](#game-configuration)
   - [Agent Configuration](#agent-configuration)
+  - [Weapon Configuration](#weapon-configuration)
   - [Objective Configuration](#objective-configuration)
 - [Architecture](#architecture)
 - [Credits](#credits)
@@ -59,7 +61,18 @@ GameConfig config = new GameConfig
             Name = "Agent1",
             BrainType = BrainType.AI,
             RandomStart = true,
-            Awareness = 10
+            Awareness = 10,
+            ThinkInterval = 0.5f // AI thinking interval in seconds
+        }
+    },
+    Weapons = new List<WeaponConfig>
+    {
+        new WeaponConfig
+        {
+            WeaponId = "knife",
+            WeaponType = WeaponType.Melee,
+            Range = 1.5f,
+            Damage = 15
         }
     }
 };
@@ -96,8 +109,33 @@ GameConfig config = new GameConfig
     Agents = new List<AgentConfig>
     {
         // Only AI agents are supported in offline mode
-        new AgentConfig { Name = "AI1", BrainType = BrainType.AI },
-        new AgentConfig { Name = "AI2", BrainType = BrainType.AI }
+        new AgentConfig { 
+            Name = "AI1", 
+            BrainType = BrainType.AI,
+            OwnedWeaponIds = new[] { "knife" } 
+        },
+        new AgentConfig { 
+            Name = "AI2", 
+            BrainType = BrainType.AI,
+            OwnedWeaponIds = new[] { "rifle" } 
+        }
+    },
+    Weapons = new List<WeaponConfig>
+    {
+        new WeaponConfig
+        {
+            WeaponId = "knife",
+            WeaponType = WeaponType.Melee,
+            Range = 1.5f,
+            Damage = 15
+        },
+        new WeaponConfig
+        {
+            WeaponId = "rifle",
+            WeaponType = WeaponType.Ranged,
+            Range = 8.0f,
+            Damage = 25
+        }
     }
 };
 
@@ -136,7 +174,9 @@ The `GameConfig` class is the main configuration for a simulation:
     {
       "Name": "AI Agent 1",
       "BrainType": "AI",
+      "OwnedWeaponIds": ["knife"],
       "RandomStart": true,
+      "ThinkInterval": 0.5,
       "Awareness": 10,
       "MaxHealth": 100,
       "AttackPower": 10,
@@ -146,12 +186,27 @@ The `GameConfig` class is the main configuration for a simulation:
     {
       "Name": "Human Player",
       "BrainType": "Human",
+      "OwnedWeaponIds": ["rifle"],
       "RandomStart": true,
       "Awareness": 15,
       "MaxHealth": 120,
       "AttackPower": 15,
       "Defense": 3,
       "Speed": 1.2
+    }
+  ],
+  "Weapons": [
+    {
+      "WeaponId": "knife",
+      "WeaponType": "Melee",
+      "Range": 1.5,
+      "Damage": 15
+    },
+    {
+      "WeaponId": "rifle",
+      "WeaponType": "Ranged",
+      "Range": 8.0,
+      "Damage": 25
     }
   ]
 }
@@ -165,14 +220,29 @@ The `AgentConfig` class configures individual agents:
 {
   "Name": "Agent Name",
   "BrainType": "AI",  // "AI" or "Human"
+  "OwnedWeaponIds": ["knife", "rifle"], // IDs of weapons this agent owns
   "StartX": 0,        // Starting X position (ignored if RandomStart is true)
   "StartY": 0,        // Starting Y position (ignored if RandomStart is true)
   "RandomStart": true, // Whether to use a random starting position
+  "ThinkInterval": 0.5, // How often AI agents think (in seconds)
   "Awareness": 10,    // Field of view radius
   "MaxHealth": 100,   // Maximum health points
   "AttackPower": 10,  // Base attack power
   "Defense": 5,       // Base defense value
   "Speed": 1.0        // Movement speed multiplier
+}
+```
+
+### Weapon Configuration
+
+The `WeaponConfig` class configures weapons that can be assigned to agents:
+
+```json
+{
+  "WeaponId": "knife",       // Unique identifier for the weapon
+  "WeaponType": "Melee",     // "Melee" or "Ranged"
+  "Range": 1.5,              // Attack range
+  "Damage": 15               // Base damage
 }
 ```
 
@@ -187,6 +257,7 @@ Runs the simulation for a specified number of steps:
 ```json
 {
   "Type": "StepsObjective",
+  "TypeEnum": "Steps",
   "MaxSteps": 10000
 }
 ```
@@ -198,6 +269,7 @@ Teams compete until only one team has surviving members:
 ```json
 {
   "Type": "DeathmatchObjective",
+  "TypeEnum": "TeamDeathmatch",
   "Teams": 2,
   "PlayersPerTeam": 5
 }
@@ -210,6 +282,7 @@ Teams compete to capture and hold a point for a specified time:
 ```json
 {
   "Type": "CapturePointObjective",
+  "TypeEnum": "CapturePoint",
   "Teams": 2,
   "PlayersPerTeam": 5,
   "CaptureRadius": 5.0,
@@ -224,6 +297,7 @@ One team defends an objective while another team attacks:
 ```json
 {
   "Type": "DefendObjective",
+  "TypeEnum": "DefendObjective",
   "Teams": 2,
   "PlayersPerTeam": 5,
   "MaxMatchTime": 120.0,
@@ -250,6 +324,7 @@ classDiagram
         +Resume()
         +Stop()
         +Update(float deltaTime)
+        +ProcessMovement(Entity, Vector3)
     }
     
     class GameConfig {
@@ -258,21 +333,33 @@ classDiagram
         +bool RealtimeMode
         +ObjectiveConfig Objective
         +List~AgentConfig~ Agents
+        +List~WeaponConfig~ Weapons
         +LoadFromJson(string path)
+        +LoadFromXml(string path)
         +SaveToJson(string path)
+        +SaveToXml(string path)
     }
     
     class AgentConfig {
         +string Name
         +BrainType BrainType
+        +string[] OwnedWeaponIds
         +int StartX
         +int StartY
         +bool RandomStart
+        +float ThinkInterval
         +int Awareness
         +int MaxHealth
         +int AttackPower
         +int Defense
         +float Speed
+    }
+    
+    class WeaponConfig {
+        +string WeaponId
+        +WeaponType WeaponType
+        +float Range
+        +int Damage
     }
     
     class ObjectiveConfig {
@@ -306,6 +393,7 @@ classDiagram
         +bool IsTransparent(int x, int y)
         +SetEntityPosition(Entity entity, int x, int y)
         +ToggleFieldOfView(Character character)
+        +GetRandomWalkableLocation()
     }
     
     class Entity {
@@ -321,18 +409,41 @@ classDiagram
         +int MaxHealth
         +IBrain Brain
         +List~Weapon~ Weapons
+        +Vector3 FacingDirection
+    }
+    
+    class Weapon {
+        +Entity Owner
+        +bool Owned
+        +bool IsEquipped
+        +float Range
+        +int Damage
+        +Attack(Vector3 direction)
+    }
+    
+    class MeleeWeapon {
+        +Attack(Vector3 direction)
+    }
+    
+    class RangedWeapon {
+        +Attack(Vector3 direction)
     }
     
     Simulation --> GameConfig
     Simulation --> IMap
     GameConfig --> ObjectiveConfig
     GameConfig --> AgentConfig
+    GameConfig --> WeaponConfig
     ObjectiveConfig <|-- StepsObjective
     ObjectiveConfig <|-- DeathmatchObjective
     DeathmatchObjective <|-- CapturePointObjective
     DeathmatchObjective <|-- DefendObjective
     Simulation --> Character
     Entity <|-- Character
+    Entity <|-- Weapon
+    Weapon <|-- MeleeWeapon
+    Weapon <|-- RangedWeapon
+    Character --> Weapon
 ```
 
 ## Simulation Flow
@@ -356,3 +467,16 @@ flowchart TD
 This project makes extensive use of the RogueSharp library for map handling, field of view calculations, and other grid-based functionality. Special thanks to:
 
 - [RogueSharp](https://github.com/FaronBracy/RogueSharp) by Faron Bracy - A .NET Standard library that provides map generation, field-of-view calculations, and other roguelike game utilities.
+
+## Changelog
+
+<details> <summary>
+<strong> 07/05/2025 - v1.0.0 </strong> </summary>
+
+- The weapon system now supports different weapon types (melee and ranged)
+- Agents can be assigned specific weapons through configuration
+- AI agents can have configurable think intervals
+- Configuration files can be in JSON or XML format
+- The simulation engine has been enhanced with additional movement processing capabilities
+- Program class has now basic usage examples
+</details>
