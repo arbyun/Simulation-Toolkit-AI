@@ -20,13 +20,14 @@ A flexible and extensible simulation framework for AI-driven agent-based simulat
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Configuration](#configuration)
+- [Configurations](#configurations)
   - [Game Configuration](#game-configuration)
   - [Agent Configuration](#agent-configuration)
   - [Weapon Configuration](#weapon-configuration)
   - [Objective Configuration](#objective-configuration)
 - [Architecture](#architecture)
 - [Credits](#credits)
+- [Changelog](#changelog)
 
 ## Installation
 
