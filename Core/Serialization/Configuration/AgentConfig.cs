@@ -22,6 +22,11 @@ namespace SimArena.Core.Configuration
         public BrainType BrainType { get; set; } = BrainType.AI;
         
         /// <summary>
+        /// IDs of the weapons owned by this agent
+        /// </summary>
+        public string[] OwnedWeaponIds { get; set; } = Array.Empty<string>();
+        
+        /// <summary>
         /// Starting X-coordinate
         /// </summary>
         public int StartX { get; set; } = 0;
@@ -35,6 +40,11 @@ namespace SimArena.Core.Configuration
         /// Whether to use a random starting position
         /// </summary>
         public bool RandomStart { get; set; } = true;
+        
+        /// <summary>
+        /// Brain think interval (in seconds)
+        /// </summary>
+        public float ThinkInterval { get; set; } = 0;
         
         /// <summary>
         /// Awareness radius

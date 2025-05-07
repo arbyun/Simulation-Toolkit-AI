@@ -76,5 +76,20 @@ namespace SimArena.Core.Entities
                 FireRate = 1.5f
             };
         }
+
+        /// <summary>
+        /// Creates a melee knife weapon.
+        /// </summary>
+        /// <param name="startX"></param>
+        /// <param name="startY"></param>
+        /// <param name="simulation"></param>
+        /// <returns></returns>
+        public static MeleeWeapon CreateKnife(int startX, int startY, Simulation simulation)
+        {
+            return new MeleeWeapon("Knife", startX, startY, true, simulation)
+            {
+                Damage = 10
+            };
+        }
     }
 }

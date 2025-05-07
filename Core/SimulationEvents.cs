@@ -13,8 +13,18 @@ namespace SimArena.Core
         public event EventHandler<int> StepCompleted;
         public event EventHandler<Entity> OnCreate;
         public event EventHandler<Entity> OnMove;
+        public event EventHandler<(Entity, Entity)> OnDamage;
+        public event EventHandler<(Entity, Entity)> OnHeal; 
+        
+        public event EventHandler<(Entity, Entity)> OnKill;
         public event EventHandler<Entity> OnDestroy;
 
+        internal void RaiseDamage(object sender, (Entity attacker, Entity victim) combat)
+            => OnDamage?.Invoke(sender, combat);
+        internal void RaiseHeal(object sender, (Entity healer, Entity healed) combat)
+            => OnHeal?.Invoke(sender, combat);
+        internal void RaiseKill(object sender, (Entity killer, Entity killed) combat)
+            => OnKill?.Invoke(sender, combat);
         internal void RaiseInitialized(object sender) => Initialized?.Invoke(sender, EventArgs.Empty);
         internal void RaiseStarted(object sender) => Started?.Invoke(sender, EventArgs.Empty);
         internal void RaisePaused(object sender) => Paused?.Invoke(sender, EventArgs.Empty);

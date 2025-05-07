@@ -134,6 +134,7 @@ namespace SimArena.Core.Entities.Components
                 else
                 {
                     // Don't move if attacking
+                    Owner.Attack(new Vector3(nearestTarget.X, nearestTarget.Y, 0));
                     _currentMovementDirection = null;
                 }
             }

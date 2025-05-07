@@ -2,7 +2,7 @@
 
 namespace SimArena.Core.SimulationElements.Map
 {
-    public interface IMap
+    public interface IMap: IMap<Cell>
     {
         /// <summary>
         /// Gets the width of the map

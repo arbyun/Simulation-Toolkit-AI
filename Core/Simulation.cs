@@ -82,9 +82,9 @@ namespace SimArena.Core
             _objective = config.Objective.TypeEnum;
             _tracker = config.Objective.CreateTracker();
             
-            if (_tracker is IStepTracker stepTracker)
+            if (_tracker is IEventInteractor eventInteractor)
             {
-                stepTracker.StepCompleted += (step) => Events.RaiseStepCompleted(this, step);
+                eventInteractor.InitializeEvents(Events);
             }
         }
     
@@ -99,7 +99,7 @@ namespace SimArena.Core
         {
             Map = map ?? throw new ArgumentNullException(nameof(map));
             Scene = scene ?? throw new ArgumentNullException(nameof(scene));
-        
+
             CreateAgents();
         
             // Raise the initialized event
@@ -127,17 +127,59 @@ namespace SimArena.Core
                     startX = randomPos.Item1;
                     startY = randomPos.Item2;
                 }
+
+                CharacterBuilder builder = new(agentConfig.Name, startX, startY, this);
+
+                if (agentConfig.OwnedWeaponIds.Length > 0)
+                {
+                    var ownedWeapons = new List<Weapon>();
+                    
+                    foreach (var weaponId in agentConfig.OwnedWeaponIds)
+                    {
+                        foreach (var weapon in Config.Weapons.Where(weapon => weapon.WeaponId == weaponId))
+                        {
+                            switch (weapon.WeaponType)
+                            {
+                                case WeaponType.Melee:
+                                    MeleeWeapon meleeWeapon = new MeleeWeapon("melee", startX, startY, 
+                                        true, this, weapon.Range)
+                                    {
+                                        Damage = weapon.Damage
+                                    };
+                                    ownedWeapons.Add(meleeWeapon);
+                                    break;
+                                    
+                                case WeaponType.Ranged:
+                                    RangedWeapon rangedWeapon = new RangedWeapon("ranged", startX, startY, true,
+                                        this)
+                                    {
+                                        Damage = weapon.Damage,
+                                        Range = weapon.Range
+                                    };
+                                    ownedWeapons.Add(rangedWeapon);
+                                    break;
+                            }
+                        }
+                    }
+                    
+                    builder.WithWeapons(ownedWeapons.ToArray())
+                        .WithDimensions(1, 1)
+                        .WithHealth(agentConfig.MaxHealth)
+                        .WithCombatStats(agentConfig.AttackPower, agentConfig.Defense)
+                        .WithSpeed(agentConfig.Speed);
+                }
+                else
+                {
+                    // Create a default weapon for the agent
+                    MeleeWeapon defaultWeapon = WeaponFactory.CreateKnife(startX, startY, this);
             
-                // Create a default weapon for the agent
-                RangedWeapon defaultWeapon = WeaponFactory.CreatePistol(startX, startY, this);
-            
-                // Use the builder pattern to create the character
-                var builder = new CharacterBuilder(agentConfig.Name, startX, startY, this)
-                    .WithWeapons(defaultWeapon)
-                    .WithDimensions(1, 1)
-                    .WithHealth(agentConfig.MaxHealth)
-                    .WithCombatStats(agentConfig.AttackPower, agentConfig.Defense)
-                    .WithSpeed(agentConfig.Speed);
+                    // Use the builder pattern to create the character
+                    builder.WithWeapons(defaultWeapon)
+                        .WithDimensions(1, 1)
+                        .WithHealth(agentConfig.MaxHealth)
+                        .WithCombatStats(agentConfig.AttackPower, agentConfig.Defense)
+                        .WithSpeed(agentConfig.Speed);
+                }
                 
                 // Set the control type based on the configuration
                 if (agentConfig.BrainType == BrainType.Human)
@@ -146,7 +188,7 @@ namespace SimArena.Core
                 }
                 else
                 {
-                    builder.WithAIControl(agentConfig.Awareness);
+                    builder.WithAIControl(agentConfig.Awareness, agentConfig.ThinkInterval);
                 }
                 
                 // Build the character
@@ -294,6 +336,7 @@ namespace SimArena.Core
             {
                 Events.RaiseOnMove(this, entity);
             }
+
         
             return success;
         }
@@ -347,6 +390,36 @@ namespace SimArena.Core
         {
             Scene.RemoveEntity(entity);
             Events.RaiseOnDestroy(this, entity);
+        }
+
+        /// <summary>
+        /// Handles the death of an entity
+        /// </summary>
+        /// <param name="killer">The entity that killed the other</param>
+        /// <param name="killed">The entity that was killed</param>
+        public void ProcessDeath(Entity killer, Entity killed)
+        {
+            Events.RaiseKill(this, (killer, killed));
+        }
+
+        /// <summary>
+        /// Handles damage dealt between two entities
+        /// </summary>
+        /// <param name="attacker">The entity that attacked</param>
+        /// <param name="defender">The entity that was attacked</param>
+        public void ProcessDamage(Entity attacker, Entity defender)
+        {
+            Events.RaiseDamage(this, (attacker, defender));
+        }
+
+        /// <summary>
+        /// Handles healing between two entities
+        /// </summary>
+        /// <param name="healer">The entity that healed the other</param>
+        /// <param name="healed">The entity that was healed</param>
+        public void ProcessHeal(Entity healer, Entity healed)
+        {
+            Events.RaiseHeal(this, (healer, healed));
         }
         
         public IEnumerable<Entity> GetEntities()

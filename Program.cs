@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+using System.Text.Json;
+using SimArena;
 using SimArena.Core.Configuration;
 using SimArena.Core.Entities;
 using SimArena.Core.Serialization.Configuration;
@@ -11,7 +12,33 @@ public static class Program
     /// <param name="args">Command line arguments</param>
     private static void Main(string[] args)
     {
-        TestEvaluationDefense();
+        // Run the simulation tests
+        RunSimulationTests();
+    }
+    
+    /// <summary>
+    /// Runs all simulation tests
+    /// </summary>
+    private static void RunSimulationTests()
+    {
+        Console.WriteLine("=== SIMULATION TESTS ===\n");
+        
+        // Test with Steps objective
+        SimulationTests.TestSimulationWithStepsObjective();
+        
+        // Test with CapturePoint objective
+        SimulationTests.TestSimulationWithCapturePointObjective();
+        
+        // Test with Defend objective
+        SimulationTests.TestSimulationWithDefendObjective();
+        
+        // Test with human agents in offline mode (should throw an exception)
+        SimulationTests.TestSimulationWithHumanAgentsInOfflineMode();
+        
+        // Test with Deathmatch objective
+        //SimulationTests.TestSimulationWithDeathmatchObjective();
+        
+        Console.WriteLine("All simulation tests completed!");
     }
 
     private static void JsonTest()

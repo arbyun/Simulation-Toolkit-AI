@@ -8,8 +8,6 @@ namespace SimArena.Core.Entities
     /// </summary>
     public class RangedWeapon: Weapon
     {
-        public int Damage { get; set; }
-        public int Range { get; set; }
         public float FireRate { get; set; }
 
 

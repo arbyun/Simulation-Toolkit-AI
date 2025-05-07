@@ -12,6 +12,8 @@ namespace SimArena.Core.Entities
         public Entity Owner { get; set; }
         public bool Owned { get; }
         public bool IsEquipped { get; set; }
+        public float Range { get; set; }
+        public int Damage { get; set; }
 
         /// <summary>
         /// Creates a weapon entity.
@@ -22,10 +24,11 @@ namespace SimArena.Core.Entities
         /// <param name="owned"></param>
         /// <param name="simulation"></param>
         /// <param name="collider"></param>
-        public Weapon(string name, int x, int y, bool owned, Simulation simulation, ICollider? collider) : 
+        public Weapon(string name, int x, int y, bool owned, Simulation simulation, ICollider? collider, float range = 1.5f) : 
             base(name, x, y, simulation, collider)
         {
             Owned = owned;
+            Range = range;
         }
 
         /// <summary>
@@ -39,9 +42,10 @@ namespace SimArena.Core.Entities
         /// <param name="width"></param>
         /// <param name="height"></param>
         protected Weapon(string name, int x, int y, bool owned, Simulation simulation, 
-            int width, int height) : base(name, x, y, simulation, width, height)
+            int width, int height, float range = 1.5f) : base(name, x, y, simulation, width, height)
         {
             Owned = owned;
+            Range = range;
         }
 
         /// <summary>
@@ -52,10 +56,11 @@ namespace SimArena.Core.Entities
         /// <param name="y"></param>
         /// <param name="owned"></param>
         /// <param name="simulation"></param>
-        protected Weapon(string name, int x, int y, bool owned, Simulation simulation) 
+        protected Weapon(string name, int x, int y, bool owned, Simulation simulation, float range = 1.5f) 
             : base(name, x, y, simulation)
         {
             Owned = owned;
+            Range = range;
         }
 
         /// <summary>
