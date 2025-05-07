@@ -33,6 +33,11 @@ namespace SimArena.Core.Configuration
         /// List of agent configurations
         /// </summary>
         public List<AgentConfig> Agents { get; set; } = new List<AgentConfig>();
+        
+        /// <summary>
+        /// List of weapon configurations
+        /// </summary>
+        public List<WeaponConfig> Weapons { get; set; } = new List<WeaponConfig>();
     
         #endregion
     

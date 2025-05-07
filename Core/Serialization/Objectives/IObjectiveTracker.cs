@@ -24,7 +24,7 @@ namespace SimArena.Core.Serialization.Objectives
 
     public interface IKillTracker: IObjectiveTracker
     {
-        void OnAgentKilled(Character killer, Character victim);
+        void OnAgentKilled(Entity killer, Entity victim);
     }
 
     public interface ICompletionTracker: IObjectiveTracker
@@ -32,20 +32,25 @@ namespace SimArena.Core.Serialization.Objectives
         bool IsComplete { get; }
     }
     
-    public class StepsTracker: IStepTracker, ICompletionTracker
+    public class StepsTracker: IStepTracker, IEventInteractor, ICompletionTracker
     {
         public event Action<int>? StepCompleted;
         public int CurrentStep => _currentStep;
         public bool ShouldStop { get; private set; }
-
+        
         private int _currentStep;
         private int _maxSteps;
 
         public StepsTracker(int maxSteps)
         {
             _maxSteps = maxSteps;
+        } 
+        
+        public void InitializeEvents(SimulationEvents events)
+        {
+            StepCompleted += (step) => events.RaiseStepCompleted(this, step);
         }
-
+        
         public void OnStep(float deltaTime)
         {
             _currentStep++;

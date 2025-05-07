@@ -2,7 +2,7 @@
 
 namespace SimArena.Core.SimulationElements.Map
 {
-    public class ContinuousMap: IMap
+    public class ContinuousMap: Map, IMap
     {
         public int Width { get; }
         public int Height { get; }

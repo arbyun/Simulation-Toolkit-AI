@@ -176,6 +176,7 @@ namespace SimArena.Core.Entities
             if (entity is Character player)
             {
                 player.TakeDamage(Damage);
+                Console.WriteLine($"Player {player.Name} took {Damage} damage!");
             }
 
             Simulation.Destroy(this);

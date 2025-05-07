@@ -15,4 +15,13 @@ namespace SimArena.Core.Configuration
         /// </summary>
         AI
     }
+
+    /// <summary>
+    /// Type of weapon for an agent
+    /// </summary>
+    public enum WeaponType
+    {
+        Ranged,
+        Melee
+    }
 }

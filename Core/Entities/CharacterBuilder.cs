@@ -25,6 +25,7 @@ namespace SimArena.Core.Entities
         private int _attackPower = 10;
         private int _defense = 5;
         private float _speed = 1.0f;
+        private float _thinkingInterval = 2.0f;
 
         /// <summary>
         /// Creates a new CharacterBuilder with required parameters.
@@ -68,11 +69,13 @@ namespace SimArena.Core.Entities
         /// Sets the character to be AI-controlled.
         /// </summary>
         /// <param name="awareness">Awareness radius for the AI brain</param>
+        /// <param name="agentConfigThinkInterval"></param>
         /// <returns>This builder instance for method chaining</returns>
-        public CharacterBuilder WithAIControl(int awareness = 10)
+        public CharacterBuilder WithAIControl(int awareness = 10, float agentConfigThinkInterval = .5f)
         {
             _isHumanControlled = false;
             _awareness = awareness;
+            _thinkingInterval = agentConfigThinkInterval;
             return this;
         }
 

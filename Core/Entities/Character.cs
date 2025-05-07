@@ -1,4 +1,5 @@
 using System.Numerics;
+using SimArena.Core.Configuration;
 using SimArena.Core.Entities.Components;
 using SimArena.Core.Entities.Components.Collision;
 
@@ -46,7 +47,23 @@ namespace SimArena.Core.Entities
         /// Owned weapons
         /// </summary>
         public Weapon[] Weapons { get; private set; }
+        
+        /// <summary>
+        /// The main weapon currently equipped by the character.
+        /// This defaults to the first weapon in the array if no weapon is equipped.
+        /// </summary>
+        public Weapon MainWeapon => Weapons.FirstOrDefault(w => w.IsEquipped) ?? Weapons.First();
 
+        /// <summary>
+        /// Kills, deaths, assists
+        /// </summary>
+        public DeathmatchSimulationResult.KDA Kda { get; internal set; } = new(0,0,0);
+
+        /// <summary>
+        /// Last entity that dealt damage to this character
+        /// </summary>
+        private Entity _lastDamager;
+        
         #endregion
 
         #region Constructors
@@ -97,7 +114,7 @@ namespace SimArena.Core.Entities
             : base(name, x, y, simulation, collider)
         {
             Weapons = [];
-            Brain = new SampleAiBrain(this, 1, simulation);
+            Brain = BrainFactory.CreateBrain(this, 1, simulation, false);
         }
 
         /// <summary>
@@ -113,7 +130,7 @@ namespace SimArena.Core.Entities
             : base(name, x, y, simulation, width, height)
         {
             Weapons = [];
-            Brain = new SampleAiBrain(this, 1, simulation);
+            Brain = BrainFactory.CreateBrain(this, 1, simulation, false);
         }
 
         /// <summary>
@@ -166,7 +183,7 @@ namespace SimArena.Core.Entities
             : base(name, x, y, simulation, collider)
         {
             Weapons = weapons;
-            Brain = new SampleAiBrain(this, awareness, simulation);
+            Brain = BrainFactory.CreateBrain(this, awareness, simulation, false);
         }
 
         /// <summary>
@@ -184,7 +201,7 @@ namespace SimArena.Core.Entities
             Weapon[] weapons, int width, int height) : base(name, x, y, simulation, width, height)
         {
             Weapons = weapons;
-            Brain = new SampleAiBrain(this, awareness, simulation);
+            Brain = BrainFactory.CreateBrain(this, awareness, simulation, false);
         }
         
         /// <summary>
@@ -202,15 +219,7 @@ namespace SimArena.Core.Entities
             Weapon[] weapons, ICollider? collider, bool humanControlled) : base(name, x, y, simulation, collider)
         {
             Weapons = weapons;
-            
-            if (humanControlled)
-            {
-                Brain = new HumanBrain(this, awareness, simulation);
-            }
-            else
-            {
-                Brain = new SampleAiBrain(this, awareness, simulation);
-            }
+            Brain = BrainFactory.CreateBrain(this, awareness, simulation, humanControlled);
         }
         
         /// <summary>
@@ -229,15 +238,7 @@ namespace SimArena.Core.Entities
             Weapon[] weapons, int width, int height, bool humanControlled) : base(name, x, y, simulation, width, height)
         {
             Weapons = weapons;
-            
-            if (humanControlled)
-            {
-                Brain = new HumanBrain(this, awareness, simulation);
-            }
-            else
-            {
-                Brain = new SampleAiBrain(this, awareness, simulation);
-            }
+            Brain = BrainFactory.CreateBrain(this, awareness, simulation, humanControlled);
         }
 
         #endregion
@@ -253,6 +254,8 @@ namespace SimArena.Core.Entities
             // If the character is dead, remove it from the scene
             if (!IsAlive)
             {
+                Kda = Kda with { Deaths = Kda.Deaths + 1 };
+                Simulation.ProcessDeath(_lastDamager, this);
                 Simulation.Destroy(this);
                 return;
             }
@@ -266,7 +269,7 @@ namespace SimArena.Core.Entities
         /// </summary>
         /// <param name="amount">Amount of damage to apply</param>
         /// <returns>True if the character was damaged, false if the character died</returns>
-        public virtual bool TakeDamage(int amount, bool log = false)
+        public virtual bool TakeDamage(int amount, Entity? attacker = null, bool log = false)
         {
             if (!IsAlive)
                 return false;
@@ -276,6 +279,13 @@ namespace SimArena.Core.Entities
             int previousHealth = Health;
 
             Health = Math.Max(0, Health - actualDamage);
+
+            if (attacker != null)
+            {
+                _lastDamager = attacker;
+            }
+            
+            Simulation.ProcessDamage(attacker, this);
 
             if (log)
             {
@@ -299,12 +309,13 @@ namespace SimArena.Core.Entities
         /// Heals the character
         /// </summary>
         /// <param name="amount">Amount of health to restore</param>
-        public void Heal(int amount)
+        public void Heal(int amount, Entity? healer = null)
         {
             if (!IsAlive)
                 return;
 
             Health = Math.Min(MaxHealth, Health + amount);
+            Simulation.ProcessHeal(healer, this);
         }
         
         /// <summary>
@@ -356,5 +367,26 @@ namespace SimArena.Core.Entities
         }
 
         #endregion
+
+        /// <summary>
+        /// Respawns the character at the given position
+        /// </summary>
+        /// <param name="position">The position where the character will respawn</param>
+        public void Respawn(Vector3 position)
+        {
+            Health = MaxHealth;
+            bool result = Simulation.Map.SetEntityPosition(this, (int)position.X, (int)position.Y);
+
+            if (result)
+            {
+                Console.WriteLine($"{Name} respawned at ({position.X}, {position.Y}).");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to respawn {Name} at ({position.X}, {position.Y}).");
+                var randomPos = Simulation.Map.GetRandomWalkableLocation();
+                    Simulation.Map.SetEntityPosition(this, randomPos.Value.x, randomPos.Value.y);
+            }
+        }
     }
 }
