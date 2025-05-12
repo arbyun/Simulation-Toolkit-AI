@@ -2,7 +2,11 @@ bin/
 /bin/
 obj/
 .idea/
-.meta
+*.meta
+!/[Aa]ssets/**/*.meta
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
