@@ -1,3 +1,5 @@
+using System;
+
 namespace SimArena.Core.SimulationElements.Map
 {
     public class MapState

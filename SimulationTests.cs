@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using SimArena.Core;
 using SimArena.Core.Configuration;

@@ -1,4 +1,5 @@
-﻿using SimArena.Core.Entities;
+﻿using System.Collections.Generic;
+using SimArena.Core.Entities;
 
 namespace SimArena.Core.SimulationElements.Map
 {

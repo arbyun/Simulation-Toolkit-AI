@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Numerics;
 using SimArena.Core.Configuration;
 using SimArena.Core.Entities.Components;
@@ -80,7 +82,7 @@ namespace SimArena.Core.Entities
         public Character(string name, int x, int y, Brain brain, Simulation simulation, ICollider? collider) 
             : base(name, x, y, simulation, collider)
         {
-            Weapons = [];
+            Weapons = Array.Empty<Weapon>();
             Brain = brain ?? throw new ArgumentNullException(nameof(brain));
         }
         
@@ -98,7 +100,7 @@ namespace SimArena.Core.Entities
         public Character(string name, int x, int y, Brain brain, Simulation simulation, int width, int height) 
             : base(name, x, y, simulation, width, height)
         {
-            Weapons = [];
+            Weapons = Array.Empty<Weapon>();
             Brain = brain ?? throw new ArgumentNullException(nameof(brain));
         }
         
@@ -113,7 +115,7 @@ namespace SimArena.Core.Entities
         public Character(string name, int x, int y, Simulation simulation, ICollider? collider) 
             : base(name, x, y, simulation, collider)
         {
-            Weapons = [];
+            Weapons = Array.Empty<Weapon>();
             Brain = BrainFactory.CreateBrain(this, 1, simulation, false);
         }
 
@@ -129,7 +131,7 @@ namespace SimArena.Core.Entities
         public Character(string name, int x, int y, Simulation simulation, int width, int height) 
             : base(name, x, y, simulation, width, height)
         {
-            Weapons = [];
+            Weapons = Array.Empty<Weapon>();
             Brain = BrainFactory.CreateBrain(this, 1, simulation, false);
         }
 

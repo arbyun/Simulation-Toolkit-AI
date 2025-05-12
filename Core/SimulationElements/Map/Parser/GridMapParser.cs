@@ -1,4 +1,7 @@
-﻿namespace SimArena.Core.SimulationElements.Map.Parser
+﻿using System;
+using System.IO;
+
+namespace SimArena.Core.SimulationElements.Map.Parser
 {
     public class GridMapParser<T> where T : Map, IMap, new()
     {

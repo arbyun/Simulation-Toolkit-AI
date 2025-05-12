@@ -1,4 +1,7 @@
-﻿namespace SimArena.Core.SimulationElements.Map
+﻿using System;
+using System.Collections.Generic;
+
+namespace SimArena.Core.SimulationElements.Map
 {
    /// <summary>
    /// The AStarShortestPath class represents a data type for finding the shortest path between two Cells on a Map

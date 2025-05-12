@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json.Serialization;
 using SimArena.Core.Configuration;
 using SimArena.Core.Serialization.Objectives;

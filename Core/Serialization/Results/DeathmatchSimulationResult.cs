@@ -5,9 +5,25 @@ namespace SimArena.Core.Configuration
 {
     public class DeathmatchSimulationResult : ISimulationResult
     {
-        public record TeamMember(string Name, KDA Kda);
-        public record KDA(int Kills, int Deaths, int Assists);
-        public record Team(int Number, KDA CollectiveKda, TeamMember[] TeamMembers);
+        public record TeamMember(string Name, KDA Kda)
+        {
+            public string Name { get; } = Name;
+            public KDA Kda { get; } = Kda;
+        }
+
+        public record KDA(int Kills, int Deaths, int Assists)
+        {
+            public int Kills { get; set; } = Kills;
+            public int Deaths { get; set; } = Deaths;
+            public int Assists { get; } = Assists;
+        }
+
+        public record Team(int Number, KDA CollectiveKda, TeamMember[] TeamMembers)
+        {
+            public KDA CollectiveKda { get; } = CollectiveKda;
+            public int Number { get; } = Number;
+            public TeamMember[] TeamMembers { get; } = TeamMembers;
+        }
 
         public int WinnerTeam { get; set; }
         public int TotalTeams { get; set; }

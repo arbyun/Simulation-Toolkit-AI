@@ -1,4 +1,5 @@
-﻿using SimArena.Core.Entities;
+﻿using System;
+using SimArena.Core.Entities;
 using SimArena.Core.Serialization.Results;
 
 namespace SimArena.Core

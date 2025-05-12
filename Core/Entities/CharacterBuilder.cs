@@ -1,3 +1,4 @@
+using System;
 using SimArena.Core.Entities.Components;
 using SimArena.Core.Entities.Components.Collision;
 

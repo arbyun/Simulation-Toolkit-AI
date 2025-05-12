@@ -1,4 +1,5 @@
-﻿using SimArena.Core.Entities;
+﻿using System;
+using SimArena.Core.Entities;
 
 namespace SimArena.Core.SimulationElements.Map
 {
@@ -163,10 +164,10 @@ namespace SimArena.Core.SimulationElements.Map
         public (int x, int y)? GetRandomWalkableLocation(int minX, int maxX, int minY, int maxY)
         {
             // Ensure bounds are within map limits
-            minX = Int32.Clamp(minX, 0, Width - 1);
-            maxX = Int32.Clamp(maxX, 0, Width - 1);
-            minY = Int32.Clamp(minY, 0, Height - 1);
-            maxY = Int32.Clamp(maxY, 0, Height - 1);
+            minX = Math.Clamp(minX, 0, Width - 1);
+            maxX = Math.Clamp(maxX, 0, Width - 1);
+            minY = Math.Clamp(minY, 0, Height - 1);
+            maxY = Math.Clamp(maxY, 0, Height - 1);
 
             // Check if there's any walkable space in the area
             bool hasWalkableSpace = false;

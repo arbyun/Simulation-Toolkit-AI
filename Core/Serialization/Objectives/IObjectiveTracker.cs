@@ -1,4 +1,5 @@
-﻿using SimArena.Core.Configuration;
+﻿using System;
+using SimArena.Core.Configuration;
 using SimArena.Core.Entities;
 using SimArena.Core.Serialization.Results;
 

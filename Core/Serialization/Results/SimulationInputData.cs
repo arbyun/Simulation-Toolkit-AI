@@ -1,3 +1,4 @@
+using System;
 using SimArena.Core.Configuration;
 
 namespace SimArena.Core.Serialization.Results
@@ -17,7 +18,7 @@ namespace SimArena.Core.Serialization.Results
     {
         public int WinnerTeam { get; set; }
         public int TotalTeams { get; set; }
-        public DeathmatchSimulationResult.Team[] Teams { get; set; } = [];
+        public DeathmatchSimulationResult.Team[] Teams { get; set; } = Array.Empty<DeathmatchSimulationResult.Team>();
         
         public ISimulationResultBuilder CreateBuilder()
         {

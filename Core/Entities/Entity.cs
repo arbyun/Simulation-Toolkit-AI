@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using SimArena.Core.Entities.Components.Collision;
 
 namespace SimArena.Core.Entities
