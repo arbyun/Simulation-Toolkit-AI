@@ -83,8 +83,21 @@ namespace SimArena.Core.Entities.Components
             // Always try to move in the current direction, even between decisions
             if (_currentMovementDirection != null)
             {
-                Move(_currentMovementDirection.Value);
-            } 
+                // Calculate new position
+                int newX = Owner.X + (int)_currentMovementDirection.Value.X;
+                int newY = Owner.Y + (int)_currentMovementDirection.Value.Y;
+                
+                // Check if the new position is valid
+                if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.IsWalkable(newX, newY))
+                {
+                    Move(_currentMovementDirection.Value);
+                }
+                else
+                {
+                    // If we can't move in the current direction, try to find a new valid direction
+                    MakeDecisions();
+                }
+            }
         } 
 
         /// <summary>
@@ -130,13 +143,14 @@ namespace SimArena.Core.Entities.Components
                     int dx = nearestTarget.X - Owner.X;
                     int dy = nearestTarget.Y - Owner.Y;
                     
+                    // Normalize the direction to ensure we move in one direction at a time
                     if (Math.Abs(dx) > Math.Abs(dy))
                     {
-                        _currentMovementDirection = dx > 0 ? DirectionVector.Right : DirectionVector.Left;
+                        _currentMovementDirection = new Vector3(Math.Sign(dx), 0, 0);
                     }
                     else
                     {
-                        _currentMovementDirection = dy > 0 ? DirectionVector.Down : DirectionVector.Up;
+                        _currentMovementDirection = new Vector3(0, Math.Sign(dy), 0);
                     }
                 }
                 else
