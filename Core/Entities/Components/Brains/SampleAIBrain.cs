@@ -79,7 +79,13 @@ namespace SimArena.Core.Entities.Components
                 _timeSinceLastDecision = 0;
                 MakeDecisions();
             }
-        }
+            
+            // Always try to move in the current direction, even between decisions
+            if (_currentMovementDirection != null)
+            {
+                Move(_currentMovementDirection.Value);
+            } 
+        } 
 
         /// <summary>
         /// 
@@ -142,13 +148,56 @@ namespace SimArena.Core.Entities.Components
             }
             else
             {
-                // If no target is found, move randomly
+                // If no target is found, try to find a valid random direction to move
                 _currentAttackTarget = null;
-                _currentMovementDirection = DirectionVector.GetRandomCardinalDirection(_random);
+                
+                // Try all cardinal directions in random order
+                var directions = new[] { DirectionVector.Up, DirectionVector.Right, DirectionVector.Down, DirectionVector.Left };
+                directions = directions.OrderBy(x => _random.Next()).ToArray();
+                
+                foreach (var direction in directions)
+                {
+                    int newX = Owner.X + (int)direction.X;
+                    int newY = Owner.Y + (int)direction.Y;
+                    
+                    if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.IsWalkable(newX, newY))
+                    {
+                        _currentMovementDirection = direction;
+                        break;
+                    }
+                }
+                
+                // If no valid direction was found, try to find any walkable cell nearby
+                if (_currentMovementDirection == null)
+                {
+                    for (int radius = 1; radius <= 3; radius++)
+                    {
+                        for (int x = -radius; x <= radius; x++)
+                        {
+                            for (int y = -radius; y <= radius; y++)
+                            {
+                                if (x == 0 && y == 0) continue;
+                                
+                                int newX = Owner.X + x;
+                                int newY = Owner.Y + y;
+                                
+                                if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.IsWalkable(newX, newY))
+                                {
+                                    // Found a walkable cell, set direction towards it
+                                    _currentMovementDirection = new Vector3(
+                                        Math.Sign(x),
+                                        Math.Sign(y),
+                                        0
+                                    );
+                                    break;
+                                }
+                            }
+                            if (_currentMovementDirection != null) break;
+                        }
+                        if (_currentMovementDirection != null) break;
+                    }
+                }
             }
-
-            if (_currentMovementDirection != null) 
-                Move(_currentMovementDirection.Value);
         }
         
         #endregion

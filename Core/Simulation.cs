@@ -326,6 +326,12 @@ namespace SimArena.Core
             int newX = entity.X + (int)direction.X;
             int newY = entity.Y + (int)direction.Y;
 
+            // Check if the new position is valid before attempting to move
+            if (!Map.IsInBounds(newX, newY) || !Map.IsWalkable(newX, newY))
+            {
+                return false;
+            }
+
             // Update the entity's facing direction if it's a player
             if (entity is Character player)
             {
@@ -339,7 +345,6 @@ namespace SimArena.Core
             {
                 Events.RaiseOnMove(this, entity);
             }
-
         
             return success;
         }

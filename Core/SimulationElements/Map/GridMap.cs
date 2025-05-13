@@ -241,7 +241,7 @@ namespace SimArena.Core.SimulationElements.Map
             }
 
             // Compute FOV with the entity as the center if it's the current FOV entity
-            if (_currentFovEntity.Equals(entity) && entity is Character character)
+            if (_currentFovEntity != null && _currentFovEntity.Equals(entity) && entity is Character character)
             {
                 ComputeFov(character);
             }

@@ -33,7 +33,7 @@ namespace SimArena.Core.Entities
             
                 if (entity is Character character)
                 {
-                    character.TakeDamage(Damage);
+                    character.TakeDamage(Damage, Owner);
                     return true;
                 }
 

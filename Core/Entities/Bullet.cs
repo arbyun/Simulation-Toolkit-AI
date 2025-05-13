@@ -176,7 +176,7 @@ namespace SimArena.Core.Entities
             // If the entity is a player, damage it
             if (entity is Character player)
             {
-                player.TakeDamage(Damage);
+                player.TakeDamage(Damage, _owner.Owner);
                 Console.WriteLine($"Player {player.Name} took {Damage} damage!");
             }
 
