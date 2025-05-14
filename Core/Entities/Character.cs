@@ -287,7 +287,7 @@ namespace SimArena.Core.Entities
                 _lastDamager = attacker;
             }
             
-            Simulation.ProcessDamage(attacker, this);
+            Simulation.ProcessDamage(_lastDamager, this);
 
             if (log)
             {
