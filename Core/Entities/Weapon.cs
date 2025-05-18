@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using SimArena.Core.Entities.Components;
-using SimArena.Core.Entities.Components.Collision;
 
 namespace SimArena.Core.Entities
 {
@@ -14,22 +13,6 @@ namespace SimArena.Core.Entities
         public bool IsEquipped { get; set; }
         public float Range { get; set; }
         public int Damage { get; set; }
-
-        /// <summary>
-        /// Creates a weapon entity.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="owned"></param>
-        /// <param name="simulation"></param>
-        /// <param name="collider"></param>
-        public Weapon(string name, int x, int y, bool owned, Simulation simulation, ICollider? collider, float range = 1.5f) : 
-            base(name, x, y, simulation, collider)
-        {
-            Owned = owned;
-            Range = range;
-        }
 
         /// <summary>
         /// Creates a weapon entity.

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Numerics;
 using SimArena.Core.Configuration;
 using SimArena.Core.Entities.Components;
-using SimArena.Core.Entities.Components.Collision;
 
 namespace SimArena.Core.Entities
 {
@@ -79,8 +78,8 @@ namespace SimArena.Core.Entities
         /// <param name="brain">Brain that controls this character</param>
         /// <param name="simulation">The simulation instance</param>
         /// <param name="collider">The collider used by the character</param>
-        public Character(string name, int x, int y, Brain brain, Simulation simulation, ICollider? collider) 
-            : base(name, x, y, simulation, collider)
+        public Character(string name, int x, int y, Brain brain, Simulation simulation) 
+            : base(name, x, y, simulation)
         {
             Weapons = Array.Empty<Weapon>();
             Brain = brain ?? throw new ArgumentNullException(nameof(brain));
@@ -112,8 +111,8 @@ namespace SimArena.Core.Entities
         /// <param name="y"></param>
         /// <param name="simulation"></param>
         /// <param name="collider"></param>
-        public Character(string name, int x, int y, Simulation simulation, ICollider? collider) 
-            : base(name, x, y, simulation, collider)
+        public Character(string name, int x, int y, Simulation simulation) 
+            : base(name, x, y, simulation)
         {
             Weapons = Array.Empty<Weapon>();
             Brain = BrainFactory.CreateBrain(this, 1, simulation, false);
@@ -145,8 +144,8 @@ namespace SimArena.Core.Entities
         /// <param name="simulation">The simulation instance</param>
         /// <param name="weapons">The weapons owned by the character</param>
         /// <param name="collider">Collider used by the character</param>
-        public Character(string name, int x, int y, Brain brain, Simulation simulation, Weapon[] weapons, ICollider? collider) 
-            : base(name, x, y, simulation, collider) 
+        public Character(string name, int x, int y, Brain brain, Simulation simulation, Weapon[] weapons) 
+            : base(name, x, y, simulation) 
         {
             Brain = brain ?? throw new ArgumentNullException(nameof(brain));
             Weapons = weapons;
@@ -181,8 +180,8 @@ namespace SimArena.Core.Entities
         /// <param name="simulation">The simulation instance</param>
         /// <param name="weapons">Weapons owned by the character</param>
         /// <param name="collider">The collider used by the character</param>
-        public Character(string name, int x, int y, int awareness, Simulation simulation, Weapon[] weapons, ICollider? collider) 
-            : base(name, x, y, simulation, collider)
+        public Character(string name, int x, int y, int awareness, Simulation simulation, Weapon[] weapons) 
+            : base(name, x, y, simulation)
         {
             Weapons = weapons;
             Brain = BrainFactory.CreateBrain(this, awareness, simulation, false);
@@ -218,7 +217,7 @@ namespace SimArena.Core.Entities
         /// <param name="collider">The collider used by the character</param>
         /// <param name="humanControlled">If the character should be controlled by a human player</param>
         public Character(string name, int x, int y, int awareness, Simulation simulation, 
-            Weapon[] weapons, ICollider? collider, bool humanControlled) : base(name, x, y, simulation, collider)
+            Weapon[] weapons, bool humanControlled) : base(name, x, y, simulation)
         {
             Weapons = weapons;
             Brain = BrainFactory.CreateBrain(this, awareness, simulation, humanControlled);
@@ -387,7 +386,7 @@ namespace SimArena.Core.Entities
             {
                 Console.WriteLine($"Failed to respawn {Name} at ({position.X}, {position.Y}).");
                 var randomPos = Simulation.Map.GetRandomWalkableLocation();
-                    Simulation.Map.SetEntityPosition(this, randomPos.Value.x, randomPos.Value.y);
+                    Simulation.Map.SetEntityPosition(this, randomPos.x, randomPos.y);
             }
         }
     }

@@ -1,6 +1,4 @@
-using System;
 using SimArena.Core.Entities.Components;
-using SimArena.Core.Entities.Components.Collision;
 
 namespace SimArena.Core.Entities
 {
@@ -18,7 +16,6 @@ namespace SimArena.Core.Entities
         private int _awareness = 1;
         private bool _isHumanControlled;
         private Weapon[] _weapons = Array.Empty<Weapon>();
-        private ICollider? _collider;
         private int _width = 1;
         private int _height = 1;
         private int _maxHealth = 100;
@@ -91,16 +88,6 @@ namespace SimArena.Core.Entities
             return this;
         }
 
-        /// <summary>
-        /// Sets a custom collider for the character.
-        /// </summary>
-        /// <param name="collider">The collider to use</param>
-        /// <returns>This builder instance for method chaining</returns>
-        public CharacterBuilder WithCollider(ICollider collider)
-        {
-            _collider = collider ?? throw new ArgumentNullException(nameof(collider));
-            return this;
-        }
 
         /// <summary>
         /// Sets the dimensions for the character's collider.
@@ -163,27 +150,11 @@ namespace SimArena.Core.Entities
             // Create the character with the appropriate constructor based on configuration
             if (_brain != null)
             {
-                // Use the provided brain
-                if (_collider != null)
-                {
-                    character = new Character(_name, _x, _y, _brain, _simulation, _weapons, _collider);
-                }
-                else
-                {
-                    character = new Character(_name, _x, _y, _brain, _simulation, _weapons, _width, _height);
-                }
+                character = new Character(_name, _x, _y, _brain, _simulation, _weapons, _width, _height);
             }
             else
             {
-                // Create a brain based on control type
-                if (_collider != null)
-                {
-                    character = new Character(_name, _x, _y, _awareness, _simulation, _weapons, _collider, _isHumanControlled);
-                }
-                else
-                {
-                    character = new Character(_name, _x, _y, _awareness, _simulation, _weapons, _width, _height, _isHumanControlled);
-                }
+                character = new Character(_name, _x, _y, _awareness, _simulation, _weapons, _width, _height, _isHumanControlled);
             }
 
             // Set additional properties

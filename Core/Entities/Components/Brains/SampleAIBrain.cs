@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Numerics;
+using RogueSharp;
 using SimArena.Core.Utilities;
 
 namespace SimArena.Core.Entities.Components
@@ -18,16 +19,6 @@ namespace SimArena.Core.Entities.Components
         /// How often the AI makes decisions (in seconds)
         /// </summary>
         public float DecisionInterval { get; } = 1.0f;
-        
-        /// <summary>
-        /// Current movement direction
-        /// </summary>
-        private Vector3? _currentMovementDirection;
-        
-        /// <summary>
-        /// Current attack target
-        /// </summary>
-        private Entity? _currentAttackTarget;
         
         /// <summary>
         /// Random number generator for AI decisions
@@ -80,7 +71,9 @@ namespace SimArena.Core.Entities.Components
                 MakeDecisions();
             }
             
-            // Always try to move in the current direction, even between decisions
+            
+            
+            /*// Always try to move in the current direction, even between decisions
             if (_currentMovementDirection != null)
             {
                 // Calculate new position
@@ -88,7 +81,7 @@ namespace SimArena.Core.Entities.Components
                 int newY = Owner.Y + (int)_currentMovementDirection.Value.Y;
                 
                 // Check if the new position is valid
-                if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.IsWalkable(newX, newY))
+                if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.Map.IsWalkable(newX, newY))
                 {
                     Move(_currentMovementDirection.Value);
                 }
@@ -97,33 +90,40 @@ namespace SimArena.Core.Entities.Components
                     // If we can't move in the current direction, try to find a new valid direction
                     MakeDecisions();
                 }
-            }
+            }*/
         } 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public override Vector3 GetMovementDirection()
-        {
-            return _currentMovementDirection ?? Vector3.Zero;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public override Entity? GetInteractionTarget()
-        {
-            return _currentAttackTarget;
-        }
 
         /// <summary>
         /// Makes decisions about movement and attacks
         /// </summary>
         protected virtual void MakeDecisions()
         {
-            // Perceive entities in the environment
+            var (x, y) = (Owner.X, Owner.Y);
+            
+            var neighbors = Simulation.Map.Map.GetBorderCellsInSquare(x, y, 1)
+                .Where(c => c.IsWalkable).ToArray();
+
+            if (neighbors.Length > 0)
+            {
+                var choice = neighbors[_random.Next(neighbors.Length)];
+                Move(new Vector3(choice.X, choice.Y, 0));
+            }
+            else
+            {
+                var goal = Simulation.Map.GetRandomWalkableLocation(Owner);
+            
+                var pathFinder = new PathFinder(Simulation.Map.Map);
+                var path = pathFinder.ShortestPath(Simulation.Map.Map.GetCell(Owner.X, Owner.Y), 
+                    Simulation.Map.Map.GetCell(goal.x, goal.y));
+            
+                if (path is { Length: > 1 })
+                {
+                    var nextStep = path.StepForward();
+                    Move(new Vector3(nextStep.X, nextStep.Y, 0));
+                }
+            }
+            
+            /*// Perceive entities in the environment
             Entity[] perceivedEntities = PerceiveEntities();
             
             // Find the nearest player or character
@@ -174,7 +174,7 @@ namespace SimArena.Core.Entities.Components
                     int newX = Owner.X + (int)direction.X;
                     int newY = Owner.Y + (int)direction.Y;
                     
-                    if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.IsWalkable(newX, newY))
+                    if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.Map.IsWalkable(newX, newY))
                     {
                         _currentMovementDirection = direction;
                         break;
@@ -195,7 +195,7 @@ namespace SimArena.Core.Entities.Components
                                 int newX = Owner.X + x;
                                 int newY = Owner.Y + y;
                                 
-                                if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.IsWalkable(newX, newY))
+                                if (Simulation.Map.IsInBounds(newX, newY) && Simulation.Map.Map.IsWalkable(newX, newY))
                                 {
                                     // Found a walkable cell, set direction towards it
                                     _currentMovementDirection = new Vector3(
@@ -211,7 +211,7 @@ namespace SimArena.Core.Entities.Components
                         if (_currentMovementDirection != null) break;
                     }
                 }
-            }
+            }*/
         }
         
         #endregion

@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using SimArena.Core.Entities.Components.Collision;
 
 namespace SimArena.Core.Entities
 {
@@ -9,21 +8,6 @@ namespace SimArena.Core.Entities
     public class RangedWeapon: Weapon
     {
         public float FireRate { get; set; }
-
-
-        /// <summary>
-        /// Ranged weapon constructor.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="owned"></param>
-        /// <param name="simulation"></param>
-        /// <param name="collider"></param>
-        public RangedWeapon(string name, int x, int y, bool owned, Simulation simulation, ICollider? collider) : 
-            base(name, x, y, owned, simulation, collider)
-        {
-        }
 
         /// <summary>
         /// Ranged weapon constructor.

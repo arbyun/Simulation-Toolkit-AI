@@ -49,9 +49,6 @@ namespace SimArena.Core.Entities.Components
         /// </summary>
         /// <param name="deltaTime">Time elapsed since the last update in seconds</param>
         public abstract void Think(float deltaTime);
-        
-        public abstract Vector3 GetMovementDirection();
-        public abstract Entity? GetInteractionTarget();
 
         protected bool Move(Vector3 direction)
         {

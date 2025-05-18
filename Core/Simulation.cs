@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
+using RogueSharp;
 using SimArena.Core.Configuration;
 using SimArena.Core.Entities;
 using SimArena.Core.Entities.Components;
 using SimArena.Core.Serialization.Objectives;
 using SimArena.Core.Serialization.Results;
 using SimArena.Core.SimulationElements.Map;
-using SimArena.Core.SimulationElements.Scene;
 
 namespace SimArena.Core
 {
@@ -29,18 +26,13 @@ namespace SimArena.Core
         /// <summary>
         /// Map
         /// </summary>
-        public IMap Map { get; protected internal set; }
-    
-        /// <summary>
-        /// Scene
-        /// </summary>
-        private IScene Scene { get; set; }
+        public IMapBridge Map { get; private set; }
     
         /// <summary>
         /// List of agents
         /// </summary>
-        public List<Character> Agents { get; } = new();
-    
+        public List<Character> Agents => EntityManager.GetEntities<Character>().ToList();
+
         /// <summary>
         /// Whether the simulation is running
         /// </summary>
@@ -55,11 +47,15 @@ namespace SimArena.Core
         /// Whether the simulation has human-controlled agents
         /// </summary>
         public bool HasHumanAgents => Agents.Any(a => a.Brain is HumanBrain);
-    
+
+        /// <summary>
+        /// Entity manager
+        /// </summary>
+        public EntityManager EntityManager { get; set; } = new();
+
         #endregion
-        
+
         private IObjectiveTracker _tracker;
-        private readonly SimulationObjective _objective;
         
         #region Constructors
     
@@ -68,12 +64,12 @@ namespace SimArena.Core
         /// </summary>
         /// <param name="config">Match configuration</param>
         /// <param name="mode">Simulation mode</param>
-        public Simulation(GameConfig config, SimulationMode mode)
+        public Simulation(GameConfig config)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
-            Mode = mode;
+            Mode = config.RealtimeMode ? SimulationMode.Realtime : SimulationMode.Offline;
         
-            if (mode == SimulationMode.Offline)
+            if (Mode == SimulationMode.Offline)
             {
                 // Validate that there are no human agents in offline mode
                 if (config.Agents.Any(a => a.BrainType == BrainType.Human))
@@ -82,7 +78,6 @@ namespace SimArena.Core
                 }
             }
             
-            _objective = config.Objective.TypeEnum;
             _tracker = config.Objective.CreateTracker();
             
             if (_tracker is IEventInteractor eventInteractor)
@@ -98,14 +93,17 @@ namespace SimArena.Core
         /// <summary>
         /// Initializes the simulation
         /// </summary>
-        public void Initialize(IMap map, Scene scene)
+        public void Initialize(IMapBridge map)
         {
             Map = map ?? throw new ArgumentNullException(nameof(map));
-            Scene = scene ?? throw new ArgumentNullException(nameof(scene));
+
+            if (Map.Map == null)
+            {
+                throw new Exception("Map bridge must have a map generated.");
+            }
 
             CreateAgents();
         
-            // Raise the initialized event
             Events.RaiseInitialized(this);
         }
     
@@ -115,7 +113,7 @@ namespace SimArena.Core
         private void CreateAgents()
         {
             // Clear any existing agents
-            Agents.Clear();
+            EntityManager.Clear();
         
             // Create agents from the configuration
             foreach (var agentConfig in Config.Agents)
@@ -124,12 +122,11 @@ namespace SimArena.Core
                 int startX = agentConfig.StartX;
                 int startY = agentConfig.StartY;
             
-                if (agentConfig.RandomStart)
-                {
-                    var randomPos = Map.GetRandomWalkableLocation() ?? (5, 5);
-                    startX = randomPos.Item1;
-                    startY = randomPos.Item2;
-                }
+                
+                    var randomPos = Map.GetRandomWalkableLocation();
+                    startX = randomPos.x;
+                    startY = randomPos.y;
+                
 
                 CharacterBuilder builder = new(agentConfig.Name, startX, startY, this);
 
@@ -200,12 +197,7 @@ namespace SimArena.Core
                 // Raise the create event
                 Events.RaiseOnCreate(this, agent);
             
-                // Add the agent to the scene and the list
-                Scene.AddEntity(agent);
-                Agents.Add(agent);
-            
-                // Enable field of view for the agent
-                Map.ToggleFieldOfView(agent);
+                EntityManager.Set(agent, Map.Map.GetCell(agent.X, agent.Y));
             }
         }
     
@@ -287,9 +279,11 @@ namespace SimArena.Core
         {
             if (!IsRunning)
                 return;
-        
-            // Update the scene
-            Scene.Update(deltaTime);
+
+            foreach (var agent in Agents)
+            {
+                agent.Brain.Think(deltaTime);
+            }
             
             _tracker.Update(deltaTime);
         
@@ -327,7 +321,7 @@ namespace SimArena.Core
             int newY = entity.Y + (int)direction.Y;
 
             // Check if the new position is valid before attempting to move
-            if (!Map.IsInBounds(newX, newY) || !Map.IsWalkable(newX, newY))
+            if (!Map.IsInBounds(newX, newY) || !Map.Map.IsWalkable(newX, newY))
             {
                 return false;
             }
@@ -343,6 +337,7 @@ namespace SimArena.Core
 
             if (success)
             {
+                EntityManager.Set(entity, Map.Map.GetCell(newX, newY));
                 Events.RaiseOnMove(this, entity);
             }
         
@@ -357,7 +352,7 @@ namespace SimArena.Core
         public bool ProcessMovement(Guid entityId, Vector3 direction)
         {
             // Find the target
-            Entity? target = Scene.GetEntity(entityId);
+            Entity? target = EntityManager.Get(entityId);
             
             if (target == null)
             {
@@ -376,6 +371,7 @@ namespace SimArena.Core
         {
             if (entity != null)
             {
+                EntityManager.Set(entity, Map.Map.GetCell(entity.X, entity.Y));
                 Events.RaiseOnMove(this, entity);
             }
         }
@@ -386,7 +382,7 @@ namespace SimArena.Core
         /// <param name="entity">The entity to create</param>
         public void ProcessNewCreation(Entity entity)
         {
-            Scene.AddEntity(entity);
+            EntityManager.Set(entity, Map.Map.GetCell(entity.X, entity.Y));
             Events.RaiseOnCreate(this, entity);
         }
         
@@ -396,7 +392,7 @@ namespace SimArena.Core
         /// <param name="entity">The entity to destroy</param>
         public void Destroy(Entity entity)
         {
-            Scene.RemoveEntity(entity);
+            EntityManager.Remove(entity);
             Events.RaiseOnDestroy(this, entity);
         }
 
@@ -432,12 +428,12 @@ namespace SimArena.Core
         
         public IEnumerable<Entity> GetEntities()
         {
-            return Scene.GetEntities<Entity>();
+            return EntityManager.GetEntities<Entity>();
         }
 
-        public Entity? GetEntityAt(int newX, int newY)
+        public Entity GetEntityAt(int newX, int newY)
         {
-            return Scene.GetEntityAt(newX, newY);
+            return EntityManager.Get(Map.Map.GetCell(newX, newY));
         }
         
         #endregion

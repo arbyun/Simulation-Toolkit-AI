@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Numerics;
 using SimArena.Core.Entities.Components;
-using SimArena.Core.Entities.Components.Collision;
 
 namespace SimArena.Core.Entities
 {
@@ -55,27 +54,6 @@ namespace SimArena.Core.Entities
         #endregion
 
         #region Constructors
-
-        /// <summary>
-        /// Creates a new bullet with the specified parameters
-        /// </summary>
-        /// <param name="x">Starting X position</param>
-        /// <param name="y">Starting Y position</param>
-        /// <param name="direction">Direction the bullet will travel</param>
-        /// <param name="owner">The owner of the bullet</param>
-        /// <param name="collider">The collider used by this bullet</param>
-        /// <param name="speed">Speed of the bullet (per second)</param>
-        /// <param name="damage">Damage the bullet deals</param>
-        /// <param name="simulation"></param>
-        public Bullet(int x, int y, Vector3 direction, Simulation simulation, Weapon owner, 
-            ICollider? collider, float speed = 10, int damage = 1)
-            : base("bullet", x, y, simulation, collider)
-        {
-            Direction = direction;
-            Speed = speed;
-            Damage = damage;
-            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
-        }
 
         /// <summary>
         /// Creates a new bullet with the specified parameters
@@ -138,28 +116,26 @@ namespace SimArena.Core.Entities
                 return;
             }
 
-            // Check if the bullet has colliders
-            if (Collider != null)
-            {
-                // Check if the new position is walkable
-                if (!Collider.IsValidPositionFor(this, Simulation.Map, newX, newY))
-                {
-                    // Bullet hit something, remove it
-                    Simulation.Destroy(this);
-                    return;
-                }
-
-                // Check if there's an entity at the new position
-                Entity? entity = Simulation.GetEntityAt(newX, newY);
+            bool validPos = Simulation.Map.Map.IsWalkable(newX, newY);
             
-                if (entity != null && !entity.Equals(this) && !entity.Equals(_owner))
-                {
-                    // Bullet hit an entity
-                    HandleEntityCollision(entity);
-                    return;
-                }
+            // Check if the new position is walkable
+            if (!validPos)
+            {
+                // Bullet hit something, remove it
+                Simulation.Destroy(this);
+                return;
             }
 
+            // Check if there's an entity at the new position
+            Entity? entity = Simulation.GetEntityAt(newX, newY);
+        
+            if (entity != null && !entity.Equals(this) && !entity.Equals(_owner))
+            {
+                // Bullet hit an entity
+                HandleEntityCollision(entity);
+                return;
+            }
+            
             // Move the bullet
             X = newX;
             Y = newY;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using SimArena.Core.Entities.Components.Collision;
 
 namespace SimArena.Core.Entities
 {
@@ -65,32 +64,10 @@ namespace SimArena.Core.Entities
         /// </summary>
         public Simulation Simulation { get; internal set; }
         
-        /// <summary>
-        /// The collider associated with this entity
-        /// </summary>
-        public ICollider? Collider { get; }
 
         #endregion
 
         #region Constructors
-
-        /// <summary>
-        /// Creates a new entity with the specified parameters
-        /// </summary>
-        /// <param name="name">Name of the entity</param>
-        /// <param name="x">X-coordinate</param>
-        /// <param name="y">Y-coordinate</param>
-        /// <param name="simulation"></param>
-        /// <param name="collider"></param>
-        protected Entity(string name, int x, int y, Simulation simulation, ICollider collider)
-        {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            X = x;
-            Y = y;
-            Simulation = simulation;
-            Collider = collider;
-            Collider.AssignOwner(this);
-        }
 
         /// <summary>
         /// Creates a new entity with the specified parameters
@@ -106,7 +83,6 @@ namespace SimArena.Core.Entities
             X = x;
             Y = y;
             Simulation = simulation;
-            Collider = null;
         }
         
         /// <summary>
@@ -125,7 +101,6 @@ namespace SimArena.Core.Entities
             X = x;
             Y = y;
             Simulation = simulation;
-            Collider = ColliderFactory.CreateCollider(this, simulation.Map, width, height);
         }
         
         #endregion

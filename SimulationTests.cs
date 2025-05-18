@@ -1,10 +1,11 @@
 using System;
 using System.Diagnostics;
+using RogueSharp;
+using RogueSharp.MapCreation;
 using SimArena.Core;
 using SimArena.Core.Configuration;
 using SimArena.Core.Serialization.Configuration;
 using SimArena.Core.SimulationElements.Map;
-using SimArena.Core.SimulationElements.Scene;
 
 namespace SimArena
 {
@@ -110,7 +111,7 @@ namespace SimArena
             try
             {
                 // Create a simulation in offline mode
-                Simulation simulation = new Simulation(config, SimulationMode.Offline);
+                Simulation simulation = new Simulation(config);
                 
                 Console.WriteLine("ERROR: Expected an InvalidOperationException but none was thrown!");
             }
@@ -174,23 +175,12 @@ namespace SimArena
         private static void RunSimulation(GameConfig config)
         {
             // Create a simulation in offline mode
-            Simulation simulation = new Simulation(config, SimulationMode.Offline);
+            Simulation simulation = new Simulation(config);
             
             // Create a map
-            IMap map = new GridMap(20, 20);
-            
-            // Make all cells walkable and transparent
-            for (int x = 0; x < 20; x++)
-            {
-                for (int y = 0; y < 20; y++)
-                {
-                    map.SetWalkable(x, y, true);
-                    map.SetTransparent(x, y, true);
-                }
-            }
-            
-            // Create a scene
-            Scene scene = new MinimalScene(map);
+            var strat = new RandomRoomsMapCreationStrategy<Map>(40,60,6,10, 5);
+            GridMapBridge bridge = new GridMapBridge(simulation);
+            bridge.GenerateMap(strat.CreateMap());
             
             // Set up event handlers
             simulation.Events.Started += (_, _) => Console.WriteLine("Simulation started");
@@ -200,7 +190,7 @@ namespace SimArena
             simulation.Events.OnDamage += (_, damage) => Console.WriteLine($"{damage.Item1.Name} dealt damage to {damage.Item2.Name}");
             
             // Initialize the simulation
-            simulation.Initialize(map, scene);
+            simulation.Initialize(bridge);
             
             // Start the simulation
             simulation.Start();

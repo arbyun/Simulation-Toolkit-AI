@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Numerics;
+using RogueSharp;
 using SimArena.Core.SimulationElements.Map;
 using SimArena.Core.Utilities;
 using Path = System.IO.Path;
@@ -34,10 +35,10 @@ namespace SimArena.Core.Entities.Components
         public SampleCapturePointAIBrain(Character owner, int awareness, Simulation simulation) : base(owner, awareness, simulation)
         {
             // Set default capture point area in the center of the map
-            _captureStartX = simulation.Map.Width / 2 - 2;
-            _captureStartY = simulation.Map.Height / 2 - 2;
-            _captureEndX = simulation.Map.Width / 2 + 2;
-            _captureEndY = simulation.Map.Height / 2 + 2;
+            _captureStartX = simulation.Map.Map.Width / 2 - 2;
+            _captureStartY = simulation.Map.Map.Height / 2 - 2;
+            _captureEndX = simulation.Map.Map.Width / 2 + 2;
+            _captureEndY = simulation.Map.Map.Height / 2 + 2;
         
             // Assign a random team ID (0 or 1)
             _teamId = _random.Next(0, 2);
@@ -153,10 +154,10 @@ namespace SimArena.Core.Entities.Components
                         Simulation.Map.SetWalkable(Owner.X, Owner.Y, true);
                         Simulation.Map.SetWalkable(nearestEnemy.X, nearestEnemy.Y, true);
  
-                        PathFinder pathFinder = new PathFinder(Simulation.Map);
-                        MapPath path = pathFinder.ShortestPath( 
-                            Simulation.Map.GetCell(Owner.X, Owner.Y), 
-                            Simulation.Map.GetCell(nearestEnemy.X, nearestEnemy.Y));
+                        PathFinder pathFinder = new PathFinder(Simulation.Map.Map);
+                        RogueSharp.Path path = pathFinder.ShortestPath( 
+                            Simulation.Map.Map.GetCell(Owner.X, Owner.Y), 
+                            Simulation.Map.Map.GetCell(nearestEnemy.X, nearestEnemy.Y));
             
                         Simulation.Map.SetWalkable(Owner.X, Owner.Y, false);
                         Simulation.Map.SetWalkable(nearestEnemy.X, nearestEnemy.Y, false);
@@ -184,14 +185,19 @@ namespace SimArena.Core.Entities.Components
                 int capturePointCenterX = (_captureStartX + _captureEndX) / 2;
                 int capturePointCenterY = (_captureStartY + _captureEndY) / 2;
             
-                Simulation.Map.SetWalkable(Owner.X, Owner.Y, true);
+                //Simulation.Map.SetWalkable(Owner.X, Owner.Y, true);
  
-                PathFinder pathFinder = new PathFinder(Simulation.Map);
-                MapPath path = pathFinder.ShortestPath( 
-                    Simulation.Map.GetCell(Owner.X, Owner.Y), 
-                    Simulation.Map.GetCell(capturePointCenterX, capturePointCenterY));
+                IgnorantPathfinder pathFinder = new IgnorantPathfinder(Simulation.Map.Map, new []{Simulation.Map.Map.GetCell(Owner.X, Owner.Y)});
+                RogueSharp.Path path = pathFinder.ShortestPath( 
+                    Simulation.Map.Map.GetCell(Owner.X, Owner.Y), 
+                    Simulation.Map.Map.GetCell(capturePointCenterX, capturePointCenterY));
             
-                Simulation.Map.SetWalkable(Owner.X, Owner.Y, false);
+                //Simulation.Map.SetWalkable(Owner.X, Owner.Y, false);
+
+                if (path == null || path.Steps == null)
+                {
+                    return;
+                }
 
                 _movementDirection = new Vector3(path.Steps.First().X, path.Steps.First().Y, 0);
             }
@@ -209,7 +215,7 @@ namespace SimArena.Core.Entities.Components
                 int newY = Owner.Y + (int)Math.Round(_movementDirection.Y);
             
                 // Check if the new position is valid
-                if (!Simulation.Map.IsInBounds(newX, newY) || !Simulation.Map.IsWalkable(newX, newY))
+                if (!Simulation.Map.IsInBounds(newX, newY) || !Simulation.Map.Map.IsWalkable(newX, newY))
                 {
                     // If we can't move in the desired direction, try a random direction
                     _movementDirection = DirectionVector.GetRandomCardinalDirection();
@@ -217,7 +223,7 @@ namespace SimArena.Core.Entities.Components
                     newX = Owner.X + (int)Math.Round(_movementDirection.X);
                     newY = Owner.Y + (int)Math.Round(_movementDirection.Y);
                 
-                    if (!Simulation.Map.IsInBounds(newX, newY) || !Simulation.Map.IsWalkable(newX, newY))
+                    if (!Simulation.Map.IsInBounds(newX, newY) || !Simulation.Map.Map.IsWalkable(newX, newY))
                     {
                         _movementDirection = Vector3.Zero;
                     }
@@ -264,7 +270,8 @@ namespace SimArena.Core.Entities.Components
             Character? nearestEnemy = null;
             float nearestDistance = float.MaxValue;
         
-            var characters = Simulation.GetEntities().OfType<Character>().Where(c => c.IsAlive && c != Owner);
+            var characters = Simulation.GetEntities().OfType<Character>()
+                .Where(c => c.IsAlive && c != Owner);
         
             foreach (var character in characters)
             {
@@ -275,7 +282,7 @@ namespace SimArena.Core.Entities.Components
                     if (GetTeamId(character) != _teamId)
                     {
                         // Check if the character is in our field of view
-                        if (Simulation.Map.IsInFov(character.X, character.Y))
+                        if (Simulation.Map.IsInFov(character.X, character.Y, Owner))
                         {
                             // Check if we have line of sight to the character
                             if (Simulation.Map.IsInLineOfSight(Owner.X, Owner.Y, character.X, character.Y))
@@ -309,16 +316,6 @@ namespace SimArena.Core.Entities.Components
         
             // If the character doesn't have a SampleCapturePointAIBrain, assume it's from a different team
             return (_teamId + 1) % 2;
-        }
- 
-        public override Vector3 GetMovementDirection()
-        {
-            return _movementDirection;
-        }
- 
-        public override Entity? GetInteractionTarget()
-        {
-            return _targetEntity;
         }
     }
 }

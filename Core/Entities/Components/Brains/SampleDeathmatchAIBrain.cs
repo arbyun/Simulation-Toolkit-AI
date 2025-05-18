@@ -1,14 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
+using RogueSharp;
 using SimArena.Core.SimulationElements.Map;
-using SimArena.Core.Utilities;
 
 namespace SimArena.Core.Entities.Components
 {
     public class SampleDeathmatchAIBrain : Brain
     {
-        private Vector3 _movementDirection = Vector3.Zero;
         private Entity? _targetEntity = null;
         private float _thinkTimer = 0;
         private const float THINK_INTERVAL = 0.5f; // Think every 0.5 seconds
@@ -59,10 +56,10 @@ namespace SimArena.Core.Entities.Components
                     Simulation.Map.SetWalkable(Owner.X, Owner.Y, true);
                     Simulation.Map.SetWalkable(nearestEnemy.X, nearestEnemy.Y, true);
  
-                    PathFinder pathFinder = new PathFinder(Simulation.Map);
-                    MapPath path = pathFinder.ShortestPath( 
-                        Simulation.Map.GetCell(Owner.X, Owner.Y), 
-                        Simulation.Map.GetCell(nearestEnemy.X, nearestEnemy.Y));
+                    PathFinder pathFinder = new PathFinder(Simulation.Map.Map);
+                    RogueSharp.Path path = pathFinder.ShortestPath( 
+                        Simulation.Map.Map.GetCell(Owner.X, Owner.Y), 
+                        Simulation.Map.Map.GetCell(nearestEnemy.X, nearestEnemy.Y));
             
                     Simulation.Map.SetWalkable(Owner.X, Owner.Y, false);
                     Simulation.Map.SetWalkable(nearestEnemy.X, nearestEnemy.Y, false);
@@ -73,46 +70,56 @@ namespace SimArena.Core.Entities.Components
                         return;
                     }
 
-                    _movementDirection = new Vector3(path.Steps.First().X, path.Steps.First().Y, 0);
+                    Move(new Vector3(path.Steps.First().X, path.Steps.First().Y, 0));
                 }
                 
                 // If we're close enough to attack, face the enemy but don't move
                 if (length <= Owner.MainWeapon.Range)
                 {
-                    Owner.FacingDirection = _movementDirection;
-                    Owner.Attack(_movementDirection);   
+                    Owner.FacingDirection = new Vector3(_targetEntity.X, _targetEntity.Y, 0);
+                    Owner.Attack(new Vector3(_targetEntity.X, _targetEntity.Y, 0));   
                     Console.WriteLine($"Attacking {_targetEntity.Name}.");
-                    _movementDirection = Vector3.Zero;
                 }
             }
             else
             {
                 // No enemy found, move randomly
                 _targetEntity = null;
-            
-                // Generate a random direction occasionally
-                if (_random.Next(0, 5) == 0 || _movementDirection == Vector3.Zero)
-                {
-                    (int x, int y)? tuple = Simulation.Map.GetRandomWalkableLocation();
-                
-                    PathFinder pathFinder = new PathFinder(Simulation.Map);
-                    MapPath path = pathFinder.ShortestPath( 
-                        Simulation.Map.GetCell(Owner.X, Owner.Y), 
-                        Simulation.Map.GetCell(tuple.Value.x, tuple.Value.y));
-
-                    if (path == null)
-                    {
-                        Console.WriteLine($"{Owner.Name} is stuck.");
-                        return;
-                    }
-                
-                    _movementDirection = new Vector3(path.Steps.First().X, path.Steps.First().Y, 0);
-                }
+                MoveRandomly();
             }
+        }
+        
+        private void MoveRandomly()
+        {
+            var (x, y) = (Owner.X, Owner.Y);
+            
+            var neighbors = Simulation.Map.Map.GetBorderCellsInSquare(x, y, 1).Where(c => c.IsWalkable).ToArray();
 
-            if (_movementDirection != Vector3.Zero)
+            if (neighbors.Length > 0)
             {
-                Move(_movementDirection);
+                var choice = neighbors[_random.Next(neighbors.Length)];
+                Move(new Vector3(choice.X, choice.Y, 0));
+            }
+            else
+            {
+                TryFindNewWalkableCell();
+            }
+        }
+        
+        private void TryFindNewWalkableCell()
+        {
+            var goal = Simulation.Map.GetRandomWalkableLocation(Owner);
+            
+            var pathFinder = new IgnorantPathfinder(Simulation.Map.Map, new []{Simulation.Map.Map.GetCell(goal.x, goal.y), 
+                Simulation.Map.Map.GetCell(Owner.X, Owner.Y)});
+            
+            var path = pathFinder.ShortestPath(Simulation.Map.Map.GetCell(Owner.X, Owner.Y), 
+                Simulation.Map.Map.GetCell(goal.x, goal.y));
+            
+            if (path is { Length: > 1 })
+            {
+                var nextStep = path.StepForward();
+                Move(new Vector3(nextStep.X, nextStep.Y, 0));
             }
         }
 
@@ -121,7 +128,7 @@ namespace SimArena.Core.Entities.Components
             Character? nearestEnemy = null;
             float nearestDistance = float.MaxValue;
         
-            FieldOfView characterFov = new FieldOfView(Simulation.Map);
+            FieldOfView characterFov = new FieldOfView(Simulation.Map.Map);
         
             // Get all characters in the simulation
             var characters = Simulation
@@ -153,16 +160,6 @@ namespace SimArena.Core.Entities.Components
             }
         
             return nearestEnemy;
-        }
- 
-        public override Vector3 GetMovementDirection()
-        {
-            return _movementDirection;
-        }
- 
-        public override Entity? GetInteractionTarget()
-        { 
-            return _targetEntity;
         }
     }
 }

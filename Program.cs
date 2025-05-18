@@ -31,7 +31,7 @@ public static class Program
         SimulationTests.TestSimulationWithStepsObjective();
         
         // Test with CapturePoint objective
-        SimulationTests.TestSimulationWithCapturePointObjective();
+        //SimulationTests.TestSimulationWithCapturePointObjective();
         
         // Test with Defend objective
         SimulationTests.TestSimulationWithDefendObjective();

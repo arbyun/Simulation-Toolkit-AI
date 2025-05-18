@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
+using RogueSharp;
 
 namespace SimArena.Core.SimulationElements.Map.Parser
 {
-    public class GridMapParser<T> where T : Map, IMap, new()
+    public class GridMapParser<T> where T : RogueSharp.Map, IMap, new()
     {
         private int _width;
         private int _height;

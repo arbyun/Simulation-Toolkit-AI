@@ -41,27 +41,6 @@ namespace SimArena.Core.Entities.Components
         public override void Think(float deltaTime)
         {
         }
-
-        /// <summary>
-        /// Gets the movement direction requested by the human player
-        /// </summary>
-        /// <returns>The movement direction</returns>
-        public override Vector3 GetMovementDirection()
-        {
-            if (_lastMovementInput != null) 
-                return _lastMovementInput.Value;
-
-            return new Vector3(0, 0, 0);
-        }
-
-        /// <summary>
-        /// Gets the interaction target (if any)
-        /// </summary>
-        /// <returns>The interaction target, or null if none is set</returns>
-        public override Entity? GetInteractionTarget()
-        {
-            return _attackTarget;
-        }
         
         /// <summary>
         /// Sets the movement input from the human player
