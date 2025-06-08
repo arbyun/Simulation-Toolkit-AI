@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using SimArena;
-using SimArena.Core.Configuration;
-using SimArena.Core.Entities;
 using SimArena.Core.Serialization.Configuration;
+using SimArena.Core.Serialization.Objectives;
+
+namespace SimArena;
 
 public static class Program
 {

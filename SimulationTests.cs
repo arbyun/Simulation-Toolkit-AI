@@ -3,8 +3,8 @@ using System.Diagnostics;
 using RogueSharp;
 using RogueSharp.MapCreation;
 using SimArena.Core;
-using SimArena.Core.Configuration;
 using SimArena.Core.Serialization.Configuration;
+using SimArena.Core.Serialization.Objectives;
 using SimArena.Core.SimulationElements.Map;
 
 namespace SimArena

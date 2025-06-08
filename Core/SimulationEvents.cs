@@ -1,6 +1,7 @@
 ﻿using System;
-using SimArena.Core.Entities;
-using SimArena.Core.Serialization.Results;
+using SimArena.Core.Results;
+using SimArena.Core.Results.Objective_Results;
+using SimArena.Entities;
 
 namespace SimArena.Core
 {
@@ -15,7 +16,9 @@ namespace SimArena.Core
         public event EventHandler<Entity> OnCreate;
         public event EventHandler<Entity> OnMove;
         public event EventHandler<(Entity, Entity)> OnDamage;
-        public event EventHandler<(Entity, Entity)> OnHeal; 
+        public event EventHandler<(Entity, Entity)> OnHeal;
+        public event EventHandler<Agent> OnAgentKilled;
+        public event EventHandler<int> OnTeamWon;
         
         public event EventHandler<(Entity, Entity)> OnKill;
         public event EventHandler<Entity> OnDestroy;
@@ -35,5 +38,9 @@ namespace SimArena.Core
         internal void RaiseOnCreate(object sender, Entity entity) => OnCreate?.Invoke(sender, entity);
         internal void RaiseOnMove(object sender, Entity entity) => OnMove?.Invoke(sender, entity);
         internal void RaiseOnDestroy(object sender, Entity entity) => OnDestroy?.Invoke(sender, entity);
+        
+        internal void RaiseOnAgentKilled(object sender, Agent entity) => OnAgentKilled?.Invoke(sender, entity);
+        internal void RaiseOnTeamWon(object sender, int team) => OnTeamWon?.Invoke(sender, team);
+
     }
 }
