@@ -1,12 +1,11 @@
-using System.Text.Json;
-using SimArena.Core.Serialization.Configuration;
-using SimArena.Core.Serialization.Objectives;
 
-namespace SimArena;
+
+namespace SimArena
+{
 
 public static class Program
 {
-    /// <summary>
+    /*/// <summary>
     /// Entry point for the application
     /// </summary>
     /// <param name="args">Command line arguments</param>
@@ -280,5 +279,5 @@ public static class Program
         }
         
         Console.WriteLine("\nEnding Evaluation...");
-    }
-}
+    }*/
+}}

@@ -1,5 +1,5 @@
 using System;
-using Plugins.RogueSharp.RogueSharp;
+using RogueSharp;
 using SimArena.Brains;
 using SimArena.Core;
 using SimArena.Entities;

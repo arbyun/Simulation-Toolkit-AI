@@ -1,6 +1,6 @@
 using System;
 using System.Text.Json.Serialization;
-using Plugins.RogueSharp.RogueSharp;
+using RogueSharp;
 using SimArena.Brains;
 using SimArena.Core;
 using SimArena.Entities;

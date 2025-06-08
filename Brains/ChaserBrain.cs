@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Plugins.RogueSharp.RogueSharp;
+using RogueSharp;
 using SimArena.Core;
 using SimArena.Entities;
 using SimArena.Utilities;

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Plugins.RogueSharp.RogueSharp;
-using Plugins.RogueSharp.RogueSharp.Algorithms;
+using RogueSharp;
+using RogueSharp.Algorithms;
 
 namespace SimArena.Utilities
 {

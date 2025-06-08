@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Plugins.RogueSharp.RogueSharp;
-using Plugins.RogueSharp.RogueSharp.MapCreation;
+using RogueSharp;
+using RogueSharp.MapCreation;
 using SimArena.Entities;
 
 namespace SimArena.Core
