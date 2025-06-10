@@ -45,6 +45,5 @@ namespace SimArena.Core
         internal void RaiseOnAgentKilled(object sender, Agent entity) => OnAgentKilled?.Invoke(sender, entity);
         internal void RaiseOnTeamWon(object sender, int team) => OnTeamWon?.Invoke(sender, team);
         internal void RaiseDebugMessage(object sender, string message) => OnDebugMessage?.Invoke(sender, message);
-
     }
 }

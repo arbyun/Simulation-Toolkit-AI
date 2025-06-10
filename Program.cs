@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using RogueSharp;
 using RogueSharp.MapCreation;
@@ -12,6 +13,7 @@ using SimArena.Core.Objectives.Trackers;
 using SimArena.Core.Objectives.Trackers.Interfaces;
 using SimArena.Entities;
 using SimArena.Serialization.Configuration.Objectives;
+using Path = System.IO.Path;
 
 namespace SimArena
 {
@@ -24,22 +26,59 @@ namespace SimArena
         {
             Console.WriteLine("=== SIMULATION TESTS ===\n");
             
-            // Test a single simulation with visualization (slow pace)
-            RunSingleSimulationWithVisualization();
+            // Parse command line arguments
+            string outputFolder = ParseOutputFolderArgument(args);
             
-            // Test multiple simulations without visualization (ultra fast)
-            RunMultipleSimulationsQuickly(100);
+            // Test a single simulation with visualization (slow pace)
+            RunSingleSimulationWithVisualization(outputFolder);
+            
+            // Test multiple simulations without visualization (fast)
+            RunMultipleSimulationsQuickly(8, outputFolder);
             
             // Test a simulation with different map creation strategy
-            TestDifferentMapCreationStrategies();
+            TestDifferentMapCreationStrategies(outputFolder);
             
             Console.WriteLine("\nAll simulation tests completed!");
         }
         
         /// <summary>
+        /// Parses the output folder argument from the command line arguments
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        /// <returns>The output folder path or null if not provided</returns>
+        private static string ParseOutputFolderArgument(string[] args)
+        {
+            if (args.Length > 0)
+            {
+                string folderPath = args[0];
+                
+                // Validate the folder path
+                try
+                {
+                    // Create the directory if it doesn't exist
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+                    
+                    Console.WriteLine($"Match logs will be saved to: {folderPath}");
+                    return folderPath;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error with output folder: {ex.Message}");
+                    Console.WriteLine("Match logs will not be saved.");
+                }
+            }
+            
+            return null;
+        }
+        
+        /// <summary>
         /// Runs a single simulation with visualization (slower pace)
         /// </summary>
-        private static void RunSingleSimulationWithVisualization()
+        /// <param name="outputFolder">Optional folder to save match logs</param>
+        private static void RunSingleSimulationWithVisualization(string outputFolder = null)
         {
             Console.WriteLine("\n[TEST 1] Running a single simulation with visualization...");
             
@@ -50,6 +89,14 @@ namespace SimArena
             var objective = new DeathmatchObjective(SimulationObjective.TeamDeathmatch, 2, 3);
             var tracker = new DeathmatchTracker(objective);
             simulation.SetObjectiveTracker(tracker);
+            
+            // Create a match logger if output folder is provided
+            MatchLogger logger = null;
+            if (!string.IsNullOrEmpty(outputFolder))
+            {
+                logger = new MatchLogger(simulation, outputFolder);
+                logger.SetObjectiveTracker(tracker);
+            }
             
             // Add agents to the simulation
             CreateAgents(simulation, 6, false); // Use normal mode for visualization
@@ -67,16 +114,14 @@ namespace SimArena
             
             // Run the simulation with visualization
             var stopwatch = Stopwatch.StartNew();
-            int stepCount = 0;
             
             while (!simulation.IsGameOver)
             {
                 simulation.Update(0.5f); // Slower update rate for visualization
-                stepCount++;
                 
-                // if (stepCount % 5 == 0)
+                // if (simulation.CurrentStep % 5 == 0)
                 // {
-                //     Console.WriteLine($"Step {stepCount} completed. {CountAlivePlayers(simulation)} agents still alive.");
+                //     Console.WriteLine($"Step {simulation.CurrentStep} completed. {CountAlivePlayers(simulation)} agents still alive.");
                 // }
                 
                 // small delay for visualization
@@ -85,15 +130,19 @@ namespace SimArena
             
             stopwatch.Stop();
             
-            Console.WriteLine($"Simulation completed in {stopwatch.ElapsedMilliseconds}ms after {stepCount} steps");
+            Console.WriteLine($"Simulation completed in {stopwatch.ElapsedMilliseconds}ms after {simulation.CurrentStep} steps");
             Console.WriteLine($"Winning team: {(simulation.WinningTeam >= 0 ? simulation.WinningTeam.ToString() : "Draw")}");
+            
+            // Save match logs if logger is available
+            logger?.SaveLogs();
         }
         
         /// <summary>
         /// Runs multiple simulations without visualization 
         /// </summary>
         /// <param name="count">Number of simulations to run</param>
-        private static void RunMultipleSimulationsQuickly(int count)
+        /// <param name="outputFolder">Optional folder to save match logs</param>
+        private static void RunMultipleSimulationsQuickly(int count, string outputFolder = null)
         {
             Console.WriteLine($"\n[TEST 2] Running {count} simulations without visualization...");
             
@@ -109,6 +158,15 @@ namespace SimArena
                 var objective = new DeathmatchObjective(SimulationObjective.TeamDeathmatch, 2, 3);
                 var tracker = new DeathmatchTracker(objective);
                 simulation.SetObjectiveTracker(tracker);
+                
+                // Create a match logger if output folder is provided
+                // Note: For multiple simulations, we only log the last one to avoid excessive files
+                MatchLogger logger = null;
+                if (!string.IsNullOrEmpty(outputFolder) && i == count - 1)
+                {
+                    logger = new MatchLogger(simulation, outputFolder);
+                    logger.SetObjectiveTracker(tracker);
+                }
                 
                 // Add agents to the simulation
                 CreateAgents(simulation, 6, true); // Set fastMode to true for quick simulations
@@ -127,6 +185,9 @@ namespace SimArena
                     
                     results[simulation.WinningTeam]++;
                 }
+                
+                // Save match logs if logger is available
+                logger?.SaveLogs();
                 
                 // Show progress
                 if ((i + 1) % 20 == 0 || i == count - 1)
@@ -151,20 +212,21 @@ namespace SimArena
         /// <summary>
         /// Tests simulations with different map creation strategies
         /// </summary>
-        private static void TestDifferentMapCreationStrategies()
+        /// <param name="outputFolder">Optional folder to save match logs</param>
+        private static void TestDifferentMapCreationStrategies(string outputFolder = null)
         {
             Console.WriteLine("\n[TEST 3] Testing different map creation strategies...");
             
             // 1. Test with random rooms strategy (default)
             Console.WriteLine("\nTesting with RandomRoomsMapCreationStrategy (default):");
             var randomRoomsSimulation = new Simulation(40, 30);
-            RunSimulationTest(randomRoomsSimulation);
+            RunSimulationTest(randomRoomsSimulation, outputFolder, "random_rooms");
             
             // 2. Test with cellular automata strategy
             Console.WriteLine("\nTesting with CellularAutomataMapCreationStrategy:");
             var cellularStrategy = new CaveMapCreationStrategy<Map>(40, 30, 45, 2, 4);
             var cellularSimulation = new Simulation(40, 30, cellularStrategy);
-            RunSimulationTest(cellularSimulation);
+            RunSimulationTest(cellularSimulation, outputFolder, "cellular_automata");
             
             // 3. Test with a pre-created map
             Console.WriteLine("\nTesting with a pre-created map:");
@@ -173,36 +235,59 @@ namespace SimArena
             // Modify the map in some way to demonstrate it's pre-created
             preCreatedMap.SetCellProperties(20, 15, true, true);
             var preCreatedMapSimulation = new Simulation(preCreatedMap);
-            RunSimulationTest(preCreatedMapSimulation);
+            RunSimulationTest(preCreatedMapSimulation, outputFolder, "pre_created");
         }
         
         /// <summary>
         /// Helper method to run a test simulation with the given simulation object
         /// </summary>
-        private static void RunSimulationTest(Simulation simulation)
+        /// <param name="simulation">The simulation to run</param>
+        /// <param name="outputFolder">Optional folder to save match logs</param>
+        /// <param name="strategyName">Name of the map creation strategy for logging</param>
+        private static void RunSimulationTest(Simulation simulation, string outputFolder = null, string strategyName = null)
         {
             // Set up the objective tracker
             var objective = new DeathmatchObjective(SimulationObjective.TeamDeathmatch, 2, 2);
             var tracker = new DeathmatchTracker(objective);
             simulation.SetObjectiveTracker(tracker);
             
+            // Create a match logger if output folder is provided
+            MatchLogger logger = null;
+            if (!string.IsNullOrEmpty(outputFolder))
+            {
+                // Create a subfolder for the strategy if provided
+                string logFolder = outputFolder;
+                if (!string.IsNullOrEmpty(strategyName))
+                {
+                    logFolder = Path.Combine(outputFolder, strategyName);
+                    if (!Directory.Exists(logFolder))
+                    {
+                        Directory.CreateDirectory(logFolder);
+                    }
+                }
+                
+                logger = new MatchLogger(simulation, logFolder);
+                logger.SetObjectiveTracker(tracker);
+            }
+            
             // Add agents
             CreateAgents(simulation, 4, true); // Use fast mode for test simulations
             
             // Run the simulation
             var stopwatch = Stopwatch.StartNew();
-            int stepCount = 0;
             
-            while (!simulation.IsGameOver && stepCount < 1000) // Prevent infinite loops
+            while (!simulation.IsGameOver && simulation.CurrentStep < 1000) // Prevent infinite loops
             {
                 simulation.Update(1.0f);
-                stepCount++;
             }
             
             stopwatch.Stop();
             
-            Console.WriteLine($"Simulation completed in {stopwatch.ElapsedMilliseconds}ms after {stepCount} steps");
+            Console.WriteLine($"Simulation completed in {stopwatch.ElapsedMilliseconds}ms after {simulation.CurrentStep} steps");
             Console.WriteLine($"Winning team: {(simulation.WinningTeam >= 0 ? simulation.WinningTeam.ToString() : "Draw/Timeout")}");
+            
+            // Save match logs if logger is available
+            logger?.SaveLogs();
         }
         
         /// <summary>

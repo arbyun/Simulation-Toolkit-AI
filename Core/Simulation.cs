@@ -17,6 +17,7 @@ namespace SimArena.Core
         public List<Agent> Agents { get; } = new();
         public bool IsGameOver { get; private set; }
         public int WinningTeam { get; private set; } = -1;
+        public int CurrentStep { get; private set; } = 0;
         
         public SimulationEvents Events { get; } = new();
         
@@ -78,6 +79,7 @@ namespace SimArena.Core
                 return;
                 
             _timeSinceLastUpdate += deltaTime;
+            CurrentStep++;
                 
             // Only update living agents
             foreach (var agent in Agents.Where(a => a.IsAlive))
@@ -112,6 +114,9 @@ namespace SimArena.Core
                 // Fallback to the original deathmatch victory condition logic
                 CheckDeathmatchVictoryConditions();
             }
+            
+            // Raise the step completed event
+            Events.RaiseStepCompleted(this, CurrentStep);
         }
         
         public void KillAgent(Agent agent)
@@ -161,6 +166,7 @@ namespace SimArena.Core
             IsGameOver = false;
             WinningTeam = -1;
             _timeSinceLastUpdate = 0f;
+            CurrentStep = 0;
             
             // Clear all agents
             Agents.Clear();
