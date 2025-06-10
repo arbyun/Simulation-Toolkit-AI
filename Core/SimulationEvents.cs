@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using SimArena.Core.Results;
 using SimArena.Core.Results.Objective_Results;
 using SimArena.Entities;
@@ -22,6 +22,9 @@ namespace SimArena.Core
         
         public event EventHandler<(Entity, Entity)> OnKill;
         public event EventHandler<Entity> OnDestroy;
+        
+        // Debug event for verbose logging
+        public event EventHandler<string> OnDebugMessage;
 
         internal void RaiseDamage(object sender, (Entity attacker, Entity victim) combat)
             => OnDamage?.Invoke(sender, combat);
@@ -41,6 +44,7 @@ namespace SimArena.Core
         
         internal void RaiseOnAgentKilled(object sender, Agent entity) => OnAgentKilled?.Invoke(sender, entity);
         internal void RaiseOnTeamWon(object sender, int team) => OnTeamWon?.Invoke(sender, team);
+        internal void RaiseDebugMessage(object sender, string message) => OnDebugMessage?.Invoke(sender, message);
 
     }
 }

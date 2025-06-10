@@ -1,37 +1,83 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using RogueSharp;
 using RogueSharp.MapCreation;
+using SimArena.Core.Objectives;
+using SimArena.Core.Objectives.Trackers.Interfaces;
+using SimArena.Core.Results;
+using SimArena.Core.Results.Result_Data;
 using SimArena.Entities;
 
 namespace SimArena.Core
 {
     public class Simulation
     {
-        public Map Map { get; }
+        public Map Map { get; private set; }
         public List<Agent> Agents { get; } = new();
         public bool IsGameOver { get; private set; }
         public int WinningTeam { get; private set; } = -1;
         
         public SimulationEvents Events { get; } = new();
         
-        public Simulation(int width, int height)
+        private IObjectiveTracker _objectiveTracker;
+        private float _timeSinceLastUpdate = 0f;
+
+        /// <summary>
+        /// Create a simulation with the specified map
+        /// </summary>
+        /// <param name="map">The map to use for this simulation</param>
+        public Simulation(Map map)
         {
-            var generator = new RandomRoomsMapCreationStrategy<Map>(width, height, 10, 
-                6, 6);
-            Map = generator.CreateMap();
+            Map = map ?? throw new ArgumentNullException(nameof(map));
+        }
+        
+        /// <summary>
+        /// Create a simulation with a randomly generated map
+        /// </summary>
+        /// <param name="width">Width of the map</param>
+        /// <param name="height">Height of the map</param>
+        /// <param name="mapCreationStrategy">The strategy to use for map creation</param>
+        public Simulation(int width, int height, IMapCreationStrategy<Map> mapCreationStrategy = null)
+        {
+            if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
+            if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
+            
+            // Default to RandomRoomsMapCreationStrategy if none is provided
+            mapCreationStrategy ??= new RandomRoomsMapCreationStrategy<Map>(width, height, 10, 6, 6);
+            
+            Map = mapCreationStrategy.CreateMap();
+        }
+
+        /// <summary>
+        /// Set the objective tracker for this simulation
+        /// </summary>
+        /// <param name="tracker">The objective tracker to use</param>
+        public void SetObjectiveTracker(IObjectiveTracker tracker)
+        {
+            _objectiveTracker = tracker ?? throw new ArgumentNullException(nameof(tracker));
+            
+            // If this tracker implements IEventInteractor, initialize it with our events
+            if (tracker is IEventInteractor eventInteractor)
+            {
+                eventInteractor.InitializeEvents(Events);
+            }
         }
 
         public void AddAgent(Agent agent)
         {
             Agents.Add(agent);
+            
+            // Raise the OnCreate event so that trackers can register the agent
+            Events.RaiseOnCreate(this, agent);
         }
 
-        public void Update()
+        public void Update(float deltaTime = 1.0f)
         {
             if (IsGameOver)
                 return;
+                
+            _timeSinceLastUpdate += deltaTime;
                 
             // Only update living agents
             foreach (var agent in Agents.Where(a => a.IsAlive))
@@ -39,8 +85,33 @@ namespace SimArena.Core
                 agent.Brain.Think();
             }
             
-            // Check for victory conditions
-            CheckVictoryConditions();
+            // Use objective tracker to check victory conditions if available
+            if (_objectiveTracker != null)
+            {
+                _objectiveTracker.Update(deltaTime);
+                
+                if (_objectiveTracker.ShouldStop)
+                {
+                    // Get result data from the tracker
+                    var resultBuilder = _objectiveTracker.GetInput();
+                    if (resultBuilder != null)
+                    {
+                        // The tracker has determined the game is over
+                        IsGameOver = true;
+                        
+                        // For backward compatibility, try to get the winning team if possible
+                        if (resultBuilder is DeathmatchInput deathmatchInput)
+                        {
+                            WinningTeam = deathmatchInput.WinnerTeam;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Fallback to the original deathmatch victory condition logic
+                CheckDeathmatchVictoryConditions();
+            }
         }
         
         public void KillAgent(Agent agent)
@@ -57,7 +128,11 @@ namespace SimArena.Core
             Events.RaiseOnAgentKilled(this, agent);
         }
         
-        private void CheckVictoryConditions()
+        /// <summary>
+        /// Legacy method for checking deathmatch victory conditions
+        /// Only used if no objective tracker is set
+        /// </summary>
+        private void CheckDeathmatchVictoryConditions()
         {
             // Get all teams that still have living agents
             var remainingTeams = Agents
@@ -85,6 +160,7 @@ namespace SimArena.Core
         {
             IsGameOver = false;
             WinningTeam = -1;
+            _timeSinceLastUpdate = 0f;
             
             // Clear all agents
             Agents.Clear();

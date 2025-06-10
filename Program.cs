@@ -1,283 +1,263 @@
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using RogueSharp;
+using RogueSharp.MapCreation;
+using SimArena.Brains;
+using SimArena.Core;
+using SimArena.Core.Objectives;
+using SimArena.Core.Objectives.Trackers;
+using SimArena.Core.Objectives.Trackers.Interfaces;
+using SimArena.Entities;
+using SimArena.Serialization.Configuration.Objectives;
 
 namespace SimArena
 {
-
-public static class Program
-{
-    /*/// <summary>
-    /// Entry point for the application
-    /// </summary>
-    /// <param name="args">Command line arguments</param>
-    private static void Main(string[] args)
+    public static class Program
     {
-        // Run the simulation tests
-        RunSimulationTests();
-    }
-    
-    /// <summary>
-    /// Runs all simulation tests
-    /// </summary>
-    private static void RunSimulationTests()
-    {
-        Console.WriteLine("=== SIMULATION TESTS ===\n");
-        
-        // Test with Steps objective
-        SimulationTests.TestSimulationWithStepsObjective();
-        
-        // Test with CapturePoint objective
-        //SimulationTests.TestSimulationWithCapturePointObjective();
-        
-        // Test with Defend objective
-        SimulationTests.TestSimulationWithDefendObjective();
-        
-        // Test with human agents in offline mode (should throw an exception)
-        SimulationTests.TestSimulationWithHumanAgentsInOfflineMode();
-        
-        // Test with Deathmatch objective
-        //SimulationTests.TestSimulationWithDeathmatchObjective();
-        
-        Console.WriteLine("All simulation tests completed!");
-    }
-
-    private static void JsonTest()
-    {
-        //test
-        string json = "{\n\"Type\": \"DefendObjective\",\n" +
-                      "\"Teams\": 2,\n" +
-                      "\"PlayersPerTeam\": 5,\n" +
-                      "\"MaxMatchTime\": 120.0\n}";
-        
-        Console.WriteLine("Serialized JSON:\n\n");
-        Console.WriteLine(json);
-        
-        //now let's try to deserialize it back to an Objective
-        try
+        /// <summary>
+        /// Entry point for the application
+        /// </summary>
+        public static void Main(string[] args)
         {
-            ObjectiveConfig deserializedObj = JsonSerializer.Deserialize<ObjectiveConfig>(json);
-            Console.WriteLine("\n\nDeserialized Objective:\n");
-            Console.WriteLine(deserializedObj is DefendObjective);
-            Console.WriteLine(deserializedObj.GetType());
-
-            if (deserializedObj is DefendObjective stepsObjective)
-            {
-                Console.WriteLine("Max Teams: " + stepsObjective.Teams);
-                Console.WriteLine("Max Match Time: " + stepsObjective.MaxMatchTime);
-            }
+            Console.WriteLine("=== SIMULATION TESTS ===\n");
             
-            Console.WriteLine(deserializedObj.TypeEnum);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-    }
-
-    private static void TestEvaluationSteps()
-    {
-        StepsObjective objective = new StepsObjective(SimulationObjective.Steps, 10);
-
-        Console.WriteLine("Starting Evaluation...");
-        Console.WriteLine("Objective Type: " + objective.TypeEnum);
-        Console.WriteLine("Max Steps: " + objective.MaxSteps);
-        Console.WriteLine();
-        
-        int stepsTaken = 0;
-        
-        while (!ObjectiveEvaluator.EvaluateObjective(objective, stepsTaken))
-        {
-            Console.WriteLine($"Steps: {stepsTaken}/{objective.MaxSteps}");
-            stepsTaken++;
+            // Test a single simulation with visualization (slow pace)
+            RunSingleSimulationWithVisualization();
+            
+            // Test multiple simulations without visualization (ultra fast)
+            RunMultipleSimulationsQuickly(100);
+            
+            // Test a simulation with different map creation strategy
+            TestDifferentMapCreationStrategies();
+            
+            Console.WriteLine("\nAll simulation tests completed!");
         }
         
-        Console.WriteLine($"Steps: {stepsTaken}/{objective.MaxSteps}");
-        
-        Console.WriteLine();
-        Console.WriteLine("Objective Reached!");
-        Console.WriteLine("Ending Evaluation...");
-    }
-
-    private static void TestEvaluationCapture()
-    {
-        CapturePointObjective objective = new CapturePointObjective(SimulationObjective.CapturePoint, 2, 
-            5, 5f, 10f);
-
-        bool ended = false;
-        var timeElapsed = 0;
-        var captureElapsed = 0;
-        Random random = new Random(Guid.NewGuid().GetHashCode());
-        
-        Console.WriteLine("Starting Evaluation...");
-        Console.WriteLine("Objective Type: " + objective.TypeEnum);
-        Console.WriteLine("Max Capture Time: " + objective.CaptureTime);
-        Console.WriteLine();
-        
-        while (ended == false)
+        /// <summary>
+        /// Runs a single simulation with visualization (slower pace)
+        /// </summary>
+        private static void RunSingleSimulationWithVisualization()
         {
-            //using a very simple random to decide whether or not we're in range of the capture point
-            bool inRange = random.Next(1, 3) == 2;
+            Console.WriteLine("\n[TEST 1] Running a single simulation with visualization...");
             
-            if (inRange)
-            {
-                Console.WriteLine("We're in capture range...");
-                captureElapsed += 1; //needs to be in seconds
-                Console.WriteLine($"Capture Elapsed: {captureElapsed}s\n");
-            }
-            else
-            {
-                Console.WriteLine("Not in capture range...\n");
-            }
-
-            timeElapsed += 1;
+            // Create a simulation with a random map
+            var simulation = new Simulation(40, 30);
             
-            ended = ObjectiveEvaluator.EvaluateObjective(objective, captureElapsed);
+            // Create a deathmatch tracker
+            var objective = new DeathmatchObjective(SimulationObjective.TeamDeathmatch, 2, 3);
+            var tracker = new DeathmatchTracker(objective);
+            simulation.SetObjectiveTracker(tracker);
             
-            Thread.Sleep(1000);
-        }
-        
-        Console.WriteLine("Objective Reached!");
-        Console.WriteLine($"Total Time Elapsed: {timeElapsed}s");
-        Console.WriteLine("Ending Evaluation...");
-    }
-
-    private static void TestEvaluationDeathmatch()
-    {
-        string GetStateText(int state) => state == 1 ? "Alive" : "Dead";
-
-        DeathmatchObjective objective = new DeathmatchObjective(SimulationObjective.TeamDeathmatch, 2,
-            2);
-        
-        //create the teams and players, pretty simply
-        //0 = dead, 1 = alive
-
-        Dictionary<string, int> teamOne = new Dictionary<string, int>
-        {
-            { "Ana", 1 },
-            { "Baptiste", 1 }
-        };
-
-        Dictionary<string, int> teamTwo = new Dictionary<string, int>
-        {
-            { "Jett", 1 },
-            { "Omen", 1 }
-        };
-
-        List<int> teamOneState = teamOne.Select(pair => pair.Value).ToList();
-        List<int> teamTwoState = teamTwo.Select(pair => pair.Value).ToList();
-        
-        Random random = new Random();
-        Random randPlayer = new Random(Guid.NewGuid().GetHashCode());
-        Random randTarget = new Random(51);
-        
-        Console.WriteLine("Starting Evaluation...");
-        Console.WriteLine("Objective Type: " + objective.TypeEnum);
-        Console.WriteLine("Only one team can be alive!\n");
-        
-        Console.WriteLine($"Teams:\n[TEAM ONE]\n" +
-                          $"{teamOne.ElementAt(0).Key}\n" +
-                          $"{teamOne.ElementAt(1).Key}\n" +
-                          $"\n[TEAM TWO]\n" +
-                          $"{teamTwo.ElementAt(0).Key}\n" +
-                          $"{teamTwo.ElementAt(1).Key}\n" +
-                          $"\n-------------------------\n");
-
-        while (!ObjectiveEvaluator.EvaluateObjective(objective, teamOneState, teamTwoState))
-        {
-            //choose a random team
-            bool isTeamOneAttacking = random.Next(0, 2) == 0;
+            // Add agents to the simulation
+            CreateAgents(simulation, 6, false); // Use normal mode for visualization
             
-            var attackingTeam = isTeamOneAttacking ? teamOne : teamTwo;
-            var defendingTeam = isTeamOneAttacking ? teamTwo : teamOne;
+            // Set up event handlers for visualization
+            simulation.Events.OnAgentKilled += (sender, agent) => 
+                Console.WriteLine($"Agent {agent.Name} from Team {agent.Team} was killed!");
             
-            //only alive characters can kill or die
-            string[] aliveAttackers = attackingTeam.Where(player => player.Value == 1)
-                .Select(player => player.Key).ToArray(); 
+            simulation.Events.OnTeamWon += (sender, teamId) => 
+                Console.WriteLine($"Team {teamId} won the match!");
                 
-            string[] aliveDefenders = defendingTeam.Where(player => player.Value == 1)
-                .Select(player => player.Key).ToArray();
+            // Set up debug message handler for visualization
+            simulation.Events.OnDebugMessage += (sender, message) => 
+                Console.WriteLine(message);
             
-            if (aliveAttackers.Any() && aliveDefenders.Any())
+            // Run the simulation with visualization
+            var stopwatch = Stopwatch.StartNew();
+            int stepCount = 0;
+            
+            while (!simulation.IsGameOver)
             {
-                // Randomly pick an attacker and a target
-                var attacker = aliveAttackers[randPlayer.Next(aliveAttackers.Length)];
-                var target = aliveDefenders[randTarget.Next(aliveDefenders.Length)];
-
-                Console.WriteLine($"{attacker} from {(isTeamOneAttacking ? "Team 1" : "Team 2")} kills {target} from " +
-                                  $"{(isTeamOneAttacking ? "Team 2" : "Team 1")}!");
-
-                defendingTeam[target] = 0; // Mark target as dead
+                simulation.Update(0.5f); // Slower update rate for visualization
+                stepCount++;
+                
+                // if (stepCount % 5 == 0)
+                // {
+                //     Console.WriteLine($"Step {stepCount} completed. {CountAlivePlayers(simulation)} agents still alive.");
+                // }
+                
+                // small delay for visualization
+                // System.Threading.Thread.Sleep(50); 
             }
             
-            //update list with new states
-            teamOneState = teamOne.Select(pair => pair.Value).ToList();
-            teamTwoState = teamTwo.Select(pair => pair.Value).ToList();
+            stopwatch.Stop();
+            
+            Console.WriteLine($"Simulation completed in {stopwatch.ElapsedMilliseconds}ms after {stepCount} steps");
+            Console.WriteLine($"Winning team: {(simulation.WinningTeam >= 0 ? simulation.WinningTeam.ToString() : "Draw")}");
         }
         
-        Console.WriteLine("\n-------------------------\n");
-        Console.WriteLine("Objective Reached!");
-        Console.WriteLine($"Winning Team: {(teamOneState.Contains(1) ? "Team One" : "Team Two")}!");
+        /// <summary>
+        /// Runs multiple simulations without visualization 
+        /// </summary>
+        /// <param name="count">Number of simulations to run</param>
+        private static void RunMultipleSimulationsQuickly(int count)
+        {
+            Console.WriteLine($"\n[TEST 2] Running {count} simulations without visualization...");
+            
+            var results = new Dictionary<int, int>(); // Team ID -> Win count
+            var stopwatch = Stopwatch.StartNew();
+            
+            for (int i = 0; i < count; i++)
+            {
+                // Create a new simulation for each run
+                var simulation = new Simulation(40, 30);
+                
+                // Create a deathmatch tracker
+                var objective = new DeathmatchObjective(SimulationObjective.TeamDeathmatch, 2, 3);
+                var tracker = new DeathmatchTracker(objective);
+                simulation.SetObjectiveTracker(tracker);
+                
+                // Add agents to the simulation
+                CreateAgents(simulation, 6, true); // Set fastMode to true for quick simulations
+                
+                // Run the simulation as fast as possible
+                while (!simulation.IsGameOver)
+                {
+                    simulation.Update(1.0f); // Fast update rate
+                }
+                
+                // Record the result
+                if (simulation.WinningTeam >= 0)
+                {
+                    if (!results.ContainsKey(simulation.WinningTeam))
+                        results[simulation.WinningTeam] = 0;
+                    
+                    results[simulation.WinningTeam]++;
+                }
+                
+                // Show progress
+                if ((i + 1) % 20 == 0 || i == count - 1)
+                {
+                    Console.WriteLine($"Completed {i + 1}/{count} simulations");
+                }
+            }
+            
+            stopwatch.Stop();
+            
+            // Show results
+            Console.WriteLine("\nResults:");
+            foreach (var result in results)
+            {
+                Console.WriteLine($"Team {result.Key}: {result.Value} wins ({result.Value * 100.0 / count:F1}%)");
+            }
+            
+            Console.WriteLine($"\nTotal time: {stopwatch.ElapsedMilliseconds}ms");
+            Console.WriteLine($"Average time per simulation: {stopwatch.ElapsedMilliseconds / (double)count:F2}ms");
+        }
         
-        Console.WriteLine($"\nCharacter States:\n[TEAM ONE]\n" +
-                          $"{teamOne.ElementAt(0).Key} : {GetStateText(teamOne.ElementAt(0).Value)}\n" +
-                          $"{teamOne.ElementAt(1).Key} : {GetStateText(teamOne.ElementAt(1).Value)}\n" +
-                          $"\n[TEAM TWO]\n" +
-                          $"{teamTwo.ElementAt(0).Key} : {GetStateText(teamTwo.ElementAt(0).Value)}\n" +
-                          $"{teamTwo.ElementAt(1).Key} : {GetStateText(teamTwo.ElementAt(1).Value)}");
+        /// <summary>
+        /// Tests simulations with different map creation strategies
+        /// </summary>
+        private static void TestDifferentMapCreationStrategies()
+        {
+            Console.WriteLine("\n[TEST 3] Testing different map creation strategies...");
+            
+            // 1. Test with random rooms strategy (default)
+            Console.WriteLine("\nTesting with RandomRoomsMapCreationStrategy (default):");
+            var randomRoomsSimulation = new Simulation(40, 30);
+            RunSimulationTest(randomRoomsSimulation);
+            
+            // 2. Test with cellular automata strategy
+            Console.WriteLine("\nTesting with CellularAutomataMapCreationStrategy:");
+            var cellularStrategy = new CaveMapCreationStrategy<Map>(40, 30, 45, 2, 4);
+            var cellularSimulation = new Simulation(40, 30, cellularStrategy);
+            RunSimulationTest(cellularSimulation);
+            
+            // 3. Test with a pre-created map
+            Console.WriteLine("\nTesting with a pre-created map:");
+            var mapCreator = new RandomRoomsMapCreationStrategy<Map>(40, 30, 5, 10, 8);
+            var preCreatedMap = mapCreator.CreateMap();
+            // Modify the map in some way to demonstrate it's pre-created
+            preCreatedMap.SetCellProperties(20, 15, true, true);
+            var preCreatedMapSimulation = new Simulation(preCreatedMap);
+            RunSimulationTest(preCreatedMapSimulation);
+        }
         
-        Console.WriteLine("\nEnding Evaluation...");
+        /// <summary>
+        /// Helper method to run a test simulation with the given simulation object
+        /// </summary>
+        private static void RunSimulationTest(Simulation simulation)
+        {
+            // Set up the objective tracker
+            var objective = new DeathmatchObjective(SimulationObjective.TeamDeathmatch, 2, 2);
+            var tracker = new DeathmatchTracker(objective);
+            simulation.SetObjectiveTracker(tracker);
+            
+            // Add agents
+            CreateAgents(simulation, 4, true); // Use fast mode for test simulations
+            
+            // Run the simulation
+            var stopwatch = Stopwatch.StartNew();
+            int stepCount = 0;
+            
+            while (!simulation.IsGameOver && stepCount < 1000) // Prevent infinite loops
+            {
+                simulation.Update(1.0f);
+                stepCount++;
+            }
+            
+            stopwatch.Stop();
+            
+            Console.WriteLine($"Simulation completed in {stopwatch.ElapsedMilliseconds}ms after {stepCount} steps");
+            Console.WriteLine($"Winning team: {(simulation.WinningTeam >= 0 ? simulation.WinningTeam.ToString() : "Draw/Timeout")}");
+        }
+        
+        /// <summary>
+        /// Creates agents for the simulation
+        /// </summary>
+        /// <param name="simulation">The simulation to add agents to</param>
+        /// <param name="agentCount">Number of agents to create</param>
+        /// <param name="fastMode">Whether to use fast mode for the agents' brains</param>
+        private static void CreateAgents(Simulation simulation, int agentCount, bool fastMode = false)
+        {
+            var random = new Random();
+            
+            // Create teams (for this example, we'll use 2 teams)
+            int teamCount = 2;
+            
+            for (int i = 0; i < agentCount; i++)
+            {
+                // Find a random walkable position for the agent
+                int x, y;
+                do
+                {
+                    x = random.Next(simulation.Map.Width);
+                    y = random.Next(simulation.Map.Height);
+                } while (!simulation.Map.IsWalkable(x, y));
+                
+                // Create an agent with random stats
+                var brain = new ChaserBrain(simulation.Map, simulation, i % teamCount);
+                
+                // Set fast mode if requested
+                if (fastMode)
+                {
+                    brain.FastMode = true;
+                }
+                
+                var agent = new Agent(
+                    x: x,
+                    y: y,
+                    brain: brain,
+                    i % teamCount,
+                    $"Agent_{i}"
+                );
+                
+                agent.Brain.SetAgent(agent);
+                
+                // Add to simulation
+                simulation.AddAgent(agent);
+            }
+        }
+        
+        /// <summary>
+        /// Counts the number of alive players in the simulation
+        /// </summary>
+        private static int CountAlivePlayers(Simulation simulation)
+        {
+            return simulation.Agents.Count(a => a.IsAlive);
+        }
     }
-
-    private static void TestEvaluationDefense()
-    {
-        DefendObjective objective = new DefendObjective(SimulationObjective.DefendObjective, 2, 
-            5, 10f);
-        
-        bool ended = false;
-        var timeElapsed = 0;
-        var objectiveHealth = 100;
-        Random random = new Random(Guid.NewGuid().GetHashCode());
-        
-        Console.WriteLine("Starting Evaluation...");
-        Console.WriteLine("Objective Type: " + objective.TypeEnum);
-        Console.WriteLine("Countdown Time: " + objective.MaxMatchTime);
-        Console.WriteLine();
-
-        while (ended == false)
-        {
-            //using a very simple random to decide whether or not the enemy team has damaged our objective
-            bool attack = random.Next(1, 4) == 2;
-            
-            if (attack)
-            {
-                Console.WriteLine("Offense hits the objective.");
-                objectiveHealth -= 20;
-                Console.WriteLine($"Defense Objective Health: {objectiveHealth}\n");
-            }
-            else
-            {
-                Console.WriteLine("Defense holds steadfast!\n");
-            }
-
-            timeElapsed += 1;
-            
-            ended = ObjectiveEvaluator.EvaluateObjective(objective, timeElapsed, objectiveHealth);
-            
-            Thread.Sleep(1000);
-        }
-        
-        Console.WriteLine("Objective Reached!");
-        Console.WriteLine($"Total Time Elapsed: {timeElapsed}s\n");
-
-        if (objectiveHealth <= objective.ObjectiveThreshold)
-        {
-            Console.WriteLine("Offense won by destroying the objective!");
-        }
-        else if (timeElapsed >= objective.MaxMatchTime)
-        {
-            Console.WriteLine("Defense won by holding off the offense!");
-        }
-        
-        Console.WriteLine("\nEnding Evaluation...");
-    }*/
-}}
+}

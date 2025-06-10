@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SimArena.Core.Objectives.Trackers.Interfaces;
@@ -37,27 +37,29 @@ namespace SimArena.Core.Objectives.Trackers
                 // Assign the character to a team
                 int teamIndex = -1;
                 
-                if (_teams.Count > 0)
-                {
-                    if (_teams.Count + 1 <= _objective.Teams)
-                    {
-                        teamIndex = _teams.Count + 1;
-                    }
-                    else
-                    {
-                        teamIndex = _teams.FindIndex(t => t.Count < _objective.PlayersPerTeam);
-                    }
-                }
+                // Assign to a team based on the agent's Team property
+                teamIndex = character.Team;
                 
-                // If all teams are full, assign to the first team
-                if (teamIndex == -1)
+                // Make sure the team index is valid
+                if (teamIndex < 0 || teamIndex >= _teams.Count)
                 {
-                    teamIndex = 0;
+                    // If the team index is invalid, assign to a team with space
+                    teamIndex = _teams.FindIndex(t => t.Count < _objective.PlayersPerTeam);
+                    
+                    // If all teams are full or no valid team found, assign to the first team
+                    if (teamIndex == -1)
+                    {
+                        teamIndex = 0;
+                    }
                 }
                 
                 AddCharacterToTeam(character, teamIndex);
                 
-                Console.WriteLine($"Assigned {character.Name} to Team {teamIndex}");
+                // Log team assignment if debug messaging is enabled
+                if (_events != null)
+                {
+                    _events.RaiseDebugMessage(this, $"Assigned {character.Name} to Team {teamIndex}");
+                }
                 
                 // // Set the team ID in the brain if it's a SampleDeathmatchAIBrain
                 // if (character.Brain is SampleDeathmatchAIBrain brain)
@@ -79,7 +81,11 @@ namespace SimArena.Core.Objectives.Trackers
                 int killerTeam = GetTeamIndex(killer);
                 int victimTeam = GetTeamIndex(victim);
                 
-                Console.WriteLine($"{killer.Name} (Team {killerTeam}) killed {victim.Name} (Team {victimTeam})");
+                // Log the kill if debug messaging is enabled
+                if (_events != null)
+                {
+                    _events.RaiseDebugMessage(this, $"{killer.Name} (Team {killerTeam}) killed {victim.Name} (Team {victimTeam})");
+                }
                 
                 // Check if the objective is complete
                 CheckObjectiveCompletion();
@@ -124,6 +130,12 @@ namespace SimArena.Core.Objectives.Trackers
             {
                 // Mark the victim as dead
                 character.Kill();
+                
+                // Log the kill if debug messaging is enabled
+                if (_events != null)
+                {
+                    _events.RaiseDebugMessage(this, $"Agent {character.Name} from Team {character.Team} was killed!");
+                }
             }
             
             CheckObjectiveCompletion();
@@ -149,14 +161,22 @@ namespace SimArena.Core.Objectives.Trackers
             {
                 _winnerTeam = lastLivingTeam;
                 ShouldStop = true;
-                Console.WriteLine($"Team {_winnerTeam} wins the deathmatch!");
+                // Only print detailed messages in debug mode
+                if (_events != null)
+                {
+                    _events.RaiseDebugMessage(this, $"Team {_winnerTeam} wins the deathmatch!");
+                }
             }
             // If no teams have living members, it's a draw
             else if (teamsWithLiving == 0)
             {
                 _winnerTeam = -1;
                 ShouldStop = true;
-                Console.WriteLine("Deathmatch ended in a draw!");
+                // Only print detailed messages in debug mode
+                if (_events != null)
+                {
+                    _events.RaiseDebugMessage(this, "Deathmatch ended in a draw!");
+                }
             }
         }
         

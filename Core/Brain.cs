@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using RogueSharp;
 using SimArena.Entities;
 
@@ -10,9 +10,10 @@ namespace SimArena.Core
         protected readonly IMap _map;
         protected readonly int _tickIntervalMs;
         protected readonly Random _random = new();
-        protected DateTime _lastDecisionTime;
+        protected DateTime _lastDecisionTime = DateTime.MinValue; // Initialize to MinValue to ensure first Think() call executes
         
         public int Team { get; }
+        public bool FastMode { get; set; } = false; // When true, bypasses time checks for ultra-fast simulation
         
         public event Action<Agent, int, int>? OnMove;
 
@@ -45,7 +46,14 @@ namespace SimArena.Core
                 throw new Exception("Brain not initialized.");
             }
             
-            // Check if tick interval has passed since last time we made a decision
+            // In fast mode, always execute thinking logic without time checks
+            if (FastMode)
+            {
+                ExecuteThink();
+                return;
+            }
+            
+            // In normal mode, check if tick interval has passed since last time we made a decision
             if ((DateTime.UtcNow - _lastDecisionTime).TotalMilliseconds < _tickIntervalMs)
                 return;
             
