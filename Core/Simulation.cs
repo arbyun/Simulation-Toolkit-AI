@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using RogueSharp;
 using RogueSharp.MapCreation;
 using SimArena.Core.Objectives;
 using SimArena.Core.Objectives.Trackers.Interfaces;
-using SimArena.Core.Results;
 using SimArena.Core.Results.Result_Data;
 using SimArena.Entities;
 

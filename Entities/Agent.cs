@@ -3,7 +3,7 @@ using SimArena.Core.Results;
 
 namespace SimArena.Entities
 {
-    public class Agent : Entity
+    public class Agent : Entity, IDamageable
     {
         public Brain Brain { get; private set; }
         public int Team { get; }
@@ -11,6 +11,10 @@ namespace SimArena.Entities
         public string Name { get; }
         
         public Kda Kda { get; set; } = new(0, 0, 0);
+        
+        public int Health { get; set; } = 100;
+
+        private List<Agent> _lastDamager = new();
 
         public Agent(int x, int y, Brain brain, int team, string name) : base(x, y)
         {
@@ -34,6 +38,26 @@ namespace SimArena.Entities
         public void Kill()
         {
             IsAlive = false;
+            Kda.Deaths++;
+        }
+
+        public void TakeDamage(int damage, Agent attacker)
+        {
+            Health = Math.Max(0, Health - damage);
+            _lastDamager.Add(attacker);
+            
+            if (Health == 0)
+            {
+                Kill();
+                attacker.Kda.Kills++;
+
+                Agent assist = _lastDamager.Last(a => a != attacker);
+
+                if (assist != null)
+                {
+                    assist.Kda.Assists++;
+                }
+            }
         }
     }
 }
