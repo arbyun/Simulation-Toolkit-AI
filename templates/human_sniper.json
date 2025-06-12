@@ -1,0 +1,32 @@
+{
+  "TemplateId": "human_sniper",
+  "Description": "Human sniper template with high attack, low defense, and cautious behavior",
+  "Version": "1.0",
+  "Author": "SimArena Team",
+  "CreatedDate": "2024-12-06T16:11:00.000Z",
+  "Tags": [
+    "human",
+    "sniper",
+    "high_attack",
+    "long_range"
+  ],
+  "Name": "Human Sniper",
+  "Brain": {
+    "Type": "ChaserBrain",
+    "BrainTypeName": "ChaserBrain",
+    "Awareness": 20,
+    "TickIntervalMs": 600,
+    "Team": 0
+  },
+  "OwnedWeaponIds": [
+    "sniper_rifle",
+    "pistol"
+  ],
+  "RandomStart": true,
+  "StartX": 0,
+  "StartY": 0,
+  "MaxHealth": 75,
+  "AttackPower": 35,
+  "Defense": 3,
+  "Speed": 0.8
+}

@@ -1,0 +1,32 @@
+{
+  "TemplateId": "ai_scout",
+  "Description": "Fast AI scout template with high awareness and speed but low health",
+  "Version": "1.0",
+  "Author": "SimArena Team",
+  "CreatedDate": "2024-12-06T16:11:00.000Z",
+  "Tags": [
+    "ai",
+    "scout",
+    "fast",
+    "reconnaissance"
+  ],
+  "Name": "AI Scout",
+  "Brain": {
+    "Type": "ChaserBrain",
+    "BrainTypeName": "ChaserBrain",
+    "Awareness": 25,
+    "TickIntervalMs": 200,
+    "Team": 1
+  },
+  "OwnedWeaponIds": [
+    "submachinegun",
+    "grenades"
+  ],
+  "RandomStart": false,
+  "StartX": 15,
+  "StartY": 5,
+  "MaxHealth": 60,
+  "AttackPower": 18,
+  "Defense": 2,
+  "Speed": 1.5
+}

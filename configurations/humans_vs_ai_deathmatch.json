@@ -1,0 +1,147 @@
+{
+  "Name": "Humans vs AI - Team Deathmatch",
+  "MapPath": null,
+  "RealtimeMode": false,
+  "Objective": {
+    "Type": "DeathmatchObjective",
+    "ObjectiveType": "TeamDeathmatch",
+    "TeamCount": 2,
+    "KillsToWin": 10
+  },
+  "Agents": [],
+  "AgentTemplates": [
+    {
+      "TemplatePath": "human_soldier",
+      "Name": "Alpha Squad Leader",
+      "Overrides": {
+        "Brain.Team": 0,
+        "MaxHealth": 120,
+        "AttackPower": 18
+      }
+    },
+    {
+      "TemplatePath": "human_soldier",
+      "Name": "Alpha Soldier 1",
+      "Overrides": {
+        "Brain.Team": 0
+      }
+    },
+    {
+      "TemplatePath": "human_sniper",
+      "Name": "Alpha Sniper",
+      "Overrides": {
+        "Brain.Team": 0
+      }
+    },
+    {
+      "TemplatePath": "human_tank",
+      "Name": "Alpha Heavy",
+      "Overrides": {
+        "Brain.Team": 0
+      }
+    },
+    {
+      "TemplatePath": "ai_scout",
+      "Name": "Beta Scout Alpha",
+      "Overrides": {
+        "Brain.Team": 1
+      }
+    },
+    {
+      "TemplatePath": "ai_scout",
+      "Name": "Beta Scout Beta",
+      "Overrides": {
+        "Brain.Team": 1
+      }
+    },
+    {
+      "TemplatePath": "ai_assassin",
+      "Name": "Beta Assassin",
+      "Overrides": {
+        "Brain.Team": 1,
+        "MaxHealth": 50
+      }
+    }
+  ],
+  "Weapons": [
+    {
+      "Id": "assault_rifle",
+      "Name": "M4A1 Assault Rifle",
+      "Type": "RangedWeapon",
+      "Damage": 25,
+      "Range": 15,
+      "Cooldown": 0.3,
+      "Ammunition": 30
+    },
+    {
+      "Id": "sniper_rifle",
+      "Name": "Barrett M82",
+      "Type": "RangedWeapon",
+      "Damage": 80,
+      "Range": 35,
+      "Cooldown": 2.0,
+      "Ammunition": 10
+    },
+    {
+      "Id": "heavy_machinegun",
+      "Name": "M249 SAW",
+      "Type": "RangedWeapon",
+      "Damage": 20,
+      "Range": 20,
+      "Cooldown": 0.15,
+      "Ammunition": 100
+    },
+    {
+      "Id": "submachinegun",
+      "Name": "MP5",
+      "Type": "RangedWeapon",
+      "Damage": 15,
+      "Range": 10,
+      "Cooldown": 0.2,
+      "Ammunition": 25
+    },
+    {
+      "Id": "pistol",
+      "Name": "Glock 17",
+      "Type": "RangedWeapon",
+      "Damage": 12,
+      "Range": 8,
+      "Cooldown": 0.4,
+      "Ammunition": 15
+    },
+    {
+      "Id": "combat_knife",
+      "Name": "Combat Knife",
+      "Type": "MeleeWeapon",
+      "Damage": 30,
+      "Range": 1,
+      "Cooldown": 0.8
+    },
+    {
+      "Id": "katana",
+      "Name": "Samurai Katana",
+      "Type": "MeleeWeapon",
+      "Damage": 50,
+      "Range": 2,
+      "Cooldown": 1.2
+    },
+    {
+      "Id": "grenades",
+      "Name": "Frag Grenades",
+      "Type": "RangedWeapon",
+      "Damage": 60,
+      "Range": 12,
+      "Cooldown": 3.0,
+      "Ammunition": 3
+    },
+    {
+      "Id": "throwing_knives",
+      "Name": "Throwing Knives",
+      "Type": "RangedWeapon",
+      "Damage": 35,
+      "Range": 6,
+      "Cooldown": 0.6,
+      "Ammunition": 12
+    }
+  ]
+}
