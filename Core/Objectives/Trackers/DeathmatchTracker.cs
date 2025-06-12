@@ -16,7 +16,7 @@ namespace SimArena.Core.Objectives.Trackers
     /// </summary>
     public class DeathmatchTracker : IObjectiveTracker, IKillTracker, IEventInteractor
     {
-        private readonly DeathmatchObjective _objective;
+        public readonly DeathmatchObjective _objective;
         private readonly List<List<Agent>> _teams = new();
         private int _winnerTeam = -1;
         private SimulationEvents _events;
@@ -73,9 +73,19 @@ namespace SimArena.Core.Objectives.Trackers
         {
             if (entities.killer is Agent killer && entities.killed is Agent victim)
             {
-                // Update KDA stats
+                // Update KDA stats for killer and victim
                 killer.Kda = killer.Kda with { Kills = killer.Kda.Kills + 1 };
                 victim.Kda = victim.Kda with { Deaths = victim.Kda.Deaths + 1 };
+                
+                // Handle assists - check if victim has any recent attackers other than the killer
+                if (victim.RecentAttackers != null && victim.RecentAttackers.Count > 0)
+                {
+                    var assistAgent = victim.RecentAttackers.LastOrDefault(a => a != killer);
+                    if (assistAgent != null)
+                    {
+                        assistAgent.Kda = assistAgent.Kda with { Assists = assistAgent.Kda.Assists + 1 };
+                    }
+                }
                 
                 // Log the kill
                 int killerTeam = GetTeamIndex(killer);

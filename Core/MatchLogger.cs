@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using SimArena.Core.Objectives.Trackers.Interfaces;
 using SimArena.Core.Results.Result_Data;
 using SimArena.Entities;
-using SimArena.Serialization.Configuration.Objectives;
 
 namespace SimArena.Core
 {
@@ -19,7 +14,7 @@ namespace SimArena.Core
         private readonly string _outputFolder;
         private readonly List<string> _logs = new List<string>();
         private readonly Dictionary<int, List<Agent>> _teams = new Dictionary<int, List<Agent>>();
-        private int _currentStep = 0;
+        private int _currentStep;
         private DateTime _startTime;
         private IObjectiveTracker _objectiveTracker;
         
@@ -43,7 +38,7 @@ namespace SimArena.Core
             _objectiveTracker = tracker;
         }
         
-        private void OnCreate(object sender, Entities.Entity entity)
+        private void OnCreate(object sender, Entity entity)
         {
             if (entity is Agent agent)
             {
@@ -62,7 +57,7 @@ namespace SimArena.Core
             _currentStep = step;
         }
         
-        private void OnKill(object sender, (Entities.Entity killer, Entities.Entity killed) entities)
+        private void OnKill(object sender, (Entity killer, Entity killed) entities)
         {
             if (entities.killer is Agent killer && entities.killed is Agent victim)
             {
@@ -145,7 +140,7 @@ namespace SimArena.Core
                 if (_objectiveTracker != null && _objectiveTracker.GetInput() is DeathmatchInput deathmatchInput)
                 {
                     var objective = _objectiveTracker as dynamic;
-                    content.AppendLine($"Objective Type: {objective?._objective?.Type ?? "Unknown"}");
+                    content.AppendLine($"Objective Type: {objective?._objective?.GetType().ToString() ?? "Unknown"}");
                     content.AppendLine($"Objective Details: Teams: {objective?._objective?.Teams ?? 0}, Players Per Team: {objective?._objective?.PlayersPerTeam ?? 0}");
                 }
                 else

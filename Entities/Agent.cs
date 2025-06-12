@@ -14,7 +14,7 @@ namespace SimArena.Entities
         
         public int Health { get; set; } = 100;
 
-        private List<Agent> _lastDamager = new();
+        public List<Agent> RecentAttackers { get; private set; } = new();
 
         public Agent(int x, int y, Brain brain, int team, string name) : base(x, y)
         {
@@ -38,25 +38,18 @@ namespace SimArena.Entities
         public void Kill()
         {
             IsAlive = false;
-            Kda.Deaths++;
+            // KDA stats are updated by the objective tracker, not here
         }
 
         public void TakeDamage(int damage, Agent attacker)
         {
             Health = Math.Max(0, Health - damage);
-            _lastDamager.Add(attacker);
+            RecentAttackers.Add(attacker);
             
             if (Health == 0)
             {
                 Kill();
-                attacker.Kda.Kills++;
-
-                Agent assist = _lastDamager.Last(a => a != attacker);
-
-                if (assist != null)
-                {
-                    assist.Kda.Assists++;
-                }
+                // KDA stats are updated by the objective tracker, not here
             }
         }
     }

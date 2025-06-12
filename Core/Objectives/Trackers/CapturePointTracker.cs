@@ -67,9 +67,19 @@ namespace SimArena.Core.Objectives.Trackers
         {
             if (entities is { killer: Agent killer, killed: Agent victim })
             {
-                // Update KDA stats
+                // Update KDA stats for killer and victim
                 killer.Kda = killer.Kda with { Kills = killer.Kda.Kills + 1 };
                 victim.Kda = victim.Kda with { Deaths = victim.Kda.Deaths + 1 };
+                
+                // Handle assists - check if victim has any recent attackers other than the killer
+                if (victim.RecentAttackers != null && victim.RecentAttackers.Count > 0)
+                {
+                    var assistAgent = victim.RecentAttackers.LastOrDefault(a => a != killer);
+                    if (assistAgent != null)
+                    {
+                        assistAgent.Kda = assistAgent.Kda with { Assists = assistAgent.Kda.Assists + 1 };
+                    }
+                }
                 
                 // Log the kill
                 int killerTeam = GetTeamIndex(killer);
