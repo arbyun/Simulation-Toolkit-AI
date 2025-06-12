@@ -1,7 +1,7 @@
 ﻿title: SimArena Documentation
 tagline: AI-driven agent-based simulations
 description: SimArena is a powerful toolkit for creating, configuring, and running simulations with multiple agents in various scenarios. It provides a robust foundation for AI research and development, with support for custom objectives, brains, weapons, and maps.
-baseurl: /SimArena
+baseurl: /Simulation-Toolkit-AI
 url: https://arbyun.github.io
 github_username: arbyun
 paginate: 10
