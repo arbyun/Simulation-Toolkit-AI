@@ -1,33 +1,35 @@
-﻿using System.Numerics;
+﻿using System.Linq;
+using System.Numerics;
 using SimArena.Core;
 
-namespace SimArena.Entities.Weapons;
-
-public class MeleeWeapon: Weapon
+namespace SimArena.Entities.Weapons
 {
-    public MeleeWeapon(int x, int y, Simulation simulation) : base(x, y, simulation)
+    public class MeleeWeapon: Weapon
     {
-    }
-
-    public override bool Attack(Vector3 direction)
-    {
-        bool validPosition = Simulation.Map.IsWalkable(X + (int)direction.X, Y + (int)direction.Y);
-
-        if (!validPosition)
+        public MeleeWeapon(int x, int y, Simulation simulation) : base(x, y, simulation)
         {
-            // find what's blocking this and try to get it as an IDamageable
-            // for now we'll do something a bit hacky to test this class out
-            IDamageable damageable = Simulation.Agents.FirstOrDefault(a => a.X == X + (int)direction.X && a.Y == Y + (int)direction.Y) as IDamageable;
-            
-            if (damageable != null)
+        }
+
+        public override bool Attack(Vector3 direction)
+        {
+            bool validPosition = Simulation.Map.IsWalkable(X + (int)direction.X, Y + (int)direction.Y);
+
+            if (!validPosition)
             {
-                damageable.TakeDamage(Damage, Owner);
-                return true;
+                // find what's blocking this and try to get it as an IDamageable
+                // for now we'll do something a bit hacky to test this class out
+                IDamageable damageable = Simulation.Agents.FirstOrDefault(a => a.X == X + (int)direction.X && a.Y == Y + (int)direction.Y) as IDamageable;
+            
+                if (damageable != null)
+                {
+                    damageable.TakeDamage(Damage, Owner);
+                    return true;
+                }
+
+                return false;
             }
 
             return false;
         }
-
-        return false;
     }
 }

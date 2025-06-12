@@ -1,6 +1,7 @@
-﻿namespace SimArena.Entities;
-
-public interface IDamageable
+﻿namespace SimArena.Entities
 {
-    public void TakeDamage(int damage, Agent attacker);
+    public interface IDamageable
+    {
+        public void TakeDamage(int damage, Agent attacker);
+    }
 }

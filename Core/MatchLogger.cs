@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using SimArena.Core.Objectives.Trackers.Interfaces;
 using SimArena.Core.Results.Result_Data;
@@ -139,9 +143,9 @@ namespace SimArena.Core
                 // Get objective information if available
                 if (_objectiveTracker != null && _objectiveTracker.GetInput() is DeathmatchInput deathmatchInput)
                 {
-                    var objective = _objectiveTracker as dynamic;
-                    content.AppendLine($"Objective Type: {objective?._objective?.GetType().ToString() ?? "Unknown"}");
-                    content.AppendLine($"Objective Details: Teams: {objective?._objective?.Teams ?? 0}, Players Per Team: {objective?._objective?.PlayersPerTeam ?? 0}");
+                    var objective = deathmatchInput;
+                    content.AppendLine($"Objective Type: {objective.GetType().ToString() ?? "Unknown"}");
+                    content.AppendLine($"Objective Details: Teams: {objective.TotalTeams}, Players Per Team: {objective.Teams[0].TeamMembers.Length}");
                 }
                 else
                 {
