@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -35,6 +35,11 @@ namespace SimArena.Serialization.Configuration
         /// List of agent configurations
         /// </summary>
         public List<AgentConfiguration> Agents { get; set; } = new List<AgentConfiguration>();
+        
+        /// <summary>
+        /// List of agent template references (alternative to direct agent configurations)
+        /// </summary>
+        public List<TemplateReference> AgentTemplates { get; set; } = new List<TemplateReference>();
         
         /// <summary>
         /// List of weapon configurations
@@ -126,23 +131,43 @@ namespace SimArena.Serialization.Configuration
         }
 
         /// <summary>
+        /// Resolves all template references to actual agent configurations
+        /// </summary>
+        /// <param name="templateManager">Template manager to use for resolution</param>
+        public void ResolveTemplates(ITemplateManager templateManager)
+        {
+            if (templateManager == null)
+                throw new ArgumentNullException(nameof(templateManager));
+                
+            // Resolve agent templates and add them to the agents list
+            foreach (var templateRef in AgentTemplates)
+            {
+                var agentConfig = templateManager.ResolveAgentTemplate(templateRef);
+                Agents.Add(agentConfig);
+            }
+            
+            // Clear template references after resolution
+            AgentTemplates.Clear();
+        }
+        
+        /// <summary>
         /// Validates the match configuration
         /// </summary>
         /// <param name="errorMessage">Error message if validation fails</param>
         /// <returns>True if the configuration is valid, false otherwise</returns>
         public bool Validate(out string errorMessage)
         {
-            // Check if the map file exists
-            if (string.IsNullOrEmpty(MapPath) || !File.Exists(MapPath))
+            // Check if the map file exists (only if MapPath is specified)
+            if (!string.IsNullOrEmpty(MapPath) && !File.Exists(MapPath))
             {
                 errorMessage = $"Map file not found: {MapPath}";
                 return false;
             }
         
-            // Check if there are any agents
-            if (Agents.Count == 0)
+            // Check if there are any agents or agent templates
+            if (Agents.Count == 0 && AgentTemplates.Count == 0)
             {
-                errorMessage = "No agents defined in the configuration";
+                errorMessage = "No agents or agent templates defined in the configuration";
                 return false;
             }
         

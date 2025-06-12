@@ -1,0 +1,127 @@
+{
+  "Name": "Tank Battalion - Heavy Combat",
+  "MapPath": null,
+  "RealtimeMode": false,
+  "Objective": {
+    "Type": "DeathmatchObjective",
+    "ObjectiveType": "TeamDeathmatch",
+    "TeamCount": 2,
+    "KillsToWin": 5
+  },
+  "Agents": [],
+  "AgentTemplates": [
+    {
+      "TemplatePath": "human_tank",
+      "Name": "Steel Battalion Commander",
+      "Overrides": {
+        "Brain.Team": 0,
+        "MaxHealth": 220,
+        "AttackPower": 15,
+        "Defense": 25
+      }
+    },
+    {
+      "TemplatePath": "human_tank",
+      "Name": "Steel Battalion Heavy 1",
+      "Overrides": {
+        "Brain.Team": 0
+      }
+    },
+    {
+      "TemplatePath": "human_tank",
+      "Name": "Steel Battalion Heavy 2",
+      "Overrides": {
+        "Brain.Team": 0
+      }
+    },
+    {
+      "TemplatePath": "human_soldier",
+      "Name": "Steel Battalion Support",
+      "Overrides": {
+        "Brain.Team": 0,
+        "OwnedWeaponIds": ["heavy_machinegun", "combat_knife"]
+      }
+    },
+    {
+      "TemplatePath": "ai_scout",
+      "Name": "Cyber Legion Infiltrator 1",
+      "Overrides": {
+        "Brain.Team": 1,
+        "Speed": 2.0,
+        "Brain.Awareness": 30
+      }
+    },
+    {
+      "TemplatePath": "ai_scout",
+      "Name": "Cyber Legion Infiltrator 2",
+      "Overrides": {
+        "Brain.Team": 1,
+        "Speed": 2.0,
+        "Brain.Awareness": 30
+      }
+    },
+    {
+      "TemplatePath": "ai_assassin",
+      "Name": "Cyber Legion Hunter",
+      "Overrides": {
+        "Brain.Team": 1,
+        "AttackPower": 60,
+        "MaxHealth": 60
+      }
+    }
+  ],
+  "Weapons": [
+    {
+      "Id": "heavy_machinegun",
+      "Name": "Heavy Plasma Cannon",
+      "Type": "RangedWeapon",
+      "Damage": 30,
+      "Range": 25,
+      "Cooldown": 0.2,
+      "Ammunition": 150
+    },
+    {
+      "Id": "submachinegun",
+      "Name": "Rapid Fire Laser",
+      "Type": "RangedWeapon",
+      "Damage": 20,
+      "Range": 12,
+      "Cooldown": 0.15,
+      "Ammunition": 40
+    },
+    {
+      "Id": "katana",
+      "Name": "Plasma Sword",
+      "Type": "MeleeWeapon",
+      "Damage": 55,
+      "Range": 2,
+      "Cooldown": 1.0
+    },
+    {
+      "Id": "combat_knife",
+      "Name": "Vibroblade",
+      "Type": "MeleeWeapon",
+      "Damage": 35,
+      "Range": 1,
+      "Cooldown": 0.6
+    },
+    {
+      "Id": "grenades",
+      "Name": "EMP Grenades",
+      "Type": "RangedWeapon",
+      "Damage": 70,
+      "Range": 15,
+      "Cooldown": 3.5,
+      "Ammunition": 4
+    },
+    {
+      "Id": "throwing_knives",
+      "Name": "Cyber Shuriken",
+      "Type": "RangedWeapon",
+      "Damage": 40,
+      "Range": 8,
+      "Cooldown": 0.5,
+      "Ammunition": 15
+    }
+  ]
+}

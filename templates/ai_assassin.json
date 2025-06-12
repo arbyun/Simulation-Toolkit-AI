@@ -1,0 +1,30 @@
+{
+  "TemplateId": "ai_assassin",
+  "Description": "Stealth AI assassin template with high attack and speed, very low health",
+  "Version": "1.0",
+  "Author": "SimArena Team",
+  "CreatedDate": "2024-12-06T16:11:00.000Z",
+  "Tags": [
+    "ai",
+    "assassin",
+    "stealth",
+    "glass_cannon"
+  ],
+  "Name": "AI Assassin",
+  "Brain": {
+    "Type": "ChaserBrain",
+    "BrainTypeName": "ChaserBrain",
+    "Awareness": 18,
+    "TickIntervalMs": 300,
+    "Team": 1
+  },
+  "OwnedWeaponIds": [
+    "katana",
+    "throwing_knives"
+  ],
+  "RandomStart": true,
+  "MaxHealth": 40,
+  "AttackPower": 45,
+  "Defense": 1,
+  "Speed": 1.8
+}
