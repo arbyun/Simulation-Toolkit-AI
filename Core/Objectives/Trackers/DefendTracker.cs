@@ -1,8 +1,6 @@
-using System;
 using SimArena.Core.Objectives.Trackers.Interfaces;
 using SimArena.Core.Results;
 using SimArena.Core.Results.Result_Data;
-using SimArena.Serialization.Configuration;
 using SimArena.Serialization.Configuration.Objectives;
 
 namespace SimArena.Core.Objectives.Trackers

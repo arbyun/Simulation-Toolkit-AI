@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using SimArena.Core;
+using SimArena.Entities.Weapons;
 
 namespace SimArena.Entities.Weapons
 {

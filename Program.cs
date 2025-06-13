@@ -1,16 +1,10 @@
-
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using RogueSharp;
 using RogueSharp.MapCreation;
 using SimArena.Brains;
 using SimArena.Core;
 using SimArena.Core.Objectives;
 using SimArena.Core.Objectives.Trackers;
-using SimArena.Core.Objectives.Trackers.Interfaces;
 using SimArena.Entities;
 using SimArena.Serialization.Configuration.Objectives;
 using Path = System.IO.Path;
@@ -40,7 +34,7 @@ namespace SimArena
             
             Console.WriteLine("\nAll simulation tests completed!");
         }
-        
+
         /// <summary>
         /// Parses the output folder argument from the command line arguments
         /// </summary>
@@ -326,7 +320,6 @@ namespace SimArena
                     x: x,
                     y: y,
                     brain: brain,
-                    i % teamCount,
                     $"Agent_{i}"
                 );
                 
