@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using SimArena.Core;
+using SimArena.Entities;
+using SimArena.Entities.Weapons;
 using SimArena.Serialization.Configuration.Weapons;
 
 namespace SimArena.Serialization.Configuration
@@ -39,5 +42,13 @@ namespace SimArena.Serialization.Configuration
         /// Parameter-less constructor for JSON deserialization
         /// </summary>
         public WeaponConfiguration() { }
+        
+        /// <summary>
+        /// Factory method to create an actual weapon instance
+        /// </summary>
+        public virtual Weapon CreateWeapon(int x, int y, Simulation simulation, Agent owner)
+        {
+            throw new NotImplementedException("This method must be overridden in derived classes.");
+        }
     }
 }

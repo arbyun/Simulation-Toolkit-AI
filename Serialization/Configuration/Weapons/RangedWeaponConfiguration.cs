@@ -1,4 +1,7 @@
 using System;
+using SimArena.Core;
+using SimArena.Entities;
+using SimArena.Entities.Weapons;
 
 namespace SimArena.Serialization.Configuration.Weapons
 {
@@ -35,5 +38,25 @@ namespace SimArena.Serialization.Configuration.Weapons
         /// Parameter-less constructor for JSON deserialization
         /// </summary>
         public RangedWeaponConfiguration() : base("", "Ranged", 0) { }
+        
+        /// <summary>
+        /// Creates a ranged weapon from this configuration
+        /// </summary>
+        /// <param name="x">Weapon's x position</param>
+        /// <param name="y">Weapon's y position</param>
+        /// <param name="simulation">The simulation</param>
+        /// <param name="owner">The agent that owns the weapon</param>
+        /// <returns>The created weapon</returns>
+        public override Weapon CreateWeapon(int x, int y, Simulation simulation, Agent owner)
+        {
+            Weapon weapon = new RangedWeapon(x, y, simulation, Range, ProjectileSpeed, FireRate);
+
+            if (owner != null)
+            {
+                weapon.Equip(owner);
+            }
+            
+            return weapon;
+        }
     }
 }
