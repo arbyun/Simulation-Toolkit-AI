@@ -12,16 +12,23 @@ namespace SimArena.Core
 {
     public class Simulation
     {
-        public Map Map { get; private set; }
+        public Map Map { get; protected set; }
         public List<Agent> Agents { get; } = new();
-        public bool IsGameOver { get; private set; }
-        public int WinningTeam { get; private set; } = -1;
-        public int CurrentStep { get; private set; } = 0;
+        public List<Entity> Entities { get; } = new();
+        public bool IsGameOver { get; protected set; }
+        public int WinningTeam { get; protected set; } = -1;
+        public int CurrentStep { get; protected set; } = 0;
         
         public SimulationEvents Events { get; } = new();
         
-        private IObjectiveTracker _objectiveTracker;
-        private float _timeSinceLastUpdate = 0f;
+        protected IObjectiveTracker _objectiveTracker;
+
+        /// <summary>
+        /// Empty constructor, only intended to be used for deserialization of
+        /// GameConfiguration in subclasses
+        /// </summary>
+        public Simulation()
+        {}
 
         /// <summary>
         /// Create a simulation with the specified map
@@ -38,7 +45,7 @@ namespace SimArena.Core
         /// <param name="width">Width of the map</param>
         /// <param name="height">Height of the map</param>
         /// <param name="mapCreationStrategy">The strategy to use for map creation</param>
-        public Simulation(int width, int height, IMapCreationStrategy<Map> mapCreationStrategy = null)
+        public Simulation(int width, int height, IMapCreationStrategy<Map>? mapCreationStrategy = null)
         {
             if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
             if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
@@ -67,17 +74,36 @@ namespace SimArena.Core
         public void AddAgent(Agent agent)
         {
             Agents.Add(agent);
+            Entities.Add(agent);
             
             // Raise the OnCreate event so that trackers can register the agent
             Events.RaiseOnCreate(this, agent);
+        }
+        
+        public void AddEntity(Entity entity)
+        {
+            if (entity is Agent agent)
+            {
+                AddAgent(agent);
+                return;
+            }
+            
+            Entities.Add(entity);
+            
+            // Raise the OnCreate event so that trackers can register the entity
+            Events.RaiseOnCreate(this, entity);
         }
 
         public void Update(float deltaTime = 1.0f)
         {
             if (IsGameOver)
                 return;
-                
-            _timeSinceLastUpdate += deltaTime;
+
+            if (CurrentStep == 1)
+            {
+                Events.RaiseStarted(this);
+            }
+
             CurrentStep++;
                 
             // Only update living agents
@@ -132,6 +158,18 @@ namespace SimArena.Core
             Events.RaiseOnAgentKilled(this, agent);
         }
         
+        public void RemoveEntity(Entity entity)
+        {
+            if (entity is Agent agent)
+            {
+                KillAgent(agent);
+            }
+            
+            Entities.Remove(entity);
+            
+            Events.RaiseOnDestroy(this, entity);
+        }
+        
         /// <summary>
         /// Legacy method for checking deathmatch victory conditions
         /// Only used if no objective tracker is set
@@ -160,11 +198,26 @@ namespace SimArena.Core
             }
         }
         
+        public T GetEntity<T>() where T : Entity
+        {
+            return Entities.OfType<T>().First();
+        }
+        
+        public T GetEntity<T>(string id) where T : Entity
+        {
+            Guid.TryParse(id, out var guid);
+            return Entities.OfType<T>().First(e => e.Id == guid);
+        }
+        
+        public IEnumerable<T> GetEntities<T>() where T : Entity
+        {
+            return Entities.OfType<T>();
+        }
+        
         public void Reset()
         {
             IsGameOver = false;
             WinningTeam = -1;
-            _timeSinceLastUpdate = 0f;
             CurrentStep = 0;
             
             // Clear all agents

@@ -35,6 +35,7 @@ namespace SimArena.Entities.Weapons
         {
             Simulation = simulation;
             Owned = false;
+            simulation.AddEntity(this);
         }
     
         protected Weapon(int x, int y, Simulation simulation, Agent owner) : base(x, y)
@@ -42,6 +43,7 @@ namespace SimArena.Entities.Weapons
             Simulation = simulation;
             Owner = owner;
             Owned = true;
+            simulation.AddEntity(this);
         }
     
         /// <summary>

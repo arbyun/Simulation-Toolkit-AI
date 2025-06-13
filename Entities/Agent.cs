@@ -2,13 +2,27 @@ using System;
 using System.Collections.Generic;
 using SimArena.Core;
 using SimArena.Core.Results;
+using SimArena.Entities.Weapons;
 
 namespace SimArena.Entities
 {
     public class Agent : Entity, IDamageable
     {
         public Brain Brain { get; private set; }
-        public int Team { get; }
+        public List<Weapon> Weapons { get; private set; } = new();
+        public int Team 
+        {
+            get
+            {
+                if (Brain != null)
+                {
+                    return Brain.Team;
+                }
+
+                return -1;
+            }
+        }
+        
         public bool IsAlive { get; private set; } = true;
         public string Name { get; }
         
@@ -18,23 +32,26 @@ namespace SimArena.Entities
 
         public List<Agent> RecentAttackers { get; private set; } = new();
 
-        public Agent(int x, int y, Brain brain, int team, string name) : base(x, y)
+        public Agent(int x, int y, Brain brain, string name) : base(x, y)
         {
             Brain = brain;
-            Team = team;
             Name = name;
         }
         
-        public Agent(int x, int y, Brain brain, int team) : base(x, y)
+        public Agent(int x, int y, Brain brain) : base(x, y)
         {
             Brain = brain;
-            Team = team;
             Name = "Agent_Unknown";
         }
 
         public void SetBrain(Brain brain)
         {
             Brain = brain;
+        }
+        
+        public void EquipWeapon(Weapon weapon)
+        {
+            Weapons.Add(weapon);
         }
     
         public void Kill()
