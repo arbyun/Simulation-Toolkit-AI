@@ -5,15 +5,15 @@ A flexible and extensible simulation framework for AI-driven agent-based simulat
 ## Features
 
 - **Flexible Simulation Engine**: Run simulations in real-time or offline mode
-- **Agent-Based Architecture**: Create and manage multiple AI or human-controlled agents
-- **Map System**: Grid-based map system with field of view calculations (based on RogueSharp)
+- **Agent-Based Architecture**: Create and manage multiple AI agents
+- **Map System**: Grid-based map system (powered by RogueSharp)
 - **Weapon System**: Support for different weapon types (melee and ranged)
 - **Multiple Objective Types**: Support for various simulation objectives:
   - Team Deathmatch
   - Capture Point
   - Defense
   - Step-based simulations
-- **Configuration Flexibility**: Easy setup through JSON or XML configuration files
+- **Configuration Flexibility**: Easy setup through JSON configuration files
 - **Event System**: Comprehensive event system for monitoring simulation state changes
 
 ## Table of Contents
@@ -22,10 +22,9 @@ A flexible and extensible simulation framework for AI-driven agent-based simulat
 - [Usage](#usage)
 - [Configurations](#configurations)
   - [Game Configuration](#game-configuration)
-  - [Agent Configuration](#agent-configuration)
-  - [Weapon Configuration](#weapon-configuration)
-  - [Objective Configuration](#objective-configuration)
+- [Documentation](#documentation)
 - [Architecture](#architecture)
+- [Game Engines](#game-engines)
 - [Credits](#credits)
 - [Changelog](#changelog)
 
@@ -43,116 +42,74 @@ git clone https://github.com/arbyun/Simulation-Toolkit-AI.git
 dotnet build
 ```
 
+4. Run the tests, if desired. You may also specify a path where the simulation will save your match logs into:
+```bash
+dotnet run -- "C:\Users\YOUR\PATH\HERE"
+```
+
 ## Usage
 
 ### Basic Simulation Setup
 
 ```csharp
-// Create a game configuration or load existing one from a path
-GameConfig config = new GameConfig
+// Create a map
+var map = new Map(10, 10);
+
+// Create a simulation
+var simulation = new Simulation(map);
+
+// Decide speed of the simulation
+float updateRate = 0.5f; // Update every 0.5 seconds
+
+// Create the objective and tracker
+var objective = new DeathmatchObjective(SimulationObjective.TeamDeathmatch, 2, 3);
+var tracker = new DeathmatchTracker(objective);
+simulation.SetObjectiveTracker(tracker);
+
+// Create sample agents
+var agent1 = new Agent(0, 0, simulation);
+var agent2 = new Agent(9, 9, simulation);
+
+// Create a brain for the agents (Optional)
+var brain1 = new RandomBrain(agent1, map, 0);
+var brain2 = new RandomBrain(agent2, map, 1);
+agent1.SetBrain(brain1);
+agent2.SetBrain(brain2);
+
+// Add weapons to the agents (Optional)
+var weapon1 = new MeleeWeapon(0, 0, simulation);
+var weapon2 = new MeleeWeapon(9, 9, simulation);
+agent1.EquipWeapon(weapon1);
+agent2.EquipWeapon(weapon2);
+
+// Add agents to the simulation
+simulation.AddAgent(agent1);
+simulation.AddAgent(agent2);
+
+// Run the simulation
+while (!simulation.IsGameOver)
 {
-    Name = "My Simulation",
-    MapPath = "path/to/map.txt",
-    RealtimeMode = true,
-    Objective = new StepsObjective(SimulationObjective.Steps, 1000),
-    Agents = new List<AgentConfig>
-    {
-        new AgentConfig
-        {
-            Name = "Agent1",
-            BrainType = BrainType.AI,
-            RandomStart = true,
-            Awareness = 10,
-            ThinkInterval = 0.5f // AI thinking interval in seconds
-        }
-    },
-    Weapons = new List<WeaponConfig>
-    {
-        new WeaponConfig
-        {
-            WeaponId = "knife",
-            WeaponType = WeaponType.Melee,
-            Range = 1.5f,
-            Damage = 15
-        }
-    }
-};
-
-// Create a simulation with the configuration
-Simulation simulation = new Simulation(config, SimulationMode.Realtime);
-
-// Initialize the simulation with a map and scene
-IMap map = MapLoader.LoadMap(config.MapPath);
-Scene scene = new Scene();
-simulation.Initialize(map, scene);
-
-// Start the simulation
-simulation.Start();
-
-// Update the simulation in a game loop (if in realtime mode)
-while (simulation.IsRunning)
-{
-    simulation.Update(0.016f); // ~60 FPS
-    // Render or process simulation state as needed
+    simulation.Update(updateRate);
 }
 ```
 
-### Running an Offline Simulation
+### Simulation through Configuration Files
 
 ```csharp
-// Create a configuration for offline mode
-GameConfig config = new GameConfig
+// Load the configuration
+var config = GameConfiguration.LoadFromJson("path/to/config.json");
+
+// Create the simulation
+var simulation = new SimulationWithConfiguration(config);
+
+// Decide speed of the simulation
+float updateRate = 0.5f; // Update every 0.5 seconds
+
+// Run the simulation
+while (!simulation.IsGameOver)
 {
-    Name = "Offline Simulation",
-    MapPath = "path/to/map.txt",
-    RealtimeMode = false,
-    Objective = new StepsObjective(SimulationObjective.Steps, 1000),
-    Agents = new List<AgentConfig>
-    {
-        // Only AI agents are supported in offline mode
-        new AgentConfig { 
-            Name = "AI1", 
-            BrainType = BrainType.AI,
-            OwnedWeaponIds = new[] { "knife" } 
-        },
-        new AgentConfig { 
-            Name = "AI2", 
-            BrainType = BrainType.AI,
-            OwnedWeaponIds = new[] { "rifle" } 
-        }
-    },
-    Weapons = new List<WeaponConfig>
-    {
-        new WeaponConfig
-        {
-            WeaponId = "knife",
-            WeaponType = WeaponType.Melee,
-            Range = 1.5f,
-            Damage = 15
-        },
-        new WeaponConfig
-        {
-            WeaponId = "rifle",
-            WeaponType = WeaponType.Ranged,
-            Range = 8.0f,
-            Damage = 25
-        }
-    }
-};
-
-// Create and run the simulation
-Simulation simulation = new Simulation(config, SimulationMode.Offline);
-IMap map = MapLoader.LoadMap(config.MapPath);
-Scene scene = new Scene();
-simulation.Initialize(map, scene);
-
-// Access the results
-simulation.Events.OnStopped += (sim, result) => {
-    Console.WriteLine($"Simulation completed with result: {result}");
-};
-
-// In offline mode, Start() will run the simulation to completion
-simulation.Start();
+    simulation.Update(updateRate);
+}
 ```
 
 ## Configurations
@@ -164,8 +121,11 @@ The `GameConfig` class is the main configuration for a simulation:
 ```json
 {
   "Name": "Example Simulation",
-  "MapPath": "maps/arena.txt",
-  "RealtimeMode": true,
+  "MapConfiguration": {
+    "Type": "Simple",
+    "Width": 40,
+    "Height": 40
+  }
   "Objective": {
     "Type": "Steps",
     "TypeEnum": "Steps",
@@ -213,98 +173,9 @@ The `GameConfig` class is the main configuration for a simulation:
 }
 ```
 
-### Agent Configuration
+## Documentation
 
-The `AgentConfig` class configures individual agents:
-
-```json
-{
-  "Name": "Agent Name",
-  "BrainType": "AI",  // "AI" or "Human"
-  "OwnedWeaponIds": ["knife", "rifle"], // IDs of weapons this agent owns
-  "StartX": 0,        // Starting X position (ignored if RandomStart is true)
-  "StartY": 0,        // Starting Y position (ignored if RandomStart is true)
-  "RandomStart": true, // Whether to use a random starting position
-  "ThinkInterval": 0.5, // How often AI agents think (in seconds)
-  "Awareness": 10,    // Field of view radius
-  "MaxHealth": 100,   // Maximum health points
-  "AttackPower": 10,  // Base attack power
-  "Defense": 5,       // Base defense value
-  "Speed": 1.0        // Movement speed multiplier
-}
-```
-
-### Weapon Configuration
-
-The `WeaponConfig` class configures weapons that can be assigned to agents:
-
-```json
-{
-  "WeaponId": "knife",       // Unique identifier for the weapon
-  "WeaponType": "Melee",     // "Melee" or "Ranged"
-  "Range": 1.5,              // Attack range
-  "Damage": 15               // Base damage
-}
-```
-
-### Objective Configuration
-
-The toolkit supports several objective types:
-
-#### Steps Objective
-
-Runs the simulation for a specified number of steps:
-
-```json
-{
-  "Type": "StepsObjective",
-  "TypeEnum": "Steps",
-  "MaxSteps": 10000
-}
-```
-
-#### Team Deathmatch Objective
-
-Teams compete until only one team has surviving members:
-
-```json
-{
-  "Type": "DeathmatchObjective",
-  "TypeEnum": "TeamDeathmatch",
-  "Teams": 2,
-  "PlayersPerTeam": 5
-}
-```
-
-#### Capture Point Objective
-
-Teams compete to capture and hold a point for a specified time:
-
-```json
-{
-  "Type": "CapturePointObjective",
-  "TypeEnum": "CapturePoint",
-  "Teams": 2,
-  "PlayersPerTeam": 5,
-  "CaptureRadius": 5.0,
-  "CaptureTime": 60.0
-}
-```
-
-#### Defense Objective
-
-One team defends an objective while another team attacks:
-
-```json
-{
-  "Type": "DefendObjective",
-  "TypeEnum": "DefendObjective",
-  "Teams": 2,
-  "PlayersPerTeam": 5,
-  "MaxMatchTime": 120.0,
-  "ObjectiveThreshold": 0
-}
-```
+Further documentation and guidance can be found [here](arbyun.github.io/Simulation-Toolkit-AI/). 
 
 ## Architecture
 
@@ -452,7 +323,7 @@ classDiagram
 ```mermaid
 flowchart TD
     A[Create GameConfig] --> B[Create Simulation]
-    B --> C[Initialize with Map & Scene]
+    B --> C[Initialize with Map]
     C --> D[Start Simulation]
     D --> E{Simulation Mode?}
     E -->|Offline| F[Run to completion]
@@ -462,6 +333,10 @@ flowchart TD
     H -->|No| I[Process Results]
     F --> I
 ```
+
+## Game Engines
+
+This project is engine agnostic, meaning that it can safely be used with any game engine that supports C#. For a Unity implementation example, check out the [Examples](https://github.com/arbyun/Simulation-Toolkit-AI-Examples) repository.
 
 ## Credits
 
