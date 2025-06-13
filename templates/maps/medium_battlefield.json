@@ -1,0 +1,12 @@
+{
+  "TemplateId": "medium_battlefield",
+  "Name": "Medium Battlefield",
+  "Description": "A medium-sized 30x30 battlefield suitable for team-based combat with tactical positioning",
+  "Version": "1.0",
+  "Tags": ["medium", "battlefield", "tactical", "team"],
+  "MapConfiguration": {
+    "Type": "Simple",
+    "Width": 30,
+    "Height": 30
+  }
+}

@@ -14,11 +14,13 @@ namespace SimArena.Serialization.Configuration
     public class TemplateManager : ITemplateManager
     {
         private readonly Dictionary<string, AgentTemplate> _agentTemplates;
+        private readonly Dictionary<string, MapTemplate> _mapTemplates;
         private readonly List<string> _templateSearchPaths;
         
         public TemplateManager()
         {
             _agentTemplates = new Dictionary<string, AgentTemplate>();
+            _mapTemplates = new Dictionary<string, MapTemplate>();
             _templateSearchPaths = new List<string>
             {
                 "templates",
@@ -55,12 +57,39 @@ namespace SimArena.Serialization.Configuration
                 {
                     LoadAgentTemplate(file);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine($"Warning: Failed to load template from {file}: {ex.Message}");
+                    try
+                    {
+                        LoadMapTemplate(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Warning: Failed to load template from {file}: {ex.Message}");
+                        throw;
+                    }
                 }
             }
         }
+        
+        /// <summary>
+        /// Loads a specific map template from a file
+        /// </summary>
+        /// <param name="filePath">Path to the template file</param>
+        private void LoadMapTemplate(string filePath)
+            {
+                var json = File.ReadAllText(filePath);
+                var template = JsonSerializer.Deserialize<MapTemplate>(json, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        WriteIndented = true
+                                                     });
+                
+                    if (template != null && !string.IsNullOrEmpty(template.TemplateId))
+                    {
+                        _mapTemplates[template.TemplateId] = template;
+                    }
+            }
         
         /// <summary>
         /// Loads a specific agent template from a file
@@ -133,6 +162,22 @@ namespace SimArena.Serialization.Configuration
         /// <param name="config">Configuration object to modify</param>
         /// <param name="overrides">Dictionary of property paths and values</param>
         private void ApplyOverrides(AgentConfiguration config, Dictionary<string, object> overrides)
+        {
+            if (overrides == null || overrides.Count == 0)
+                return;
+                
+            foreach (var kvp in overrides)
+            {
+                ApplyOverride(config, kvp.Key, kvp.Value);
+            }
+        }
+        
+        /// <summary>
+        /// Applies property overrides to a map configuration using reflection
+        /// </summary>
+        /// <param name="config">Configuration object to modify</param>
+        /// <param name="overrides">Dictionary of property paths and values</param>
+        private void ApplyOverrides(MapConfiguration config, Dictionary<string, object> overrides)
         {
             if (overrides == null || overrides.Count == 0)
                 return;
@@ -223,5 +268,68 @@ namespace SimArena.Serialization.Configuration
         {
             return _agentTemplates.Values.Where(t => t.Tags != null && t.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase));
         }
-    }
-}
+        
+        /// <summary>
+        /// Resolves a map template reference to an actual map configuration
+        /// </summary>
+        /// <param name="templateRef">Map template reference to resolve</param>
+        /// <returns>Resolved map configuration</returns>
+        public MapConfiguration ResolveMapTemplate(MapTemplateReference templateRef)
+        {
+            if (templateRef == null)
+                throw new ArgumentNullException(nameof(templateRef));
+                
+            MapTemplate template = null;
+            
+            // Try to find template by ID first
+            if (_mapTemplates.TryGetValue(templateRef.TemplatePath, out template))
+            {
+                // Found by ID
+            }
+            // Try to load from file path
+            else if (File.Exists(templateRef.TemplatePath))
+            {
+                var json = File.ReadAllText(templateRef.TemplatePath);
+                template = JsonSerializer.Deserialize<MapTemplate>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            else
+            {
+                throw new FileNotFoundException($"Map template not found: {templateRef.TemplatePath}");
+            }
+            
+            // Create instance from template
+            var mapConfig = template.CreateMapConfiguration();
+            
+            // Apply overrides if any
+            if (templateRef.Overrides != null && templateRef.Overrides.Count > 0)
+            {
+                ApplyOverrides(mapConfig, templateRef.Overrides);
+            }
+            
+            return mapConfig;
+        }
+        
+        /// <summary>
+        /// Gets all available map templates
+        /// </summary>
+        /// <returns>Collection of available map templates</returns>
+        public IEnumerable<MapTemplate> GetAvailableMapTemplates()
+        {
+            return _mapTemplates.Values;
+        }
+        
+        /// <summary>
+        /// Gets map templates by tag
+        /// </summary>
+        /// <param name="tag">Tag to filter by</param>
+        /// <returns>Map templates with the specified tag</returns>
+        public IEnumerable<MapTemplate> GetMapTemplatesByTag(string tag)
+        {
+            return _mapTemplates.Values.Where(t => 
+                t.Tags != null && t.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase));
+        }
+     }
+ }

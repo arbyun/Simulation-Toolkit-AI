@@ -32,5 +32,25 @@ namespace SimArena.Serialization.Configuration
         /// <param name="tag">Tag to filter by</param>
         /// <returns>Templates with the specified tag</returns>
         IEnumerable<AgentTemplate> GetTemplatesByTag(string tag);
+        
+        /// <summary>
+        /// Resolves a map template reference to an actual map configuration
+        /// </summary>
+        /// <param name="templateRef">Map template reference to resolve</param>
+        /// <returns>Resolved map configuration</returns>
+        MapConfiguration ResolveMapTemplate(MapTemplateReference templateRef);
+        
+        /// <summary>
+        /// Gets all available map templates
+        /// </summary>
+        /// <returns>Collection of available map templates</returns>
+        IEnumerable<MapTemplate> GetAvailableMapTemplates();
+        
+        /// <summary>
+        /// Gets map templates filtered by tag
+        /// </summary>
+        /// <param name="tag">Tag to filter by</param>
+        /// <returns>Map templates with the specified tag</returns>
+        IEnumerable<MapTemplate> GetMapTemplatesByTag(string tag);
     }
 }

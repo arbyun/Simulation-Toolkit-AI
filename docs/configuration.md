@@ -1,4 +1,4 @@
-﻿---
+---
 title: Configuration
 ---
 
@@ -11,6 +11,7 @@ documentation will only be provided for JSON.
 
 - [Purpose](#purpose)
 - [Game Configuration](#game-configuration)
+- [Map Configuration](#map-configuration)
 - [Objective Configuration](#objective-configuration)
 - [Agent Configuration](#agent-configuration)
 - [Brain Configuration](#brain-configuration)
@@ -28,12 +29,75 @@ or at runtime using the `GameConfiguration` class.
 The `GameConfiguration` class is the root of all configurations. It contains the following properties:
 
 - `Name`: The name of the match
-- `MapPath`: The path to the map file
+- `Map`: The direct map configuration (optional if using MapTemplate)
+- `MapTemplate`: The map template reference (alternative to direct map configuration)
 - `RealtimeMode`: Whether to run the simulation in realtime mode
 - `Objective`: The objective configuration
 - `Agents`: The list of agent configurations
 - `AgentTemplates`: The list of agent template references (alternative to direct agent configurations)
 - `Weapons`: The list of weapon configurations
+
+**Note**: You must specify either `Map` or `MapTemplate`, but not both. Map templates are the recommended approach for reusable map configurations.
+
+## Map Configuration
+
+Maps define the battlefield where agents will fight. SimArena supports multiple map types and a template system for reusable map configurations.
+
+### Direct Map Configuration
+
+You can specify a map directly in the game configuration:
+
+```json
+{
+  "Name": "Direct Map Example",
+  "Map": {
+    "Type": "Simple",
+    "Width": 30,
+    "Height": 30
+  }
+}
+```
+
+### Map Template Reference
+
+The recommended approach is to use map templates:
+
+```json
+{
+  "Name": "Template Map Example",
+  "MapTemplate": {
+    "TemplatePath": "medium_battlefield"
+  }
+}
+```
+
+### Map Template Overrides
+
+You can override specific properties of map templates:
+
+```json
+{
+  "Name": "Customized Template Example",
+  "MapTemplate": {
+    "TemplatePath": "urban_complex",
+    "Overrides": {
+      "Width": 60,
+      "Height": 60,
+      "MaxRooms": 25
+    }
+  }
+}
+```
+
+### Map Types
+
+- **Simple**: Basic rectangular maps with all cells walkable
+- **ProcGen**: Procedurally generated maps using various strategies
+  - **RandomRooms**: Maps with randomly placed rooms and corridors
+  - **BorderOnly**: Maps with walls only around the border
+- **File**: Maps loaded from text files with custom layouts
+
+For detailed information about maps, see the [Maps](maps.md) and [Custom Maps](custom-maps.md) documentation.
 
 ## Objective Configuration
 

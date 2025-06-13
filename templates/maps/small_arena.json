@@ -1,0 +1,12 @@
+{
+  "TemplateId": "small_arena",
+  "Name": "Small Arena",
+  "Description": "A small 20x20 arena perfect for quick skirmishes and close-quarters combat",
+  "Version": "1.0",
+  "Tags": ["small", "arena", "combat", "quick"],
+  "MapConfiguration": {
+    "Type": "Simple",
+    "Width": 20,
+    "Height": 20
+  }
+}

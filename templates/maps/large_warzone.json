@@ -1,0 +1,12 @@
+{
+  "TemplateId": "large_warzone",
+  "Name": "Large Warzone",
+  "Description": "A large 50x50 warzone for epic battles with multiple squads and long-range combat",
+  "Version": "1.0",
+  "Tags": ["large", "warzone", "epic", "long-range"],
+  "MapConfiguration": {
+    "Type": "Simple",
+    "Width": 50,
+    "Height": 50
+  }
+}

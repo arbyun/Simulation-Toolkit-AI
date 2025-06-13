@@ -1,6 +1,8 @@
 {
   "Name": "Tank Battalion - Heavy Combat",
-  "MapPath": null,
+  "MapTemplate": {
+    "TemplatePath": "urban_complex"
+  },
   "RealtimeMode": false,
   "Objective": {
     "Type": "DeathmatchObjective",

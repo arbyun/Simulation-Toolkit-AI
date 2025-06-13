@@ -1,0 +1,16 @@
+{
+  "TemplateId": "urban_complex",
+  "Name": "Urban Complex",
+  "Description": "A procedurally generated urban environment with rooms and corridors for tactical combat",
+  "Version": "1.0",
+  "Tags": ["urban", "complex", "rooms", "tactical", "procedural"],
+  "MapConfiguration": {
+    "Type": "ProcGen",
+    "StrategyType": "RandomRooms",
+    "Width": 40,
+    "Height": 40,
+    "MaxRooms": 15,
+    "RoomMaxWidth": 8,
+    "RoomMaxHeight": 8
+  }
+}

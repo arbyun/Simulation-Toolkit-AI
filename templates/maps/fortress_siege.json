@@ -1,0 +1,13 @@
+{
+  "TemplateId": "fortress_siege",
+  "Name": "Fortress Siege",
+  "Description": "A border-only map creating a fortress-like environment perfect for siege scenarios",
+  "Version": "1.0",
+  "Tags": ["fortress", "siege", "border", "defensive"],
+  "MapConfiguration": {
+    "Type": "ProcGen",
+    "StrategyType": "BorderOnly",
+    "Width": 35,
+    "Height": 35
+  }
+}

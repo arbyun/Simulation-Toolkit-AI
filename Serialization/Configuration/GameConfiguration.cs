@@ -17,9 +17,14 @@ namespace SimArena.Serialization.Configuration
         public string Name { get; set; } = "Default Match";
     
         /// <summary>
-        /// Path to the map file
+        /// Map configuration for this game
         /// </summary>
-        public string MapPath { get; set; }
+        public MapConfiguration Map { get; set; }
+        
+        /// <summary>
+        /// Map template reference (alternative to direct map configuration)
+        /// </summary>
+        public MapTemplateReference MapTemplate { get; set; }
     
         /// <summary>
         /// Whether to run the simulation in realtime mode
@@ -131,13 +136,20 @@ namespace SimArena.Serialization.Configuration
         }
 
         /// <summary>
-        /// Resolves all template references to actual agent configurations
+        /// Resolves all template references to actual configurations
         /// </summary>
         /// <param name="templateManager">Template manager to use for resolution</param>
         public void ResolveTemplates(ITemplateManager templateManager)
         {
             if (templateManager == null)
                 throw new ArgumentNullException(nameof(templateManager));
+                
+            // Resolve map template if specified
+            if (MapTemplate != null && Map == null)
+            {
+                Map = templateManager.ResolveMapTemplate(MapTemplate);
+                MapTemplate = null; // Clear template reference after resolution
+            }
                 
             // Resolve agent templates and add them to the agents list
             foreach (var templateRef in AgentTemplates)
@@ -157,10 +169,22 @@ namespace SimArena.Serialization.Configuration
         /// <returns>True if the configuration is valid, false otherwise</returns>
         public bool Validate(out string errorMessage)
         {
-            // Check if the map file exists (only if MapPath is specified)
-            if (!string.IsNullOrEmpty(MapPath) && !File.Exists(MapPath))
+            // Check if we have either a map configuration or map template
+            if (Map == null && MapTemplate == null)
             {
-                errorMessage = $"Map file not found: {MapPath}";
+                errorMessage = "Either Map or MapTemplate must be specified";
+                return false;
+            }
+            
+            // Validate map configuration if specified
+            if (Map != null && !Map.Validate(out errorMessage))
+            {
+                return false;
+            }
+            
+            // Validate map template reference if specified
+            if (MapTemplate != null && !MapTemplate.Validate(out errorMessage))
+            {
                 return false;
             }
         

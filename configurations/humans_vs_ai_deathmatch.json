@@ -1,6 +1,8 @@
 {
   "Name": "Humans vs AI - Team Deathmatch",
-  "MapPath": null,
+  "MapTemplate": {
+    "TemplatePath": "medium_battlefield"
+  },
   "RealtimeMode": false,
   "Objective": {
     "Type": "DeathmatchObjective",

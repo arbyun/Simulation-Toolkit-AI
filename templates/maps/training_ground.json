@@ -1,0 +1,12 @@
+{
+  "TemplateId": "training_ground",
+  "Name": "Training Ground",
+  "Description": "A compact training environment for testing AI behaviors and weapon effectiveness",
+  "Version": "1.0",
+  "Tags": ["training", "testing", "compact", "ai"],
+  "MapConfiguration": {
+    "Type": "Simple",
+    "Width": 15,
+    "Height": 15
+  }
+}

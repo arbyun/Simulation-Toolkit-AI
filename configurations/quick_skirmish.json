@@ -1,6 +1,8 @@
 {
   "Name": "Quick Skirmish - 2v2",
-  "MapPath": null,
+  "MapTemplate": {
+    "TemplatePath": "small_arena"
+  },
   "RealtimeMode": false,
   "Objective": {
     "Type": "DeathmatchObjective",
