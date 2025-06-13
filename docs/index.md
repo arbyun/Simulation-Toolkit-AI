@@ -8,5 +8,20 @@ SimArena is a flexible and extensible simulation framework for AI-driven agent-b
 
 ## Quick Links
 
+### Guides
 - [Getting Started](getting-started.md)
 - [Usage](usage.md)
+
+### Concepts
+- [Configuration](configuration.md)
+- [Entities](entities.md)
+- [Brains](brains.md)
+- [Weapons](weapons.md)
+- [Maps](maps.md)
+- [Objectives](objectives.md)
+
+### Extending SimArena
+- [Custom Objectives](custom-objectives.md)
+- [Custom Brains](custom-brains.md)
+- [Custom Weapons](custom-weapons.md)
+- [Custom Maps](custom-maps.md)

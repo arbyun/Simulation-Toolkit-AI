@@ -4,9 +4,24 @@ title: Custom Weapons
 
 # Creating Custom Weapons
 
-This page will walk you through the process of creating a complete custom weapon for SimArena, 
+This page will walk you through the process of creating a complete custom [weapon](weapons.md) for SimArena, 
 including all necessary components, and how to work with weapon configurations in SimArena using 
 the polymorphic JSON serialization system.
+
+# Index
+
+- [Overview](#overview)
+- [Existing Weapons](#existing-weapons)
+  - [Creating a Melee Weapon](#creating-a-melee-weapon)
+  - [Creating a Ranged Weapon](#creating-a-ranged-weapon)
+- [Serializing Weapons](#serializing-weapons)
+- [Creating a Custom Weapon](#creating-a-custom-weapon)
+  - [Step 1: Create a Custom Weapon Type](#step-1-create-a-custom-weapon-type)
+  - [Step 2: Create a Configuration for Your Custom Weapon](#step-2-create-a-configuration-for-your-custom-weapon)
+  - [Step 3: Register Your Weapon Type for JSON Serialization](#step-3-register-your-weapon-type-for-json-serialization)
+- [Common Properties](#common-properties)
+- [Ranged Weapon Properties](#ranged-weapon-properties)
+- [Best Practices](#best-practices)
 
 ## Overview
 

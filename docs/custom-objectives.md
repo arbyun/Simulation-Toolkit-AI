@@ -4,8 +4,21 @@ title: Custom Objectives
 
 # Creating Custom Objectives
 
-This page will walk you through the process of creating a complete custom objective for SimArena, including all necessary components. 
+This page will walk you through the process of creating a complete custom [objective](objectives.md) for SimArena, including all necessary components. 
 We'll use the Deathmatch objective as a reference pattern.
+
+# Index
+
+- [Overview of the Objective System Architecture](#overview-of-the-objective-system-architecture)
+- [Step 1: Define Your Objective Type](#step-1-define-your-objective-type)
+- [Step 2: Create the Objective Configuration](#step-2-create-the-objective-configuration)
+- [Step 3: Create the Input Data](#step-3-create-the-input-data)
+- [Step 4: Create the Simulation Result](#step-4-create-the-simulation-result)
+- [Step 5: Create the Result Builder](#step-5-create-the-result-builder)
+- [Step 6: Create the Objective Tracker](#step-6-create-the-objective-tracker)
+- [Step 7: Register Your Objective Type for JSON Serialization](#step-7-register-your-objective-type-for-json-serialization)
+- [Using Your New Objective](#using-your-new-objective)
+- [Best Practices](#best-practices)
 
 ## Overview of the Objective System Architecture
 

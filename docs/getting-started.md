@@ -18,6 +18,14 @@ Then, direct your command prompt to the folder where you have cloned the reposit
 dotnet build
 ```
 
+To try running the tests, run the solution with an output folder for the match logs:
+
+```bash
+dotnet run -- "C:\Users\YOURNAME\YOURFOLDER"
+```
+
+Otherwise, to try running a simulation, please refer to the [simulation](simulation.md) documentation.
+
 ## 2. Unity Integration
 
 If you are using Unity, you can import the project as a submodule on your Assets folder:

@@ -4,7 +4,17 @@ title: Custom Brains
 
 # Creating Custom Brains
 
-This page explains how to create new Brain types in SimArena that are compatible with JSON serialization.
+This page explains how to create new [brain](brains.md) types in SimArena that are compatible with JSON serialization.
+
+# Index
+
+- [Overview](#overview)
+- [Step 1: Create a Brain implementation](#step-1-create-a-brain-implementation)
+- [Step 2: Create a BrainConfiguration for your brain](#step-2-create-a-brainconfiguration-for-your-brain)
+- [Step 3: Register your brain type for polymorphic serialization](#step-3-register-your-brain-type-for-polymorphic-serialization)
+- [Usage Examples](#usage-examples)
+- [Best Practices](#best-practices)
+- [Fun Fact: How the JSON Polymorphism Works](#fun-fact-how-the-json-polymorphism-works)
 
 ## Overview
 
