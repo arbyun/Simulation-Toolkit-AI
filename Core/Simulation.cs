@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using RogueSharp;
 using RogueSharp.MapCreation;
 using SimArena.Core.Objectives;
 using SimArena.Core.Objectives.Trackers.Interfaces;
+using SimArena.Core.Queries;
 using SimArena.Core.Results.Result_Data;
 using SimArena.Entities;
 
@@ -20,6 +18,7 @@ namespace SimArena.Core
         public int CurrentStep { get; protected set; } = 0;
         
         public SimulationEvents Events { get; } = new();
+        public MapQuerier MapQuerier => MapQuerier.Instance;
         
         protected IObjectiveTracker _objectiveTracker;
 
@@ -37,6 +36,7 @@ namespace SimArena.Core
         public Simulation(Map map)
         {
             Map = map ?? throw new ArgumentNullException(nameof(map));
+            InitializeMapQuerier();
         }
         
         /// <summary>
@@ -54,6 +54,7 @@ namespace SimArena.Core
             mapCreationStrategy ??= new RandomRoomsMapCreationStrategy<Map>(width, height, 10, 6, 6);
             
             Map = mapCreationStrategy.CreateMap();
+            InitializeMapQuerier();
         }
 
         /// <summary>
@@ -222,6 +223,42 @@ namespace SimArena.Core
             
             // Clear all agents
             Agents.Clear();
+            
+            // Reset map querier data
+            MapQuerier.Reset();
+        }
+        
+        /// <summary>
+        /// Initializes the MapQuerier and subscribes to death events
+        /// </summary>
+        private void InitializeMapQuerier()
+        {
+            if (Map != null)
+            {
+                MapQuerier.Initialize(Map.Width, Map.Height);
+                
+                // Subscribe to agent death events to track death locations
+                Events.OnAgentKilled += OnAgentKilled;
+            }
+        }
+        
+        /// <summary>
+        /// Ensures MapQuerier is initialized - useful for deserialized instances
+        /// </summary>
+        public void EnsureMapQuerierInitialized()
+        {
+            if (!MapQuerier.IsInitialized && Map != null)
+            {
+                InitializeMapQuerier();
+            }
+        }
+        
+        /// <summary>
+        /// Event handler for when an agent is killed - records the death location
+        /// </summary>
+        private void OnAgentKilled(object sender, Agent killedAgent)
+        {
+            MapQuerier.RecordDeath(killedAgent, CurrentStep);
         }
     }
 }
