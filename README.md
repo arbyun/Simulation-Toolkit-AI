@@ -317,8 +317,7 @@ classDiagram
 ```mermaid
 flowchart TD
     A[Create Simulation] --> B[Set Objective Tracker]
-    B --> C[Add Agents with Brains]
-    C --> D[Optional: Initialize Map Analyzers]
+    B --> D[Add Agents with Brains]
     D --> E[Start Update Loop]
     E --> F[Current Step++]
     F --> G[Agents Think & Act]
