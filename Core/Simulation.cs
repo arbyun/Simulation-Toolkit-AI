@@ -1,8 +1,9 @@
 using RogueSharp;
 using RogueSharp.MapCreation;
+using SimArena.Core.Analysis;
+using SimArena.Core.Analysis.Data;
 using SimArena.Core.Objectives;
 using SimArena.Core.Objectives.Trackers.Interfaces;
-using SimArena.Core.Queries;
 using SimArena.Core.Results.Result_Data;
 using SimArena.Entities;
 
@@ -18,7 +19,7 @@ namespace SimArena.Core
         public int CurrentStep { get; protected set; } = 0;
         
         public SimulationEvents Events { get; } = new();
-        public MapQuerier MapQuerier => MapQuerier.Instance;
+        public List<IMapAnalysis> MapAnalyzers { get; private set; } = new();
         
         protected IObjectiveTracker _objectiveTracker;
 
@@ -36,7 +37,7 @@ namespace SimArena.Core
         public Simulation(Map map)
         {
             Map = map ?? throw new ArgumentNullException(nameof(map));
-            InitializeMapQuerier();
+            InitializeMapAnalyzers();
         }
         
         /// <summary>
@@ -54,7 +55,7 @@ namespace SimArena.Core
             mapCreationStrategy ??= new RandomRoomsMapCreationStrategy<Map>(width, height, 10, 6, 6);
             
             Map = mapCreationStrategy.CreateMap();
-            InitializeMapQuerier();
+            InitializeMapAnalyzers();
         }
 
         /// <summary>
@@ -76,6 +77,12 @@ namespace SimArena.Core
         {
             Agents.Add(agent);
             Entities.Add(agent);
+            
+            // Set the simulation reference on the brain so it can access analyzers
+            if (agent.Brain != null)
+            {
+                agent.Brain.Simulation = this;
+            }
             
             // Raise the OnCreate event so that trackers can register the agent
             Events.RaiseOnCreate(this, agent);
@@ -224,33 +231,70 @@ namespace SimArena.Core
             // Clear all agents
             Agents.Clear();
             
-            // Reset map querier data
-            MapQuerier.Reset();
+            // Reset all map analyzers
+            foreach (var analyzer in MapAnalyzers)
+            {
+                analyzer.Reset();
+            }
         }
         
         /// <summary>
-        /// Initializes the MapQuerier and subscribes to death events
+        /// Initializes the map analyzers and subscribes to events
         /// </summary>
-        private void InitializeMapQuerier()
+        private void InitializeMapAnalyzers()
         {
             if (Map != null)
             {
-                MapQuerier.Initialize(Map.Width, Map.Height);
+                // Create default analyzers
+                var deathAnalysis = new DeathAnalysis();
+                var damageAnalysis = new DamageAnalysis();
+                var healingAnalysis = new HealingAnalysis();
                 
-                // Subscribe to agent death events to track death locations
+                // Initialize them with map dimensions
+                deathAnalysis.Initialize(Map.Width, Map.Height);
+                damageAnalysis.Initialize(Map.Width, Map.Height);
+                healingAnalysis.Initialize(Map.Width, Map.Height);
+                
+                // Add to the list
+                MapAnalyzers.Add(deathAnalysis);
+                MapAnalyzers.Add(damageAnalysis);
+                MapAnalyzers.Add(healingAnalysis);
+                
+                // Subscribe to events
                 Events.OnAgentKilled += OnAgentKilled;
+                //TODO: damage and healing events 
             }
         }
         
         /// <summary>
-        /// Ensures MapQuerier is initialized - useful for deserialized instances
+        /// Ensures map analyzers are initialized - useful for deserialized instances
         /// </summary>
-        public void EnsureMapQuerierInitialized()
+        public void EnsureMapAnalyzersInitialized()
         {
-            if (!MapQuerier.IsInitialized && Map != null)
+            if (MapAnalyzers.Count == 0 && Map != null)
             {
-                InitializeMapQuerier();
+                InitializeMapAnalyzers();
             }
+        }
+        
+        /// <summary>
+        /// Get a specific type of map analyzer
+        /// </summary>
+        /// <typeparam name="T">The type of analyzer to get</typeparam>
+        /// <returns>The analyzer of the specified type, or null if not found</returns>
+        public T? GetMapAnalyzer<T>() where T : class, IMapAnalysis
+        {
+            return MapAnalyzers.OfType<T>().FirstOrDefault();
+        }
+        
+        /// <summary>
+        /// Get a map analyzer by analysis type name
+        /// </summary>
+        /// <param name="analysisType">The type of analysis (e.g., "Death", "Damage", "Healing")</param>
+        /// <returns>The analyzer with the specified type, or null if not found</returns>
+        public IMapAnalysis? GetMapAnalyzer(string analysisType)
+        {
+            return MapAnalyzers.FirstOrDefault(a => a.AnalysisType.Equals(analysisType, StringComparison.OrdinalIgnoreCase));
         }
         
         /// <summary>
@@ -258,7 +302,12 @@ namespace SimArena.Core
         /// </summary>
         private void OnAgentKilled(object sender, Agent killedAgent)
         {
-            MapQuerier.RecordDeath(killedAgent, CurrentStep);
+            var deathAnalysis = GetMapAnalyzer<DeathAnalysis>();
+            if (deathAnalysis != null)
+            {
+                var deathData = new DeathData(killedAgent.X, killedAgent.Y, killedAgent.Name, killedAgent.Team, CurrentStep);
+                deathAnalysis.RecordData(deathData);
+            }
         }
     }
 }

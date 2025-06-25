@@ -14,6 +14,7 @@ namespace SimArena.Core
         
         public int Team { get; }
         public bool FastMode { get; set; } = false; // When true, bypasses time checks for ultra-fast simulation
+        public Simulation? Simulation { get; set; } // Reference to the simulation for accessing analyzers
         
         public event Action<Agent, int, int>? OnMove;
 

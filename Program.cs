@@ -10,11 +10,11 @@ namespace SimArena
         public static void Main(string[] args)
         {
             // Examples of tests you might want to run:
-            // MapQuerierDemo.RunDemo();
+            // MapAnalysisDemo.RunDemo();
             // SimulationTests.Start(args);
             // MapCreationStrategiesDemo.RunDemo();
             
-            SimulationTests.Start(args);
+            MapAnalysisDemo.RunDemo();
         }
     }
 }

@@ -1,12 +1,12 @@
 using RogueSharp;
 using SimArena.Core;
-using SimArena.Core.Queries;
+using SimArena.Core.Analysis;
 
 namespace SimArena.Brains
 {
     /// <summary>
     /// An advanced brain that uses death density information to make tactical decisions
-    /// Demonstrates how to leverage the MapQuerier for strategic gameplay
+    /// Demonstrates how to leverage the DeathAnalysis for strategic gameplay
     /// </summary>
     public class TacticalBrain : Brain
     {
@@ -19,34 +19,36 @@ namespace SimArena.Brains
 
         protected override void ExecuteThink()
         {
-            var mapQuerier = MapQuerier.Instance;
-            
-            if (!mapQuerier.IsInitialized)
+            if (Simulation == null)
             {
-                // Fallback to random behavior if no map querier available
-                // Always good to have a fallback behavior :)
+                // Fallback to random behavior if no simulation reference
+                MoveRandomly();
+                return;
+            }
+
+            var deathAnalysis = Simulation.GetMapAnalyzer<DeathAnalysis>();
+            if (deathAnalysis == null || !deathAnalysis.IsInitialized)
+            {
+                // Fallback to random behavior if no death analysis 
                 MoveRandomly();
                 return;
             }
 
             // Periodically analyze the battlefield
-            // Note: We can't access simulation step directly, so we're using a simple counter here
-            // If I notice this is a problem, I will add access to the simulation in the future
             _lastAnalysisStep++;
-            
             if (_lastAnalysisStep >= ANALYSIS_INTERVAL)
             {
-                AnalyzeBattlefield(mapQuerier);
+                AnalyzeBattlefield(deathAnalysis);
                 _lastAnalysisStep = 0;
             }
 
             // Make tactical decisions based on current position and death data
-            MakeTacticalDecision(mapQuerier);
+            MakeTacticalDecision(deathAnalysis);
         }
 
-        private void AnalyzeBattlefield(MapQuerier mapQuerier)
+        private void AnalyzeBattlefield(DeathAnalysis deathAnalysis)
         {
-            var dangerousAreas = mapQuerier.GetMostDenseDeathAreas(radius: 3, topCount: 3);
+            var dangerousAreas = deathAnalysis.GetMostDenseAreas(radius: 3, topCount: 3);
             
             if (dangerousAreas.Count > 0)
             {
@@ -57,34 +59,34 @@ namespace SimArena.Brains
             }
         }
 
-        private void MakeTacticalDecision(MapQuerier mapQuerier)
+        private void MakeTacticalDecision(DeathAnalysis deathAnalysis)
         {
             var currentX = Agent.X;
             var currentY = Agent.Y;
             
             // Assess risk of current position
-            var deathsNearby = mapQuerier.GetDeathsInRadius(currentX, currentY, 2);
+            var deathsNearby = deathAnalysis.GetDataInRadius(currentX, currentY, 2);
             var riskLevel = CalculateLocalRisk(deathsNearby.Count);
 
             // Decision making based on risk level
             if (riskLevel > 0.8) // High risk area
             {
                 // Try to move to a safer area
-                MoveToSaferArea(mapQuerier);
+                MoveToSaferArea(deathAnalysis);
             }
             else if (riskLevel < 0.3) // Low risk area
             {
                 // Move towards areas with potential action but not too dangerous
-                MoveToOpportunityArea(mapQuerier);
+                MoveToOpportunityArea(deathAnalysis);
             }
             else
             {
                 // Move randomly but avoid high-risk areas
-                MoveRandomlyAvoidingDanger(mapQuerier);
+                MoveRandomlyAvoidingDanger(deathAnalysis);
             }
         }
 
-        private void MoveToSaferArea(MapQuerier mapQuerier)
+        private void MoveToSaferArea(DeathAnalysis deathAnalysis)
         {
             var currentX = Agent.X;
             var currentY = Agent.Y;
@@ -103,7 +105,7 @@ namespace SimArena.Brains
 
                     if (IsValidMove(newX, newY))
                     {
-                        var deathsInArea = mapQuerier.GetDeathsInRadius(newX, newY, 2);
+                        var deathsInArea = deathAnalysis.GetDataInRadius(newX, newY, 2);
                         var risk = CalculateLocalRisk(deathsInArea.Count);
 
                         if (risk < lowestRisk)
@@ -122,16 +124,16 @@ namespace SimArena.Brains
             }
         }
 
-        private void MoveToOpportunityArea(MapQuerier mapQuerier)
+        private void MoveToOpportunityArea(DeathAnalysis deathAnalysis)
         {
             // Look for areas with moderate death density (indicates action but not too dangerous)
-            var densityAreas = mapQuerier.GetMostDenseDeathAreas(radius: 4, topCount: 10);
+            var densityAreas = deathAnalysis.GetMostDenseAreas(radius: 4, topCount: 10);
             
             if (densityAreas.Count > 0)
             {
                 // Find a moderately active area that's not too close to avoid the highest risk
                 var targetArea = densityAreas
-                    .Where(area => area.DeathCount >= 2 && area.DeathCount <= 8) // Moderate activity
+                    .Where(area => area.DataCount >= 2 && area.DataCount <= 8) // Moderate activity
                     .OrderBy(area => GetDistance(Agent.X, Agent.Y, area.X, area.Y))
                     .FirstOrDefault();
 
@@ -146,7 +148,7 @@ namespace SimArena.Brains
             MoveRandomly();
         }
 
-        private void MoveRandomlyAvoidingDanger(MapQuerier mapQuerier)
+        private void MoveRandomlyAvoidingDanger(DeathAnalysis deathAnalysis)
         {
             var currentX = Agent.X;
             var currentY = Agent.Y;
@@ -163,7 +165,7 @@ namespace SimArena.Brains
 
                     if (IsValidMove(newX, newY))
                     {
-                        var deathsInArea = mapQuerier.GetDeathsInRadius(newX, newY, 2);
+                        var deathsInArea = deathAnalysis.GetDataInRadius(newX, newY, 2);
                         var risk = CalculateLocalRisk(deathsInArea.Count);
 
                         // Only consider moves with acceptable risk
