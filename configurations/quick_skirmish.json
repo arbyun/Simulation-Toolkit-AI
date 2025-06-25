@@ -27,14 +27,14 @@
       }
     },
     {
-      "TemplatePath": "ai_scout",
+      "TemplatePath": "human_tank",
       "Name": "Blue Team Charlie",
       "Overrides": {
         "Brain.Team": 1
       }
     },
     {
-      "TemplatePath": "ai_assassin",
+      "TemplatePath": "human_soldier",
       "Name": "Blue Team Delta",
       "Overrides": {
         "Brain.Team": 1

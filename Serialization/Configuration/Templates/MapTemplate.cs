@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-
-namespace SimArena.Serialization.Configuration
+namespace SimArena.Serialization.Configuration.Templates
 {
     /// <summary>
     /// Template for map configurations that can be reused across different game configurations

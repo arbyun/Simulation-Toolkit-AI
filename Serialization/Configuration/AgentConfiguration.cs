@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SimArena.Serialization.Configuration
+﻿namespace SimArena.Serialization.Configuration
 {
     [Serializable]
     public class AgentConfiguration

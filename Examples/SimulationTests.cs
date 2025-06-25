@@ -109,14 +109,6 @@ public static class SimulationTests
         while (!simulation.IsGameOver)
         {
             simulation.Update(0.5f); // Slower update rate for visualization
-            
-            // if (simulation.CurrentStep % 5 == 0)
-            // {
-            //     Console.WriteLine($"Step {simulation.CurrentStep} completed. {CountAlivePlayers(simulation)} agents still alive.");
-            // }
-            
-            // small delay for visualization
-            // System.Threading.Thread.Sleep(50); 
         }
         
         stopwatch.Stop();

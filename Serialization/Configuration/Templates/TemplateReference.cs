@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-
-namespace SimArena.Serialization.Configuration
+namespace SimArena.Serialization.Configuration.Templates
 {
     /// <summary>
     /// Represents a reference to a template configuration with optional overrides

@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace SimArena.Serialization.Configuration
+namespace SimArena.Serialization.Configuration.Templates
 {
     /// <summary>
     /// Interface for template management operations

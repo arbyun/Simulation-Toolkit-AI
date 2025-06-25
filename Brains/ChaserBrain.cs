@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using RogueSharp;
+﻿using RogueSharp;
 using SimArena.Core;
 using SimArena.Entities;
 using SimArena.Utilities;
