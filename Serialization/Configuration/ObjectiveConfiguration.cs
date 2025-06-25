@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using SimArena.Core.Objectives;
 using SimArena.Core.Objectives.Trackers.Interfaces;
 using SimArena.Serialization.Configuration.Objectives;

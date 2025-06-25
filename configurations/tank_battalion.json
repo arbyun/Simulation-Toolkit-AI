@@ -1,5 +1,5 @@
 {
-  "Name": "Tank Battalion - Heavy Combat",
+  "Name": "Tank Battalion",
   "MapTemplate": {
     "TemplatePath": "urban_complex"
   },
@@ -45,7 +45,7 @@
       }
     },
     {
-      "TemplatePath": "ai_scout",
+      "TemplatePath": "human_soldier",
       "Name": "Cyber Legion Infiltrator 1",
       "Overrides": {
         "Brain.Team": 1,
@@ -54,7 +54,7 @@
       }
     },
     {
-      "TemplatePath": "ai_scout",
+      "TemplatePath": "human_soldier",
       "Name": "Cyber Legion Infiltrator 2",
       "Overrides": {
         "Brain.Team": 1,
@@ -63,7 +63,7 @@
       }
     },
     {
-      "TemplatePath": "ai_assassin",
+      "TemplatePath": "human_sniper",
       "Name": "Cyber Legion Hunter",
       "Overrides": {
         "Brain.Team": 1,

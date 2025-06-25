@@ -1,6 +1,4 @@
-using System;
-
-namespace SimArena.Serialization.Configuration
+namespace SimArena.Serialization.Configuration.Templates
 {
     /// <summary>
     /// Template for agent configurations that can be reused and extended
@@ -50,16 +48,16 @@ namespace SimArena.Serialization.Configuration
         {
             return new AgentConfiguration
             {
-                Name = this.Name,
-                Brain = this.Brain,
-                OwnedWeaponIds = (string[])this.OwnedWeaponIds.Clone(),
-                RandomStart = this.RandomStart,
-                StartX = this.StartX,
-                StartY = this.StartY,
-                MaxHealth = this.MaxHealth,
-                AttackPower = this.AttackPower,
-                Defense = this.Defense,
-                Speed = this.Speed
+                Name = Name,
+                Brain = Brain,
+                OwnedWeaponIds = (string[])OwnedWeaponIds.Clone(),
+                RandomStart = RandomStart,
+                StartX = StartX,
+                StartY = StartY,
+                MaxHealth = MaxHealth,
+                AttackPower = AttackPower,
+                Defense = Defense,
+                Speed = Speed
             };
         }
     }

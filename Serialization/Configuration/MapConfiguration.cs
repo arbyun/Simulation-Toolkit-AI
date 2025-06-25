@@ -1,7 +1,5 @@
-using System;
 using System.Text.Json.Serialization;
 using RogueSharp;
-using RogueSharp.MapCreation;
 using SimArena.Serialization.Configuration.Maps;
 
 namespace SimArena.Serialization.Configuration

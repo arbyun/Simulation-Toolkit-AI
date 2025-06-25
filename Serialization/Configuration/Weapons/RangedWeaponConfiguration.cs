@@ -1,4 +1,3 @@
-using System;
 using SimArena.Core;
 using SimArena.Entities;
 using SimArena.Entities.Weapons;

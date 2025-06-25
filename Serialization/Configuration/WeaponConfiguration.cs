@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using SimArena.Core;
 using SimArena.Entities;
 using SimArena.Entities.Weapons;

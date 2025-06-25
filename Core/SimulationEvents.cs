@@ -1,5 +1,3 @@
-using System;
-using SimArena.Core.Results;
 using SimArena.Core.Results.Objective_Results;
 using SimArena.Entities;
 

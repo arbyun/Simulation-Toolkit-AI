@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using SimArena.Core.Objectives.Trackers.Interfaces;
 using SimArena.Core.Results;
 using SimArena.Core.Results.Objective_Results;
 using SimArena.Core.Results.Result_Data;
 using SimArena.Entities;
-using SimArena.Serialization.Configuration;
 using SimArena.Serialization.Configuration.Objectives;
 
 namespace SimArena.Core.Objectives.Trackers
@@ -60,12 +56,6 @@ namespace SimArena.Core.Objectives.Trackers
                 {
                     _events.RaiseDebugMessage(this, $"Assigned {character.Name} to Team {teamIndex}");
                 }
-                
-                // // Set the team ID in the brain if it's a SampleDeathmatchAIBrain
-                // if (character.Brain is SampleDeathmatchAIBrain brain)
-                // {
-                //     // In a real implementation, we would set the team ID in the brain
-                // }
             }
         }
         

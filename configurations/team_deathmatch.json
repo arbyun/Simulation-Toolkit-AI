@@ -1,5 +1,5 @@
 {
-  "Name": "Humans vs AI - Team Deathmatch",
+  "Name": "Team Deathmatch",
   "MapTemplate": {
     "TemplatePath": "medium_battlefield"
   },
@@ -43,22 +43,22 @@
       }
     },
     {
-      "TemplatePath": "ai_scout",
-      "Name": "Beta Scout Alpha",
+      "TemplatePath": "human_soldier",
+      "Name": "Beta Soldier Alpha",
       "Overrides": {
         "Brain.Team": 1
       }
     },
     {
-      "TemplatePath": "ai_scout",
-      "Name": "Beta Scout Beta",
+      "TemplatePath": "human_soldier",
+      "Name": "Beta Soldier Beta",
       "Overrides": {
         "Brain.Team": 1
       }
     },
     {
-      "TemplatePath": "ai_assassin",
-      "Name": "Beta Assassin",
+      "TemplatePath": "human_sniper",
+      "Name": "Beta Sniper",
       "Overrides": {
         "Brain.Team": 1,
         "MaxHealth": 50

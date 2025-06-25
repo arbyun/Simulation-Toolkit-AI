@@ -1,6 +1,4 @@
-using System;
-
-namespace SimArena.Serialization.Configuration
+namespace SimArena.Serialization.Configuration.Templates
 {
     /// <summary>
     /// Interface for configuration templates that can be referenced and extended
